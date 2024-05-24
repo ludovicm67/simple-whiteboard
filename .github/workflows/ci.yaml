@@ -4,6 +4,16 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
   pages:
@@ -12,6 +22,10 @@ jobs:
     defaults:
       run:
         shell: bash
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Checkout
@@ -27,11 +41,14 @@ jobs:
       - name: Build the project
         run: npm run build
 
-      - name: Create a CNAME file
-        run: echo 'simple-whiteboard.ludovicm67.fr' > dist/CNAME
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "./dist"
 
       - name: Deploy to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
-        with:
-          branch: gh-pages
-          folder: dist
+        id: deployment
+        uses: actions/deploy-pages@v4
