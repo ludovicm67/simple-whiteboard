@@ -28,7 +28,7 @@ type WhiteboardLine = {
 };
 type WhiteboardItem = WhiteboardRect | WhiteboardCircle | WhiteboardLine;
 
-@customElement("ludo-whiteboard")
+@customElement("simple-whiteboard")
 export class Whiteboard extends LitElement {
   private canvas?: HTMLCanvasElement;
 
@@ -58,7 +58,7 @@ export class Whiteboard extends LitElement {
     },
   ];
   private currentDrawing: WhiteboardItem | undefined;
-  private currentTool = "circle";
+  private currentTool = "rect";
 
   static styles = css`
     #root {
@@ -226,6 +226,16 @@ export class Whiteboard extends LitElement {
   render() {
     return html`
       <div id="root">
+        <div>
+          <button @click="${() => (this.currentTool = "rect")}">
+            Rectangle
+          </button>
+          <button @click="${() => (this.currentTool = "circle")}">
+            Circle
+          </button>
+          <button @click="${() => (this.currentTool = "line")}">Line</button>
+        </div>
+
         <canvas
           @mousedown="${this.handleMouseDown}"
           @mouseup="${this.handleMouseUp}"
@@ -238,6 +248,6 @@ export class Whiteboard extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    "ludo-whiteboard": Whiteboard;
+    "simple-whiteboard": Whiteboard;
   }
 }
