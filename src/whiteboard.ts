@@ -258,15 +258,15 @@ export class Whiteboard extends LitElement {
     super.disconnectedCallback();
   }
 
-  handleMouseDown(e: MouseEvent) {
+  handleDrawingStart(x: number, y: number) {
     this.currentDrawing = undefined;
 
     switch (this.currentTool) {
       case "rect":
         this.currentDrawing = {
           kind: "rect",
-          x: e.offsetX,
-          y: e.offsetY,
+          x: x,
+          y: y,
           width: 0,
           height: 0,
           options: {},
@@ -275,8 +275,8 @@ export class Whiteboard extends LitElement {
       case "circle":
         this.currentDrawing = {
           kind: "circle",
-          x: e.offsetX,
-          y: e.offsetY,
+          x: x,
+          y: y,
           diameter: 0,
           options: {},
         };
@@ -284,55 +284,55 @@ export class Whiteboard extends LitElement {
       case "line":
         this.currentDrawing = {
           kind: "line",
-          x1: e.offsetX,
-          y1: e.offsetY,
-          x2: e.offsetX,
-          y2: e.offsetY,
+          x1: x,
+          y1: y,
+          x2: x,
+          y2: y,
           options: {},
         };
         break;
       case "pen":
         this.currentDrawing = {
           kind: "pen",
-          path: [{ x: e.offsetX, y: e.offsetY }],
+          path: [{ x, y }],
           options: {},
         };
         break;
     }
   }
 
-  handleMouseMove(e: MouseEvent) {
+  handleDrawingMove(x: number, y: number) {
     if (!this.currentDrawing) {
       return;
     }
 
     switch (this.currentDrawing.kind) {
       case "rect":
-        const { x, y } = this.currentDrawing;
-        this.currentDrawing.width = e.offsetX - x;
-        this.currentDrawing.height = e.offsetY - y;
+        const { x: currentX, y: currentY } = this.currentDrawing;
+        this.currentDrawing.width = x - currentX;
+        this.currentDrawing.height = y - currentY;
         break;
       case "circle":
         const { x: x1, y: y1 } = this.currentDrawing;
-        const x2 = e.offsetX;
-        const y2 = e.offsetY;
+        const x2 = x;
+        const y2 = y;
         const dx = x2 - x1;
         const dy = y2 - y1;
         this.currentDrawing.diameter = Math.sqrt(dx * dx + dy * dy) * 2;
         break;
       case "line":
-        this.currentDrawing.x2 = e.offsetX;
-        this.currentDrawing.y2 = e.offsetY;
+        this.currentDrawing.x2 = x;
+        this.currentDrawing.y2 = y;
         break;
       case "pen":
-        this.currentDrawing.path.push({ x: e.offsetX, y: e.offsetY });
+        this.currentDrawing.path.push({ x, y });
         break;
     }
 
     this.draw();
   }
 
-  handleMouseUp() {
+  handleDrawingEnd() {
     if (!this.currentDrawing) {
       return;
     }
@@ -343,8 +343,73 @@ export class Whiteboard extends LitElement {
     this.draw();
   }
 
+  handleMouseDown(e: MouseEvent) {
+    this.handleDrawingStart(e.offsetX, e.offsetY);
+  }
+
+  handleMouseMove(e: MouseEvent) {
+    this.handleDrawingMove(e.offsetX, e.offsetY);
+  }
+
+  handleMouseUp() {
+    this.handleDrawingEnd();
+  }
+
+  handleTouchStart(e: TouchEvent) {
+    if (e.touches.length < 1 || !this.canvas) {
+      return;
+    }
+
+    // Prevent the default action to prevent scrolling
+    e.preventDefault();
+
+    // Get the first touch
+    const touch = e.touches[0];
+
+    // Get the position of the touch relative to the canvas
+    const rect = this.canvas.getBoundingClientRect();
+
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    this.handleDrawingStart(x, y);
+  }
+
+  handleTouchMove(e: TouchEvent) {
+    if (e.touches.length < 1 || !this.canvas) {
+      return;
+    }
+
+    // Prevent the default action to prevent scrolling
+    e.preventDefault();
+
+    // Get the first touch
+    const touch = e.touches[0];
+
+    // Get the position of the touch relative to the canvas
+    const rect = this.canvas.getBoundingClientRect();
+
+    const x = touch.clientX - rect.left;
+    const y = touch.clientY - rect.top;
+
+    this.handleDrawingMove(x, y);
+  }
+
+  handleTouchEnd() {
+    this.handleDrawingEnd();
+  }
+
+  handleTouchCancel() {
+    if (!this.currentDrawing) {
+      return;
+    }
+
+    this.currentDrawing = undefined;
+
+    this.draw();
+  }
+
   handleToolChange(event: Event, tool: string) {
-    console.log("tool", this.toolsMenu);
     event.stopPropagation();
     this.currentTool = tool;
     this.toolsMenu?.querySelectorAll("button").forEach((button) => {
@@ -386,6 +451,10 @@ export class Whiteboard extends LitElement {
           @mousedown="${this.handleMouseDown}"
           @mouseup="${this.handleMouseUp}"
           @mousemove="${this.handleMouseMove}"
+          @touchstart="${this.handleTouchStart}"
+          @touchmove="${this.handleTouchMove}"
+          @touchend="${this.handleTouchEnd}"
+          @touchcancel="${this.handleTouchCancel}"
         ></canvas>
       </div>
     `;
