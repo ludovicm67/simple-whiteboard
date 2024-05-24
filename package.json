@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "lit": "^3.1.2",
+    "perfect-freehand": "^1.2.2",
     "roughjs": "^4.6.6"
   },
   "devDependencies": {

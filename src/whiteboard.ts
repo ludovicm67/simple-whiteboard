@@ -1,7 +1,58 @@
 import { LitElement, css, html } from "lit";
 import rough from "roughjs";
+import getStroke from "perfect-freehand";
 import { customElement, state } from "lit/decorators.js";
 import { RoughCanvas } from "roughjs/bin/canvas";
+import { Options as RoughCanvasOptions } from "roughjs/bin/core";
+
+/**
+ * Calculate the average of two numbers.
+ *
+ * @param a The first number.
+ * @param b The second number.
+ * @returns The average of the two numbers.
+ */
+const average = (a: number, b: number) => (a + b) / 2;
+
+/**
+ * Get a SVG path from a stroke.
+ *
+ * @param points Coordinates of the points.
+ * @param closed If the path should be closed.
+ * @returns The SVG path.
+ */
+const getSvgPathFromStroke = (points: number[][], closed = true) => {
+  const len = points.length;
+
+  if (len < 4) {
+    return ``;
+  }
+
+  let a = points[0];
+  let b = points[1];
+  const c = points[2];
+
+  let result = `M${a[0].toFixed(2)},${a[1].toFixed(2)} Q${b[0].toFixed(
+    2
+  )},${b[1].toFixed(2)} ${average(b[0], c[0]).toFixed(2)},${average(
+    b[1],
+    c[1]
+  ).toFixed(2)} T`;
+
+  for (let i = 2, max = len - 1; i < max; i++) {
+    a = points[i];
+    b = points[i + 1];
+    result += `${average(a[0], b[0]).toFixed(2)},${average(a[1], b[1]).toFixed(
+      2
+    )} `;
+  }
+
+  if (closed) {
+    result += "Z";
+  }
+
+  return result;
+};
 
 type WhiteboardRect = {
   kind: "rect";
@@ -9,14 +60,14 @@ type WhiteboardRect = {
   y: number;
   width: number;
   height: number;
-  options: Record<string, any>;
+  options: RoughCanvasOptions;
 };
 type WhiteboardCircle = {
   kind: "circle";
   x: number;
   y: number;
   diameter: number;
-  options: Record<string, any>;
+  options: RoughCanvasOptions;
 };
 type WhiteboardLine = {
   kind: "line";
@@ -24,9 +75,20 @@ type WhiteboardLine = {
   y1: number;
   x2: number;
   y2: number;
-  options: Record<string, any>;
+  options: RoughCanvasOptions;
 };
-type WhiteboardItem = WhiteboardRect | WhiteboardCircle | WhiteboardLine;
+type WhiteboardPen = {
+  kind: "pen";
+  path: { x: number; y: number }[];
+  options: {
+    color?: string;
+  };
+};
+type WhiteboardItem =
+  | WhiteboardRect
+  | WhiteboardCircle
+  | WhiteboardLine
+  | WhiteboardPen;
 
 @customElement("simple-whiteboard")
 export class Whiteboard extends LitElement {
@@ -56,6 +118,18 @@ export class Whiteboard extends LitElement {
       y2: 80,
       options: { roughness: 0.5, stroke: "green" },
     },
+    {
+      kind: "pen",
+      path: [
+        { x: 100, y: 100 },
+        { x: 150, y: 150 },
+        { x: 200, y: 200 },
+        { x: 250, y: 170 },
+        { x: 300, y: 150 },
+        { x: 350, y: 100 },
+      ],
+      options: { color: "blue" },
+    },
   ];
   private currentDrawing: WhiteboardItem | undefined;
   private currentTool = "rect";
@@ -65,11 +139,29 @@ export class Whiteboard extends LitElement {
       height: 100%;
       width: 100%;
       background-color: #fff;
+      position: relative;
+    }
+
+    .tools {
+      gap: 8px;
+      padding: 8px;
+      background-color: #f0f0f0;
+      margin: auto;
+      position: absolute;
+      z-index: 1;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
     }
 
     canvas {
-      height: 100%;
+      top: 0;
+      left: 0;
+      position: absolute;
+      right: 0;
+      bottom: 0;
       width: 100%;
+      height: 100%;
     }
   `;
 
@@ -101,7 +193,11 @@ export class Whiteboard extends LitElement {
     this.draw();
   }
 
-  drawItem(rc: RoughCanvas, item: WhiteboardItem) {
+  drawItem(
+    rc: RoughCanvas,
+    context: CanvasRenderingContext2D,
+    item: WhiteboardItem
+  ) {
     switch (item.kind) {
       case "rect":
         rc.rectangle(item.x, item.y, item.width, item.height, item.options);
@@ -111,6 +207,21 @@ export class Whiteboard extends LitElement {
         break;
       case "line":
         rc.line(item.x1, item.y1, item.x2, item.y2, item.options);
+        break;
+      case "pen":
+        const outlinePoints = getStroke(item.path, {
+          size: 6,
+          smoothing: 0.5,
+          thinning: 0.5,
+          streamline: 0.5,
+        });
+        const pathData = getSvgPathFromStroke(outlinePoints);
+
+        const path = new Path2D(pathData);
+        const prevFillStyle = context.fillStyle;
+        context.fillStyle = item.options.color || "black";
+        context.fill(path);
+        context.fillStyle = prevFillStyle;
         break;
     }
   }
@@ -124,9 +235,9 @@ export class Whiteboard extends LitElement {
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     const rc = rough.canvas(this.canvas, { options: { seed: 42 } });
-    this.items.forEach((item) => this.drawItem(rc, item));
+    this.items.forEach((item) => this.drawItem(rc, context, item));
     if (this.currentDrawing) {
-      this.drawItem(rc, this.currentDrawing);
+      this.drawItem(rc, context, this.currentDrawing);
     }
   }
 
@@ -181,6 +292,13 @@ export class Whiteboard extends LitElement {
           options: {},
         };
         break;
+      case "pen":
+        this.currentDrawing = {
+          kind: "pen",
+          path: [{ x: e.offsetX, y: e.offsetY }],
+          options: {},
+        };
+        break;
     }
   }
 
@@ -207,6 +325,9 @@ export class Whiteboard extends LitElement {
         this.currentDrawing.x2 = e.offsetX;
         this.currentDrawing.y2 = e.offsetY;
         break;
+      case "pen":
+        this.currentDrawing.path.push({ x: e.offsetX, y: e.offsetY });
+        break;
     }
 
     this.draw();
@@ -226,7 +347,7 @@ export class Whiteboard extends LitElement {
   render() {
     return html`
       <div id="root">
-        <div>
+        <div class="tools">
           <button @click="${() => (this.currentTool = "rect")}">
             Rectangle
           </button>
@@ -234,6 +355,7 @@ export class Whiteboard extends LitElement {
             Circle
           </button>
           <button @click="${() => (this.currentTool = "line")}">Line</button>
+          <button @click="${() => (this.currentTool = "pen")}">Pen</button>
         </div>
 
         <canvas
