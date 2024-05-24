@@ -94,43 +94,7 @@ type WhiteboardItem =
 export class Whiteboard extends LitElement {
   private canvas?: HTMLCanvasElement;
 
-  @state() private items: WhiteboardItem[] = [
-    {
-      kind: "rect",
-      x: 10,
-      y: 10,
-      width: 200,
-      height: 200,
-      options: {},
-    },
-    {
-      kind: "circle",
-      x: 150,
-      y: 150,
-      diameter: 80,
-      options: { roughness: 2.8, stroke: "red" },
-    },
-    {
-      kind: "line",
-      x1: 300,
-      y1: 20,
-      x2: 400,
-      y2: 80,
-      options: { roughness: 0.5, stroke: "green" },
-    },
-    {
-      kind: "pen",
-      path: [
-        { x: 100, y: 100 },
-        { x: 150, y: 150 },
-        { x: 200, y: 200 },
-        { x: 250, y: 170 },
-        { x: 300, y: 150 },
-        { x: 350, y: 100 },
-      ],
-      options: { color: "blue" },
-    },
-  ];
+  @state() private items: WhiteboardItem[] = [];
   private currentDrawing: WhiteboardItem | undefined;
   private currentTool = "rect";
 
