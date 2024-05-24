@@ -16,6 +16,7 @@ This allows the whiteboard to be easily embedded in any web application regardle
   - Rectangle
   - Circle
   - Line
+- Support mouse and touch input
 
 ## Used Technologies
 
