@@ -1,9 +1,11 @@
 import { LitElement, css, html } from "lit";
 import rough from "roughjs";
+import { icons } from "feather-icons";
 import getStroke from "perfect-freehand";
 import { customElement, state } from "lit/decorators.js";
 import { RoughCanvas } from "roughjs/bin/canvas";
 import { Options as RoughCanvasOptions } from "roughjs/bin/core";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 /**
  * Calculate the average of two numbers.
@@ -89,6 +91,13 @@ type WhiteboardItem =
   | WhiteboardCircle
   | WhiteboardLine
   | WhiteboardPen;
+
+const svgs = {
+  rect: icons.square.toSvg(),
+  circle: icons.circle.toSvg(),
+  line: icons.minus.toSvg(),
+  pen: icons["edit-2"].toSvg(),
+};
 
 @customElement("simple-whiteboard")
 export class Whiteboard extends LitElement {
@@ -313,13 +322,17 @@ export class Whiteboard extends LitElement {
       <div id="root">
         <div class="tools">
           <button @click="${() => (this.currentTool = "rect")}">
-            Rectangle
+            ${unsafeHTML(svgs.rect)}
           </button>
           <button @click="${() => (this.currentTool = "circle")}">
-            Circle
+            ${unsafeHTML(svgs.circle)}
           </button>
-          <button @click="${() => (this.currentTool = "line")}">Line</button>
-          <button @click="${() => (this.currentTool = "pen")}">Pen</button>
+          <button @click="${() => (this.currentTool = "line")}">
+            ${unsafeHTML(svgs.line)}
+          </button>
+          <button @click="${() => (this.currentTool = "pen")}">
+            ${unsafeHTML(svgs.pen)}
+          </button>
         </div>
 
         <canvas
