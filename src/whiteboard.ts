@@ -1,9 +1,11 @@
 import { LitElement, css, html } from "lit";
 import rough from "roughjs";
+import { icons } from "feather-icons";
 import getStroke from "perfect-freehand";
 import { customElement, state } from "lit/decorators.js";
 import { RoughCanvas } from "roughjs/bin/canvas";
 import { Options as RoughCanvasOptions } from "roughjs/bin/core";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 /**
  * Calculate the average of two numbers.
@@ -90,32 +92,60 @@ type WhiteboardItem =
   | WhiteboardLine
   | WhiteboardPen;
 
+const svgs = {
+  rect: icons.square.toSvg(),
+  circle: icons.circle.toSvg(),
+  line: icons.minus.toSvg(),
+  pen: icons["edit-2"].toSvg(),
+};
+
 @customElement("simple-whiteboard")
 export class Whiteboard extends LitElement {
   private canvas?: HTMLCanvasElement;
+  private toolsMenu?: HTMLDivElement;
 
   @state() private items: WhiteboardItem[] = [];
   private currentDrawing: WhiteboardItem | undefined;
-  private currentTool = "rect";
+  private currentTool = "none";
 
   static styles = css`
     #root {
       height: 100%;
       width: 100%;
-      background-color: #fff;
+      background-color: #fcfcff;
       position: relative;
     }
 
     .tools {
       gap: 8px;
-      padding: 8px;
-      background-color: #f0f0f0;
+      padding: 16px;
+      border-radius: 8px;
+      background-color: #fff;
       margin: auto;
       position: absolute;
       z-index: 1;
       top: 16px;
       left: 50%;
       transform: translateX(-50%);
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .tools button {
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+
+    .tools button:hover {
+      background-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .tools button:active,
+    .tools .tools--active {
+      background-color: rgba(0, 0, 0, 0.1);
     }
 
     canvas {
@@ -133,6 +163,11 @@ export class Whiteboard extends LitElement {
     this.canvas = this.shadowRoot?.querySelector("canvas") || undefined;
     if (!this.canvas) {
       throw new Error("Canvas not found");
+    }
+
+    this.toolsMenu = this.shadowRoot?.querySelector(".tools") || undefined;
+    if (!this.toolsMenu) {
+      throw new Error("Tools menu not found");
     }
 
     this.handleResize();
@@ -308,18 +343,43 @@ export class Whiteboard extends LitElement {
     this.draw();
   }
 
+  handleToolChange(event: Event, tool: string) {
+    console.log("tool", this.toolsMenu);
+    event.stopPropagation();
+    this.currentTool = tool;
+    this.toolsMenu?.querySelectorAll("button").forEach((button) => {
+      button.classList.toggle("tools--active", button === event.currentTarget);
+    });
+  }
+
   render() {
     return html`
       <div id="root">
         <div class="tools">
-          <button @click="${() => (this.currentTool = "rect")}">
-            Rectangle
+          <button
+            @click="${(e: Event) => this.handleToolChange(e, "rect")}"
+            title="Rectangle Tool"
+          >
+            ${unsafeHTML(svgs.rect)}
           </button>
-          <button @click="${() => (this.currentTool = "circle")}">
-            Circle
+          <button
+            @click="${(e: Event) => this.handleToolChange(e, "circle")}"
+            title="Circle Tool"
+          >
+            ${unsafeHTML(svgs.circle)}
           </button>
-          <button @click="${() => (this.currentTool = "line")}">Line</button>
-          <button @click="${() => (this.currentTool = "pen")}">Pen</button>
+          <button
+            @click="${(e: Event) => this.handleToolChange(e, "line")}"
+            title="Line Tool"
+          >
+            ${unsafeHTML(svgs.line)}
+          </button>
+          <button
+            @click="${(e: Event) => this.handleToolChange(e, "pen")}"
+            title="Pen Tool"
+          >
+            ${unsafeHTML(svgs.pen)}
+          </button>
         </div>
 
         <canvas

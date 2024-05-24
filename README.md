@@ -23,6 +23,7 @@ This allows the whiteboard to be easily embedded in any web application regardle
 - [TypeScript](https://www.typescriptlang.org/) - A typed superset of JavaScript that compiles to plain JavaScript.
 - [Rough.js](https://roughjs.com/) - A small graphics library that lets you draw in a sketchy, hand-drawn-like, style.
 - [Perfect Freehand](https://github.com/steveruizok/perfect-freehand) - A tiny library for rendering perfect freehand lines.
+- [Feather Icons](https://feathericons.com/) - Simply beautiful open source icons.
 
 ## License
 
