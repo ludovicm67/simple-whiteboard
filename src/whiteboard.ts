@@ -56,6 +56,13 @@ const getSvgPathFromStroke = (points: number[][], closed = true) => {
   return result;
 };
 
+type BoundingRect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
 type WhiteboardRect = {
   kind: "rect";
   x: number;
@@ -99,6 +106,7 @@ type WhiteboardItem =
   | WhiteboardMove;
 
 const svgs = {
+  move: icons.move.toSvg(),
   rect: icons.square.toSvg(),
   circle: icons.circle.toSvg(),
   line: icons.minus.toSvg(),
@@ -253,6 +261,62 @@ export class Whiteboard extends LitElement {
         context.fillStyle = prevFillStyle;
         break;
     }
+  }
+
+  getBoundingRect(item: WhiteboardItem): BoundingRect {
+    let x = 0;
+    let y = 0;
+    let width = 0;
+    let height = 0;
+
+    // Get the bounding box of the item
+    switch (item.kind) {
+      case "rect":
+        x = item.x;
+        y = item.y;
+        width = item.width;
+        height = item.height;
+        break;
+      case "circle":
+        x = item.x - item.diameter / 2;
+        y = item.y - item.diameter / 2;
+        width = item.diameter;
+        height = item.diameter;
+        break;
+      case "line":
+        x = Math.min(item.x1, item.x2);
+        y = Math.min(item.y1, item.y2);
+        width = Math.abs(item.x2 - item.x1);
+        height = Math.abs(item.y2 - item.y1);
+        break;
+      case "pen":
+        const xValues = item.path.map((p) => p.x);
+        const yValues = item.path.map((p) => p.y);
+        x = Math.min(...xValues);
+        y = Math.min(...yValues);
+        width = Math.max(...xValues) - x;
+        height = Math.max(...yValues) - y;
+        break;
+      default:
+        return { x, y, width, height };
+    }
+
+    return { x, y, width, height };
+  }
+
+  drawItemBox(context: CanvasRenderingContext2D, item: WhiteboardItem) {
+    const { x, y, width, height } = this.getBoundingRect(item);
+
+    context.strokeStyle = "#135aa0";
+    context.lineWidth = 2;
+    context.beginPath();
+    context.rect(
+      x + this.canvasCoords.x,
+      y + this.canvasCoords.y,
+      width,
+      height
+    );
+    context.stroke();
   }
 
   draw() {
@@ -479,7 +543,7 @@ export class Whiteboard extends LitElement {
             @click="${(e: Event) => this.handleToolChange(e, "move")}"
             title="Move Tool"
           >
-            ${unsafeHTML(icons.move.toSvg())}
+            ${unsafeHTML(svgs.move)}
           </button>
           <button
             @click="${(e: Event) => this.handleToolChange(e, "rect")}"
