@@ -86,11 +86,17 @@ type WhiteboardPen = {
     color?: string;
   };
 };
+type WhiteboardMove = {
+  kind: "move";
+  x: number;
+  y: number;
+};
 type WhiteboardItem =
   | WhiteboardRect
   | WhiteboardCircle
   | WhiteboardLine
-  | WhiteboardPen;
+  | WhiteboardPen
+  | WhiteboardMove;
 
 const svgs = {
   rect: icons.square.toSvg(),
@@ -105,6 +111,7 @@ export class Whiteboard extends LitElement {
   private toolsMenu?: HTMLDivElement;
 
   @state() private items: WhiteboardItem[] = [];
+  @state() private canvasCoords: { x: number; y: number } = { x: 0, y: 0 };
   private currentDrawing: WhiteboardItem | undefined;
   private currentTool = "none";
 
@@ -199,21 +206,44 @@ export class Whiteboard extends LitElement {
   ) {
     switch (item.kind) {
       case "rect":
-        rc.rectangle(item.x, item.y, item.width, item.height, item.options);
+        rc.rectangle(
+          item.x + this.canvasCoords.x,
+          item.y + this.canvasCoords.y,
+          item.width,
+          item.height,
+          item.options
+        );
         break;
       case "circle":
-        rc.circle(item.x, item.y, item.diameter, item.options);
+        rc.circle(
+          item.x + this.canvasCoords.x,
+          item.y + this.canvasCoords.y,
+          item.diameter,
+          item.options
+        );
         break;
       case "line":
-        rc.line(item.x1, item.y1, item.x2, item.y2, item.options);
+        rc.line(
+          item.x1 + this.canvasCoords.x,
+          item.y1 + this.canvasCoords.y,
+          item.x2 + this.canvasCoords.x,
+          item.y2 + this.canvasCoords.y,
+          item.options
+        );
         break;
       case "pen":
-        const outlinePoints = getStroke(item.path, {
-          size: 6,
-          smoothing: 0.5,
-          thinning: 0.5,
-          streamline: 0.5,
-        });
+        const outlinePoints = getStroke(
+          item.path.map((p) => ({
+            x: p.x + this.canvasCoords.x,
+            y: p.y + this.canvasCoords.y,
+          })),
+          {
+            size: 6,
+            smoothing: 0.5,
+            thinning: 0.5,
+            streamline: 0.5,
+          }
+        );
         const pathData = getSvgPathFromStroke(outlinePoints);
 
         const path = new Path2D(pathData);
@@ -265,8 +295,8 @@ export class Whiteboard extends LitElement {
       case "rect":
         this.currentDrawing = {
           kind: "rect",
-          x: x,
-          y: y,
+          x: x - this.canvasCoords.x,
+          y: y - this.canvasCoords.y,
           width: 0,
           height: 0,
           options: {},
@@ -275,8 +305,8 @@ export class Whiteboard extends LitElement {
       case "circle":
         this.currentDrawing = {
           kind: "circle",
-          x: x,
-          y: y,
+          x: x - this.canvasCoords.x,
+          y: y - this.canvasCoords.y,
           diameter: 0,
           options: {},
         };
@@ -284,18 +314,25 @@ export class Whiteboard extends LitElement {
       case "line":
         this.currentDrawing = {
           kind: "line",
-          x1: x,
-          y1: y,
-          x2: x,
-          y2: y,
+          x1: x - this.canvasCoords.x,
+          y1: y - this.canvasCoords.y,
+          x2: x - this.canvasCoords.x,
+          y2: y - this.canvasCoords.y,
           options: {},
         };
         break;
       case "pen":
         this.currentDrawing = {
           kind: "pen",
-          path: [{ x, y }],
+          path: [{ x: x - this.canvasCoords.x, y: y - this.canvasCoords.y }],
           options: {},
+        };
+        break;
+      case "move":
+        this.currentDrawing = {
+          kind: "move",
+          x: x,
+          y: y,
         };
         break;
     }
@@ -309,23 +346,38 @@ export class Whiteboard extends LitElement {
     switch (this.currentDrawing.kind) {
       case "rect":
         const { x: currentX, y: currentY } = this.currentDrawing;
-        this.currentDrawing.width = x - currentX;
-        this.currentDrawing.height = y - currentY;
+        this.currentDrawing.width = x - currentX - this.canvasCoords.x;
+        this.currentDrawing.height = y - currentY - this.canvasCoords.y;
         break;
       case "circle":
         const { x: x1, y: y1 } = this.currentDrawing;
-        const x2 = x;
-        const y2 = y;
+        const x2 = x - this.canvasCoords.x;
+        const y2 = y - this.canvasCoords.y;
         const dx = x2 - x1;
         const dy = y2 - y1;
         this.currentDrawing.diameter = Math.sqrt(dx * dx + dy * dy) * 2;
         break;
       case "line":
-        this.currentDrawing.x2 = x;
-        this.currentDrawing.y2 = y;
+        this.currentDrawing.x2 = x - this.canvasCoords.x;
+        this.currentDrawing.y2 = y - this.canvasCoords.y;
         break;
       case "pen":
-        this.currentDrawing.path.push({ x, y });
+        this.currentDrawing.path.push({
+          x: x - this.canvasCoords.x,
+          y: y - this.canvasCoords.y,
+        });
+        break;
+      case "move":
+        const { x: startX, y: startY } = this.currentDrawing;
+        const moveX = x - startX;
+        const moveY = y - startY;
+
+        this.canvasCoords.x += moveX;
+        this.canvasCoords.y += moveY;
+
+        this.currentDrawing.x = x;
+        this.currentDrawing.y = y;
+
         break;
     }
 
@@ -337,7 +389,9 @@ export class Whiteboard extends LitElement {
       return;
     }
 
-    this.items.push(this.currentDrawing);
+    if (this.currentDrawing.kind !== "move") {
+      this.items.push(this.currentDrawing);
+    }
     this.currentDrawing = undefined;
 
     this.draw();
@@ -421,6 +475,12 @@ export class Whiteboard extends LitElement {
     return html`
       <div id="root">
         <div class="tools">
+          <button
+            @click="${(e: Event) => this.handleToolChange(e, "move")}"
+            title="Move Tool"
+          >
+            ${unsafeHTML(icons.move.toSvg())}
+          </button>
           <button
             @click="${(e: Event) => this.handleToolChange(e, "rect")}"
             title="Rectangle Tool"
