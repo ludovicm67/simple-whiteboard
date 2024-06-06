@@ -2,6 +2,7 @@ import { LitElement, css, html } from "lit";
 import rough from "roughjs";
 import { icons } from "feather-icons";
 import getStroke from "perfect-freehand";
+import { v4 as uuidv4 } from "uuid";
 import { customElement, state } from "lit/decorators.js";
 import { RoughCanvas } from "roughjs/bin/canvas";
 import { Options as RoughCanvasOptions } from "roughjs/bin/core";
@@ -56,8 +57,16 @@ const getSvgPathFromStroke = (points: number[][], closed = true) => {
   return result;
 };
 
+type BoundingRect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
 type WhiteboardRect = {
   kind: "rect";
+  id: string;
   x: number;
   y: number;
   width: number;
@@ -66,6 +75,7 @@ type WhiteboardRect = {
 };
 type WhiteboardCircle = {
   kind: "circle";
+  id: string;
   x: number;
   y: number;
   diameter: number;
@@ -73,6 +83,7 @@ type WhiteboardCircle = {
 };
 type WhiteboardLine = {
   kind: "line";
+  id: string;
   x1: number;
   y1: number;
   x2: number;
@@ -81,6 +92,7 @@ type WhiteboardLine = {
 };
 type WhiteboardPen = {
   kind: "pen";
+  id: string;
   path: { x: number; y: number }[];
   options: {
     color?: string;
@@ -91,14 +103,26 @@ type WhiteboardMove = {
   x: number;
   y: number;
 };
+type WhiteboardPointer = {
+  kind: "pointer";
+  x: number;
+  y: number;
+};
 type WhiteboardItem =
   | WhiteboardRect
   | WhiteboardCircle
   | WhiteboardLine
   | WhiteboardPen
-  | WhiteboardMove;
+  | WhiteboardMove
+  | WhiteboardPointer;
+type WhiteboardDrawableItem = Exclude<
+  WhiteboardItem,
+  WhiteboardMove | WhiteboardPointer
+>;
 
 const svgs = {
+  move: icons.move.toSvg(),
+  pointer: icons["mouse-pointer"].toSvg(),
   rect: icons.square.toSvg(),
   circle: icons.circle.toSvg(),
   line: icons.minus.toSvg(),
@@ -108,12 +132,16 @@ const svgs = {
 @customElement("simple-whiteboard")
 export class Whiteboard extends LitElement {
   private canvas?: HTMLCanvasElement;
+  private canvasContext?: CanvasRenderingContext2D;
   private toolsMenu?: HTMLDivElement;
 
   @state() private items: WhiteboardItem[] = [];
   @state() private canvasCoords: { x: number; y: number } = { x: 0, y: 0 };
   private currentDrawing: WhiteboardItem | undefined;
   private currentTool = "none";
+  private selectedItemId?: string = undefined;
+
+  private drawableItems = ["rect", "circle", "line", "pen"];
 
   static styles = css`
     #root {
@@ -171,6 +199,12 @@ export class Whiteboard extends LitElement {
     if (!this.canvas) {
       throw new Error("Canvas not found");
     }
+
+    const canvasContext = this.canvas.getContext("2d");
+    if (!canvasContext) {
+      throw new Error("Canvas context not found");
+    }
+    this.canvasContext = canvasContext;
 
     this.toolsMenu = this.shadowRoot?.querySelector(".tools") || undefined;
     if (!this.toolsMenu) {
@@ -255,18 +289,89 @@ export class Whiteboard extends LitElement {
     }
   }
 
+  getBoundingRect(item: WhiteboardItem): BoundingRect {
+    let x = 0;
+    let y = 0;
+    let width = 0;
+    let height = 0;
+
+    // Get the bounding box of the item
+    switch (item.kind) {
+      case "rect":
+        x = item.x;
+        y = item.y;
+        width = item.width;
+        height = item.height;
+        break;
+      case "circle":
+        x = item.x - item.diameter / 2;
+        y = item.y - item.diameter / 2;
+        width = item.diameter;
+        height = item.diameter;
+        break;
+      case "line":
+        x = Math.min(item.x1, item.x2);
+        y = Math.min(item.y1, item.y2);
+        width = Math.abs(item.x2 - item.x1);
+        height = Math.abs(item.y2 - item.y1);
+        break;
+      case "pen":
+        const xValues = item.path.map((p) => p.x);
+        const yValues = item.path.map((p) => p.y);
+        x = Math.min(...xValues);
+        y = Math.min(...yValues);
+        width = Math.max(...xValues) - x;
+        height = Math.max(...yValues) - y;
+        break;
+      default:
+        return { x, y, width, height };
+    }
+
+    return { x, y, width, height };
+  }
+
+  drawItemBox(context: CanvasRenderingContext2D, item: WhiteboardItem) {
+    const { x, y, width, height } = this.getBoundingRect(item);
+
+    context.strokeStyle = "#135aa0";
+    context.lineWidth = 2;
+    context.beginPath();
+    context.rect(
+      x + this.canvasCoords.x,
+      y + this.canvasCoords.y,
+      width,
+      height
+    );
+    context.stroke();
+  }
+
   draw() {
-    if (!this.canvas) {
+    if (!this.canvas || !this.canvasContext) {
       return;
     }
 
-    const context = this.canvas.getContext("2d") as CanvasRenderingContext2D;
+    const context = this.canvasContext;
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
     const rc = rough.canvas(this.canvas, { options: { seed: 42 } });
     this.items.forEach((item) => this.drawItem(rc, context, item));
     if (this.currentDrawing) {
       this.drawItem(rc, context, this.currentDrawing);
+    }
+
+    if (this.selectedItemId) {
+      const drawableItems = this.items.filter((item) => {
+        if (!item || !this.drawableItems.includes(item.kind)) {
+          return false;
+        }
+        return true;
+      }) as WhiteboardDrawableItem[];
+      const selectedItem = drawableItems.find(
+        (item) => item.id === this.selectedItemId
+      );
+      if (selectedItem) {
+        this.drawItemBox(context, selectedItem);
+      }
     }
   }
 
@@ -290,11 +395,15 @@ export class Whiteboard extends LitElement {
 
   handleDrawingStart(x: number, y: number) {
     this.currentDrawing = undefined;
+    this.selectedItemId = undefined;
+
+    const itemId = uuidv4();
 
     switch (this.currentTool) {
       case "rect":
         this.currentDrawing = {
           kind: "rect",
+          id: itemId,
           x: x - this.canvasCoords.x,
           y: y - this.canvasCoords.y,
           width: 0,
@@ -305,6 +414,7 @@ export class Whiteboard extends LitElement {
       case "circle":
         this.currentDrawing = {
           kind: "circle",
+          id: itemId,
           x: x - this.canvasCoords.x,
           y: y - this.canvasCoords.y,
           diameter: 0,
@@ -314,6 +424,7 @@ export class Whiteboard extends LitElement {
       case "line":
         this.currentDrawing = {
           kind: "line",
+          id: itemId,
           x1: x - this.canvasCoords.x,
           y1: y - this.canvasCoords.y,
           x2: x - this.canvasCoords.x,
@@ -324,6 +435,7 @@ export class Whiteboard extends LitElement {
       case "pen":
         this.currentDrawing = {
           kind: "pen",
+          id: itemId,
           path: [{ x: x - this.canvasCoords.x, y: y - this.canvasCoords.y }],
           options: {},
         };
@@ -333,6 +445,13 @@ export class Whiteboard extends LitElement {
           kind: "move",
           x: x,
           y: y,
+        };
+        break;
+      case "pointer":
+        this.currentDrawing = {
+          kind: "pointer",
+          x: x - this.canvasCoords.x,
+          y: y - this.canvasCoords.y,
         };
         break;
     }
@@ -385,12 +504,35 @@ export class Whiteboard extends LitElement {
   }
 
   handleDrawingEnd() {
-    if (!this.currentDrawing) {
+    if (!this.currentDrawing || !this.canvasContext) {
       return;
     }
 
-    if (this.currentDrawing.kind !== "move") {
-      this.items.push(this.currentDrawing);
+    const kind = this.currentDrawing.kind;
+
+    if (kind === "pointer") {
+      const { x: pointerX, y: pointerY } = this.currentDrawing;
+      // Get all items that are under the pointer
+      const potentialItems = this.items.filter((item) => {
+        if (!this.currentDrawing || !this.drawableItems.includes(item.kind)) {
+          return false;
+        }
+        const { x, y, width, height } = this.getBoundingRect(item);
+        return (
+          pointerX > x &&
+          pointerX < x + width &&
+          pointerY > y &&
+          pointerY < y + height
+        );
+      }) as WhiteboardDrawableItem[];
+      if (potentialItems.length > 0) {
+        this.selectedItemId = potentialItems[0].id;
+      }
+    }
+
+    if (this.drawableItems.includes(kind)) {
+      // Add the current drawing to the items list (at the start)
+      this.items.unshift(this.currentDrawing);
     }
     this.currentDrawing = undefined;
 
@@ -479,7 +621,13 @@ export class Whiteboard extends LitElement {
             @click="${(e: Event) => this.handleToolChange(e, "move")}"
             title="Move Tool"
           >
-            ${unsafeHTML(icons.move.toSvg())}
+            ${unsafeHTML(svgs.move)}
+          </button>
+          <button
+            @click="${(e: Event) => this.handleToolChange(e, "pointer")}"
+            title="Pointer Tool"
+          >
+            ${unsafeHTML(svgs.pointer)}
           </button>
           <button
             @click="${(e: Event) => this.handleToolChange(e, "rect")}"
