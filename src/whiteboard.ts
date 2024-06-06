@@ -127,6 +127,7 @@ const svgs = {
   circle: icons.circle.toSvg(),
   line: icons.minus.toSvg(),
   pen: icons["edit-2"].toSvg(),
+  clear: icons["trash-2"].toSvg(),
 };
 
 @customElement("simple-whiteboard")
@@ -136,7 +137,11 @@ export class Whiteboard extends LitElement {
   private toolsMenu?: HTMLDivElement;
 
   @state() private items: WhiteboardItem[] = [];
-  @state() private canvasCoords: { x: number; y: number } = { x: 0, y: 0 };
+  @state() private canvasCoords: { x: number; y: number; zoom: number } = {
+    x: 0,
+    y: 0,
+    zoom: 1,
+  };
   private currentDrawing: WhiteboardItem | undefined;
   private currentTool = "none";
   private selectedItemId?: string = undefined;
@@ -613,6 +618,13 @@ export class Whiteboard extends LitElement {
     });
   }
 
+  clearWhiteboard() {
+    this.items = [];
+    this.selectedItemId = undefined;
+    this.canvasCoords = { x: 0, y: 0, zoom: 1 };
+    this.draw();
+  }
+
   render() {
     return html`
       <div id="root">
@@ -652,6 +664,9 @@ export class Whiteboard extends LitElement {
             title="Pen Tool"
           >
             ${unsafeHTML(svgs.pen)}
+          </button>
+          <button @click="${this.clearWhiteboard}" title="Clear Whiteboard">
+            ${unsafeHTML(svgs.clear)}
           </button>
         </div>
 
