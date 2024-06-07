@@ -9,5 +9,71 @@
   </head>
   <body>
     <simple-whiteboard id="app"></simple-whiteboard>
+    <a href="/" target="_blank">Multi demo</a>
+    <script>
+      const id = Math.random().toString(36).substr(2, 9);
+      const app = document.getElementById("app");
+      (async () => {
+        await new Promise((resolve) => {
+          window.customElements.whenDefined("simple-whiteboard").then(() => {
+            resolve();
+          });
+        });
+
+        // Listen for items-updated event
+        app.addEventListener("items-updated", (e) => {
+          if (!e.detail.type) {
+            return;
+          }
+
+          console.log("Items updated event:", e.detail);
+
+          switch (e.detail.type) {
+            case "add":
+              bc.postMessage({
+                type: "item-add",
+                item: e.detail.item,
+              });
+              break;
+            case "clear":
+              bc.postMessage({
+                type: "clear",
+              });
+              break;
+          }
+        });
+
+        const bc = new BroadcastChannel("whiteboard-channel");
+        bc.postMessage({
+          type: "join",
+          id,
+        });
+        console.log("Client ID:", id);
+
+        bc.onmessage = (e) => {
+          if (!e.data.type) {
+            return;
+          }
+
+          switch (e.data.type) {
+            case "item-add":
+              app.addItem(e.data.item);
+              break;
+            case "join":
+              bc.postMessage({
+                type: "sync",
+                items: app.getItems(),
+              });
+              break;
+            case "sync":
+              app.setItems(e.data.items);
+              break;
+            case "clear":
+              app.clear();
+              break;
+          }
+        };
+      })();
+    </script>
   </body>
 </html>
