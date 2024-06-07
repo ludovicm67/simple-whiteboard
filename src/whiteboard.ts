@@ -538,6 +538,14 @@ export class Whiteboard extends LitElement {
     if (this.drawableItems.includes(kind)) {
       // Add the current drawing to the items list (at the start)
       this.items.unshift(this.currentDrawing);
+
+      const itemsUpdatedEvent = new CustomEvent("items-updated", {
+        detail: {
+          type: "add",
+          item: this.currentDrawing,
+        },
+      });
+      this.dispatchEvent(itemsUpdatedEvent);
     }
     this.currentDrawing = undefined;
 
@@ -618,11 +626,22 @@ export class Whiteboard extends LitElement {
     });
   }
 
-  clearWhiteboard() {
+  resetWhiteboard() {
     this.items = [];
     this.selectedItemId = undefined;
+  }
+
+  clearWhiteboard() {
+    this.resetWhiteboard();
     this.canvasCoords = { x: 0, y: 0, zoom: 1 };
     this.draw();
+
+    const itemsUpdatedEvent = new CustomEvent("items-updated", {
+      detail: {
+        type: "clear",
+      },
+    });
+    this.dispatchEvent(itemsUpdatedEvent);
   }
 
   render() {
@@ -681,6 +700,25 @@ export class Whiteboard extends LitElement {
         ></canvas>
       </div>
     `;
+  }
+
+  public getItems(): WhiteboardItem[] {
+    return this.items;
+  }
+
+  public setItems(items: WhiteboardItem[]) {
+    this.items = items;
+    this.draw();
+  }
+
+  public addItem(item: WhiteboardItem) {
+    this.items.unshift(item);
+    this.draw();
+  }
+
+  public clear() {
+    this.resetWhiteboard();
+    this.draw();
   }
 }
 
