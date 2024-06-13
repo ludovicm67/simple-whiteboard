@@ -1,5 +1,11 @@
 # @ludovicm67/whiteboard
 
+## 0.1.1
+
+### Patch Changes
+
+- fda1a5d: Improve exports.
+
 ## 0.1.0
 
 ### Minor Changes
