@@ -1,9 +1,10 @@
-import { Whiteboard } from "./whiteboard";
+import { SimpleWhiteboard } from "./simple-whiteboard";
 
 declare global {
   interface HTMLElementTagNameMap {
-    "simple-whiteboard": Whiteboard;
+    "simple-whiteboard": SimpleWhiteboard;
   }
 }
 
-export default Whiteboard;
+export { SimpleWhiteboard };
+export default SimpleWhiteboard;

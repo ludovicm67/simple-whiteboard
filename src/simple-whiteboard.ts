@@ -131,7 +131,7 @@ const svgs = {
 };
 
 @customElement("simple-whiteboard")
-export class Whiteboard extends LitElement {
+export class SimpleWhiteboard extends LitElement {
   private canvas?: HTMLCanvasElement;
   private canvasContext?: CanvasRenderingContext2D;
   private toolsMenu?: HTMLDivElement;
