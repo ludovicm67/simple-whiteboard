@@ -8,8 +8,20 @@
     <script type="module" src="/src/whiteboard.ts"></script>
   </head>
   <body>
-    <simple-whiteboard id="app"></simple-whiteboard>
-    <a href="/" target="_blank">Multi demo</a>
+    <main>
+      <simple-whiteboard id="app"></simple-whiteboard>
+    </main>
+    <footer>
+      <a href="/" target="_blank">New Tab</a>
+      -
+      <a href="https://github.com/ludovicm67/simple-whiteboard" target="_blank"
+        >GitHub</a
+      >
+      -
+      <a href="https://ludovic-muller.fr/" target="_blank"
+        >Created by Ludovic Muller</a
+      >
+    </footer>
     <script>
       const id = Math.random().toString(36).substr(2, 9);
       const app = document.getElementById("app");
