@@ -24,7 +24,8 @@
     "@types/uuid": "^9.0.8",
     "typescript": "^5.2.2",
     "vite": "^5.2.13",
-    "vite-plugin-dts": "^3.9.1"
+    "vite-plugin-dts": "^3.9.1",
+    "vite-plugin-html": "^3.2.2"
   },
   "files": [
     "dist"
