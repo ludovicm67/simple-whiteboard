@@ -1,13 +1,14 @@
 {
-  "name": "whiteboard",
-  "private": true,
+  "name": "@ludovicm67/whiteboard",
   "version": "0.0.0",
   "type": "module",
   "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prepack": "npm run build"
   },
   "dependencies": {
     "feather-icons": "^4.29.2",
@@ -22,5 +23,11 @@
     "typescript": "^5.2.2",
     "vite": "^5.2.13",
     "vite-plugin-dts": "^3.9.1"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
   }
 }
