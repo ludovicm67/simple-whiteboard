@@ -721,9 +721,3 @@ export class Whiteboard extends LitElement {
     this.draw();
   }
 }
-
-declare global {
-  interface HTMLElementTagNameMap {
-    "simple-whiteboard": Whiteboard;
-  }
-}
