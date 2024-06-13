@@ -49,3 +49,8 @@ footer {
   height: 10svh;
   border-top: 1px solid #e0e0e0;
 }
+
+footer a {
+  display: inline-block;
+  padding: 0 8px;
+}
