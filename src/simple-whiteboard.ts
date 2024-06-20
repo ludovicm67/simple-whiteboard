@@ -72,14 +72,21 @@ type WhiteboardDrawableItem = Exclude<
   WhiteboardMove | WhiteboardPointer
 >;
 
+const svgOptions = { width: 16, height: 16 };
+
 const svgs = {
-  move: icons.move.toSvg(),
-  pointer: icons["mouse-pointer"].toSvg(),
-  rect: icons.square.toSvg(),
-  circle: icons.circle.toSvg(),
-  line: icons.minus.toSvg(),
-  pen: icons["edit-2"].toSvg(),
-  clear: icons["trash-2"].toSvg(),
+  move: icons.move.toSvg(svgOptions),
+  pointer: icons["mouse-pointer"].toSvg(svgOptions),
+  rect: icons.square.toSvg(svgOptions),
+  circle: icons.circle.toSvg(svgOptions),
+  line: icons.minus.toSvg(svgOptions),
+  pen: icons["edit-2"].toSvg(svgOptions),
+  clear: icons["trash-2"].toSvg(svgOptions),
+};
+
+type CurrentToolOptions = {
+  strokeColor: string;
+  fillColor: string;
 };
 
 @customElement("simple-whiteboard")
@@ -97,6 +104,10 @@ export class SimpleWhiteboard extends LitElement {
   private currentDrawing: WhiteboardItem | undefined;
   private currentTool = "none";
   private selectedItemId?: string = undefined;
+  private currentToolOptions: CurrentToolOptions = {
+    strokeColor: "#000000",
+    fillColor: "#000000",
+  };
 
   private drawableItems = ["rect", "circle", "line", "pen"];
 
@@ -110,7 +121,7 @@ export class SimpleWhiteboard extends LitElement {
 
     .tools {
       gap: 8px;
-      padding: 16px;
+      padding: 8px;
       border-radius: 8px;
       background-color: #fff;
       margin: auto;
@@ -138,6 +149,18 @@ export class SimpleWhiteboard extends LitElement {
     .tools button:active,
     .tools .tools--active {
       background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .tools-options {
+      position: absolute;
+      z-index: 1;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+      top: 84px;
+      width: 200px;
+      left: 16px;
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 8px;
     }
 
     canvas {
@@ -356,6 +379,9 @@ export class SimpleWhiteboard extends LitElement {
 
     const itemId = uuidv4();
 
+    const strokeColor = this.currentToolOptions.strokeColor;
+    const fillColor = this.currentToolOptions.fillColor;
+
     switch (this.currentTool) {
       case "rect":
         this.currentDrawing = {
@@ -365,7 +391,10 @@ export class SimpleWhiteboard extends LitElement {
           y: y - this.canvasCoords.y,
           width: 0,
           height: 0,
-          options: {},
+          options: {
+            stroke: strokeColor,
+            fill: fillColor,
+          },
         };
         break;
       case "circle":
@@ -375,7 +404,10 @@ export class SimpleWhiteboard extends LitElement {
           x: x - this.canvasCoords.x,
           y: y - this.canvasCoords.y,
           diameter: 0,
-          options: {},
+          options: {
+            stroke: strokeColor,
+            fill: fillColor,
+          },
         };
         break;
       case "line":
@@ -386,7 +418,9 @@ export class SimpleWhiteboard extends LitElement {
           y1: y - this.canvasCoords.y,
           x2: x - this.canvasCoords.x,
           y2: y - this.canvasCoords.y,
-          options: {},
+          options: {
+            stroke: strokeColor,
+          },
         };
         break;
       case "pen":
@@ -394,7 +428,9 @@ export class SimpleWhiteboard extends LitElement {
           kind: "pen",
           id: itemId,
           path: [{ x: x - this.canvasCoords.x, y: y - this.canvasCoords.y }],
-          options: {},
+          options: {
+            color: strokeColor,
+          },
         };
         break;
       case "move":
@@ -596,6 +632,15 @@ export class SimpleWhiteboard extends LitElement {
     this.dispatchEvent(itemsUpdatedEvent);
   }
 
+  handleStrokeColorChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.currentToolOptions.strokeColor = input.value;
+  }
+  handleFillColorChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.currentToolOptions.fillColor = input.value;
+  }
+
   render() {
     return html`
       <div class="root">
@@ -639,6 +684,21 @@ export class SimpleWhiteboard extends LitElement {
           <button @click="${this.clearWhiteboard}" title="Clear Whiteboard">
             ${unsafeHTML(svgs.clear)}
           </button>
+        </div>
+
+        <div class="tools-options">
+          <p>Stroke color</p>
+          <input
+            type="color"
+            .value=${this.currentToolOptions.strokeColor}
+            @input=${this.handleStrokeColorChange}
+          />
+          <p>Fill color</p>
+          <input
+            type="color"
+            .value=${this.currentToolOptions.fillColor}
+            @input=${this.handleFillColorChange}
+          />
         </div>
 
         <canvas
