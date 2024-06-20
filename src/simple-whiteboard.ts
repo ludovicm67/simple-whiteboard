@@ -149,7 +149,7 @@ export class SimpleWhiteboard extends LitElement {
   private drawableItems = ["rect", "circle", "line", "pen"];
 
   static styles = css`
-    #root {
+    .root {
       height: 100%;
       width: 100%;
       background-color: #fcfcff;
@@ -646,7 +646,7 @@ export class SimpleWhiteboard extends LitElement {
 
   render() {
     return html`
-      <div id="root">
+      <div class="root">
         <div class="tools">
           <button
             @click="${(e: Event) => this.handleToolChange(e, "move")}"
