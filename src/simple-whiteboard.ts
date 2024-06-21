@@ -1,4 +1,4 @@
-import { LitElement, css, html } from "lit";
+import { LitElement, TemplateResult, css, html } from "lit";
 import rough from "roughjs";
 import { icons } from "feather-icons";
 import getStroke from "perfect-freehand";
@@ -7,55 +7,7 @@ import { customElement, state } from "lit/decorators.js";
 import { RoughCanvas } from "roughjs/bin/canvas";
 import { Options as RoughCanvasOptions } from "roughjs/bin/core";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
-
-/**
- * Calculate the average of two numbers.
- *
- * @param a The first number.
- * @param b The second number.
- * @returns The average of the two numbers.
- */
-const average = (a: number, b: number) => (a + b) / 2;
-
-/**
- * Get a SVG path from a stroke.
- *
- * @param points Coordinates of the points.
- * @param closed If the path should be closed.
- * @returns The SVG path.
- */
-const getSvgPathFromStroke = (points: number[][], closed = true) => {
-  const len = points.length;
-
-  if (len < 4) {
-    return ``;
-  }
-
-  let a = points[0];
-  let b = points[1];
-  const c = points[2];
-
-  let result = `M${a[0].toFixed(2)},${a[1].toFixed(2)} Q${b[0].toFixed(
-    2
-  )},${b[1].toFixed(2)} ${average(b[0], c[0]).toFixed(2)},${average(
-    b[1],
-    c[1]
-  ).toFixed(2)} T`;
-
-  for (let i = 2, max = len - 1; i < max; i++) {
-    a = points[i];
-    b = points[i + 1];
-    result += `${average(a[0], b[0]).toFixed(2)},${average(a[1], b[1]).toFixed(
-      2
-    )} `;
-  }
-
-  if (closed) {
-    result += "Z";
-  }
-
-  return result;
-};
+import { getSvgPathFromStroke } from "./lib/svg";
 
 type BoundingRect = {
   x: number;
@@ -120,14 +72,30 @@ type WhiteboardDrawableItem = Exclude<
   WhiteboardMove | WhiteboardPointer
 >;
 
+const svgOptions = { width: 16, height: 16 };
+
 const svgs = {
-  move: icons.move.toSvg(),
-  pointer: icons["mouse-pointer"].toSvg(),
-  rect: icons.square.toSvg(),
-  circle: icons.circle.toSvg(),
-  line: icons.minus.toSvg(),
-  pen: icons["edit-2"].toSvg(),
-  clear: icons["trash-2"].toSvg(),
+  move: icons.move.toSvg(svgOptions),
+  pointer: icons["mouse-pointer"].toSvg(svgOptions),
+  rect: icons.square.toSvg(svgOptions),
+  circle: icons.circle.toSvg(svgOptions),
+  line: icons.minus.toSvg(svgOptions),
+  pen: icons["edit-2"].toSvg(svgOptions),
+  clear: icons["trash-2"].toSvg(svgOptions),
+};
+
+type CurrentToolOptions = {
+  strokeColor: string;
+  fillColor: string;
+  fillStyle:
+    | "solid"
+    | "hachure"
+    | "zigzag"
+    | "cross-hatch"
+    | "dots"
+    | "dashed"
+    | "zigzag-line";
+  noFill: boolean;
 };
 
 @customElement("simple-whiteboard")
@@ -143,8 +111,14 @@ export class SimpleWhiteboard extends LitElement {
     zoom: 1,
   };
   private currentDrawing: WhiteboardItem | undefined;
-  private currentTool = "none";
-  private selectedItemId?: string = undefined;
+  @state() private currentTool = "none";
+  @state() private selectedItemId?: string = undefined;
+  @state() private currentToolOptions: CurrentToolOptions = {
+    strokeColor: "#000000",
+    fillColor: "#000000",
+    fillStyle: "hachure",
+    noFill: true,
+  };
 
   private drawableItems = ["rect", "circle", "line", "pen"];
 
@@ -157,8 +131,9 @@ export class SimpleWhiteboard extends LitElement {
     }
 
     .tools {
+      user-select: none;
       gap: 8px;
-      padding: 16px;
+      padding: 8px;
       border-radius: 8px;
       background-color: #fff;
       margin: auto;
@@ -186,6 +161,24 @@ export class SimpleWhiteboard extends LitElement {
     .tools button:active,
     .tools .tools--active {
       background-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .tools-options {
+      user-select: none;
+      position: absolute;
+      z-index: 1;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+      top: 84px;
+      width: 200px;
+      left: 16px;
+      background-color: #fff;
+      border-radius: 8px;
+      padding: 8px 12px;
+    }
+
+    .tools-options p {
+      font-size: 14px;
+      margin: 0;
     }
 
     canvas {
@@ -404,6 +397,14 @@ export class SimpleWhiteboard extends LitElement {
 
     const itemId = uuidv4();
 
+    const strokeColor = this.currentToolOptions.strokeColor;
+    let fillColor = this.currentToolOptions.fillColor;
+    const fillStyle = this.currentToolOptions.fillStyle;
+    const noFill = this.currentToolOptions.noFill;
+    if (noFill) {
+      fillColor = "transparent";
+    }
+
     switch (this.currentTool) {
       case "rect":
         this.currentDrawing = {
@@ -413,7 +414,11 @@ export class SimpleWhiteboard extends LitElement {
           y: y - this.canvasCoords.y,
           width: 0,
           height: 0,
-          options: {},
+          options: {
+            stroke: strokeColor,
+            fill: fillColor,
+            fillStyle,
+          },
         };
         break;
       case "circle":
@@ -423,7 +428,11 @@ export class SimpleWhiteboard extends LitElement {
           x: x - this.canvasCoords.x,
           y: y - this.canvasCoords.y,
           diameter: 0,
-          options: {},
+          options: {
+            stroke: strokeColor,
+            fill: fillColor,
+            fillStyle,
+          },
         };
         break;
       case "line":
@@ -434,7 +443,9 @@ export class SimpleWhiteboard extends LitElement {
           y1: y - this.canvasCoords.y,
           x2: x - this.canvasCoords.x,
           y2: y - this.canvasCoords.y,
-          options: {},
+          options: {
+            stroke: strokeColor,
+          },
         };
         break;
       case "pen":
@@ -442,7 +453,9 @@ export class SimpleWhiteboard extends LitElement {
           kind: "pen",
           id: itemId,
           path: [{ x: x - this.canvasCoords.x, y: y - this.canvasCoords.y }],
-          options: {},
+          options: {
+            color: strokeColor,
+          },
         };
         break;
       case "move":
@@ -644,6 +657,145 @@ export class SimpleWhiteboard extends LitElement {
     this.dispatchEvent(itemsUpdatedEvent);
   }
 
+  handleItemStrokeColorChange(itemId: string) {
+    const item = this.items.find(
+      (item: any) => item.id === itemId
+    ) as WhiteboardDrawableItem;
+    if (!item || !this.drawableItems.includes(item.kind)) {
+      return (_event: Event) => {};
+    }
+
+    return (event: Event) => {
+      const input = event.target as HTMLInputElement;
+      if (item.kind === "pen") {
+        item.options.color = input.value;
+      } else {
+        item.options.stroke = input.value;
+      }
+
+      this.draw();
+
+      const itemsUpdatedEvent = new CustomEvent("items-updated", {
+        detail: {
+          type: "update",
+          itemId,
+          item: item,
+        },
+      });
+      this.dispatchEvent(itemsUpdatedEvent);
+    };
+  }
+
+  handleItemFillColorChange(itemId: string) {
+    const item = this.items.find((item: any) => item.id === itemId) as any;
+    if (
+      !item ||
+      !this.drawableItems.includes(item.kind) ||
+      !item.options.fill
+    ) {
+      return (_event: Event) => {};
+    }
+
+    return (event: Event) => {
+      const input = event.target as HTMLInputElement;
+      const value = input.value;
+      item.options.fillColor = value;
+
+      this.draw();
+
+      const itemsUpdatedEvent = new CustomEvent("items-updated", {
+        detail: {
+          type: "update",
+          itemId,
+          item: item,
+        },
+      });
+      this.dispatchEvent(itemsUpdatedEvent);
+    };
+  }
+
+  handleStrokeColorChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    this.currentToolOptions.strokeColor = input.value;
+  }
+  handleFillColorChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const value = input.value;
+    if (value === "checkbox") {
+      this.currentToolOptions.noFill = input.checked;
+    } else {
+      this.currentToolOptions.fillColor = value;
+    }
+  }
+
+  renderToolsOptions() {
+    const options: TemplateResult[] = [];
+
+    let tool = this.currentTool;
+    const currentToolOptions = { ...this.currentToolOptions };
+    let handleStrokeColorChange = this.handleStrokeColorChange;
+    let handleFillColorChange = this.handleFillColorChange;
+
+    let currentItem;
+
+    if (this.selectedItemId) {
+      currentItem = this.items.find((item) => {
+        if (!this.drawableItems.includes(item.kind)) {
+          return false;
+        }
+        const drawableItem = item as WhiteboardDrawableItem;
+        return drawableItem.id === this.selectedItemId;
+      }) as WhiteboardDrawableItem;
+    }
+    if (currentItem) {
+      tool = currentItem.kind || this.currentTool;
+      if (currentItem.kind === "pen") {
+        currentToolOptions.strokeColor = currentItem.options.color || "#000000";
+      }
+      if (currentItem.kind === "rect" || currentItem.kind === "circle") {
+        currentToolOptions.fillColor = currentItem.options.fill || "#000000";
+      }
+      if (
+        currentItem.kind === "rect" ||
+        currentItem.kind === "circle" ||
+        currentItem.kind === "line"
+      ) {
+        currentToolOptions.strokeColor =
+          currentItem.options.stroke || "#000000";
+      }
+      handleStrokeColorChange = this.handleItemStrokeColorChange(
+        currentItem.id
+      );
+      handleFillColorChange = this.handleItemFillColorChange(currentItem.id);
+    }
+
+    if (this.drawableItems.includes(tool)) {
+      const colorOption = html`<p>Stroke color</p>
+        <input
+          type="color"
+          .value=${currentToolOptions.strokeColor}
+          @input=${handleStrokeColorChange}
+        />`;
+      options.push(colorOption);
+    }
+
+    if (tool === "rect" || tool === "circle") {
+      const fillOption = html`<p>Fill color</p>
+        <input
+          type="color"
+          .value=${currentToolOptions.fillColor}
+          @input=${handleFillColorChange}
+        />`;
+      options.push(fillOption);
+    }
+
+    if (options.length === 0) {
+      return null;
+    }
+
+    return html`<div class="tools-options">${options}</div>`;
+  }
+
   render() {
     return html`
       <div class="root">
@@ -689,6 +841,8 @@ export class SimpleWhiteboard extends LitElement {
           </button>
         </div>
 
+        ${this.renderToolsOptions()}
+
         <canvas
           @mousedown="${this.handleMouseDown}"
           @mouseup="${this.handleMouseUp}"
@@ -713,6 +867,16 @@ export class SimpleWhiteboard extends LitElement {
 
   public addItem(item: WhiteboardItem) {
     this.items.unshift(item);
+    this.draw();
+  }
+
+  public updateItem(itemId: string, item: WhiteboardItem) {
+    const index = this.items.findIndex((item: any) => item.id === itemId);
+    if (index === -1) {
+      return;
+    }
+
+    this.items[index] = item;
     this.draw();
   }
 
