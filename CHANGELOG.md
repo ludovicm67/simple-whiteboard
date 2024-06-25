@@ -1,5 +1,11 @@
 # @ludovicm67/whiteboard
 
+## 0.1.2
+
+### Patch Changes
+
+- 357d000: Change tool colors
+
 ## 0.1.1
 
 ### Patch Changes
