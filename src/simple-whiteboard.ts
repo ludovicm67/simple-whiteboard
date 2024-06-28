@@ -72,6 +72,11 @@ type WhiteboardDrawableItem = Exclude<
   WhiteboardMove | WhiteboardPointer
 >;
 
+type Point = {
+  x: number;
+  y: number;
+};
+
 const svgOptions = { width: 16, height: 16 };
 
 const svgs = {
@@ -226,6 +231,20 @@ export class SimpleWhiteboard extends LitElement {
     this.draw();
   }
 
+  coordsToCanvasCoords(x: number, y: number): Point {
+    return {
+      x: x + this.canvasCoords.x,
+      y: y + this.canvasCoords.y,
+    };
+  }
+
+  coordsFromCanvasCoords(x: number, y: number): Point {
+    return {
+      x: x - this.canvasCoords.x,
+      y: y - this.canvasCoords.y,
+    };
+  }
+
   handleVisibilityChange() {
     if (!this.canvas) {
       return;
@@ -241,37 +260,36 @@ export class SimpleWhiteboard extends LitElement {
   ) {
     switch (item.kind) {
       case "rect":
-        rc.rectangle(
-          item.x + this.canvasCoords.x,
-          item.y + this.canvasCoords.y,
-          item.width,
-          item.height,
-          item.options
+        const { x: rectX, y: rectY } = this.coordsToCanvasCoords(
+          item.x,
+          item.y
         );
+        rc.rectangle(rectX, rectY, item.width, item.height, item.options);
         break;
       case "circle":
-        rc.circle(
-          item.x + this.canvasCoords.x,
-          item.y + this.canvasCoords.y,
-          item.diameter,
-          item.options
+        const { x: circleX, y: circleY } = this.coordsToCanvasCoords(
+          item.x,
+          item.y
         );
+        rc.circle(circleX, circleY, item.diameter, item.options);
         break;
       case "line":
-        rc.line(
-          item.x1 + this.canvasCoords.x,
-          item.y1 + this.canvasCoords.y,
-          item.x2 + this.canvasCoords.x,
-          item.y2 + this.canvasCoords.y,
-          item.options
+        const { x: lineX1, y: lineY1 } = this.coordsToCanvasCoords(
+          item.x1,
+          item.y1
         );
+        const { x: lineX2, y: lineY2 } = this.coordsToCanvasCoords(
+          item.x2,
+          item.y2
+        );
+        rc.line(lineX1, lineY1, lineX2, lineY2, item.options);
         break;
       case "pen":
         const outlinePoints = getStroke(
-          item.path.map((p) => ({
-            x: p.x + this.canvasCoords.x,
-            y: p.y + this.canvasCoords.y,
-          })),
+          item.path.map((p) => {
+            const { x, y } = this.coordsToCanvasCoords(p.x, p.y);
+            return { x, y };
+          }),
           {
             size: 6,
             smoothing: 0.5,
@@ -333,16 +351,12 @@ export class SimpleWhiteboard extends LitElement {
 
   drawItemBox(context: CanvasRenderingContext2D, item: WhiteboardItem) {
     const { x, y, width, height } = this.getBoundingRect(item);
+    const { x: coordX, y: coordY } = this.coordsToCanvasCoords(x, y);
 
     context.strokeStyle = "#135aa0";
     context.lineWidth = 2;
     context.beginPath();
-    context.rect(
-      x + this.canvasCoords.x,
-      y + this.canvasCoords.y,
-      width,
-      height
-    );
+    context.rect(coordX, coordY, width, height);
     context.stroke();
   }
 
