@@ -3,7 +3,7 @@ import rough from "roughjs";
 import { icons } from "feather-icons";
 import getStroke from "perfect-freehand";
 import { v4 as uuidv4 } from "uuid";
-import { customElement, state } from "lit/decorators.js";
+import { customElement, queryAssignedElements, state } from "lit/decorators.js";
 import { RoughCanvas } from "roughjs/bin/canvas";
 import { Options as RoughCanvasOptions } from "roughjs/bin/core";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
@@ -103,6 +103,9 @@ export class SimpleWhiteboard extends LitElement {
   private canvas?: HTMLCanvasElement;
   private canvasContext?: CanvasRenderingContext2D;
   private toolsMenu?: HTMLDivElement;
+
+  @queryAssignedElements({ slot: "tools" })
+  toolsSlotElements!: HTMLElement[];
 
   @state() private items: WhiteboardItem[] = [];
   @state() private canvasCoords: { x: number; y: number; zoom: number } = {
