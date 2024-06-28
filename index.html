@@ -6,10 +6,15 @@
     <title>Simple Whiteboard</title>
     <link rel="stylesheet" href="./src/index.css" />
     <script type="module" src="/src/simple-whiteboard.ts"></script>
+    <script type="module" src="/src/tools/rect.ts"></script>
   </head>
   <body>
     <main>
-      <simple-whiteboard id="app"></simple-whiteboard>
+      <simple-whiteboard id="app">
+        <simple-whiteboard--tool-rect
+          slot="tools"
+        ></simple-whiteboard--tool-rect>
+      </simple-whiteboard>
     </main>
     <footer>
       <a href="/" target="_blank">New Tab</a>

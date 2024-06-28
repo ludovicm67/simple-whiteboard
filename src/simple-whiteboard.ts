@@ -802,6 +802,7 @@ export class SimpleWhiteboard extends LitElement {
   render() {
     return html`
       <div class="root">
+        <slot name="tools"></slot>
         <div class="tools">
           <button
             @click="${(e: Event) => this.handleToolChange(e, "move")}"
