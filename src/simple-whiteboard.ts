@@ -424,11 +424,12 @@ export class SimpleWhiteboard extends LitElement {
 
     switch (this.currentTool) {
       case "rect":
+        const { x: rectX, y: rectY } = this.coordsFromCanvasCoords(x, y);
         this.currentDrawing = {
           kind: "rect",
           id: itemId,
-          x: x - this.canvasCoords.x,
-          y: y - this.canvasCoords.y,
+          x: rectX,
+          y: rectY,
           width: 0,
           height: 0,
           options: {
@@ -439,11 +440,12 @@ export class SimpleWhiteboard extends LitElement {
         };
         break;
       case "circle":
+        const { x: circleX, y: circleY } = this.coordsFromCanvasCoords(x, y);
         this.currentDrawing = {
           kind: "circle",
           id: itemId,
-          x: x - this.canvasCoords.x,
-          y: y - this.canvasCoords.y,
+          x: circleX,
+          y: circleY,
           diameter: 0,
           options: {
             stroke: strokeColor,
@@ -453,23 +455,25 @@ export class SimpleWhiteboard extends LitElement {
         };
         break;
       case "line":
+        const { x: lineX, y: lineY } = this.coordsFromCanvasCoords(x, y);
         this.currentDrawing = {
           kind: "line",
           id: itemId,
-          x1: x - this.canvasCoords.x,
-          y1: y - this.canvasCoords.y,
-          x2: x - this.canvasCoords.x,
-          y2: y - this.canvasCoords.y,
+          x1: lineX,
+          y1: lineY,
+          x2: lineX,
+          y2: lineY,
           options: {
             stroke: strokeColor,
           },
         };
         break;
       case "pen":
+        const { x: penX, y: penY } = this.coordsFromCanvasCoords(x, y);
         this.currentDrawing = {
           kind: "pen",
           id: itemId,
-          path: [{ x: x - this.canvasCoords.x, y: y - this.canvasCoords.y }],
+          path: [{ x: penX, y: penY }],
           options: {
             color: strokeColor,
           },
@@ -483,10 +487,11 @@ export class SimpleWhiteboard extends LitElement {
         };
         break;
       case "pointer":
+        const { x: pointerX, y: pointerY } = this.coordsFromCanvasCoords(x, y);
         this.currentDrawing = {
           kind: "pointer",
-          x: x - this.canvasCoords.x,
-          y: y - this.canvasCoords.y,
+          x: pointerX,
+          y: pointerY,
         };
         break;
     }
