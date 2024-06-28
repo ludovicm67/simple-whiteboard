@@ -1,13 +1,20 @@
-import { LitElement, TemplateResult, css, html } from "lit";
+import {
+  LitElement,
+  PropertyDeclaration,
+  TemplateResult,
+  css,
+  html,
+} from "lit";
 import rough from "roughjs";
 import { icons } from "feather-icons";
 import getStroke from "perfect-freehand";
 import { v4 as uuidv4 } from "uuid";
-import { customElement, queryAssignedElements, state } from "lit/decorators.js";
+import { customElement, state } from "lit/decorators.js";
 import { RoughCanvas } from "roughjs/bin/canvas";
 import { Options as RoughCanvasOptions } from "roughjs/bin/core";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { getSvgPathFromStroke } from "./lib/svg";
+import SimpleWhiteboardTool from "./lib/SimpleWhiteboardTool";
 
 type BoundingRect = {
   x: number;
@@ -107,10 +114,9 @@ type CurrentToolOptions = {
 export class SimpleWhiteboard extends LitElement {
   private canvas?: HTMLCanvasElement;
   private canvasContext?: CanvasRenderingContext2D;
-  private toolsMenu?: HTMLDivElement;
 
-  @queryAssignedElements({ slot: "tools" })
-  toolsSlotElements!: HTMLElement[];
+  @state() private registeredTools: Map<string, SimpleWhiteboardTool> =
+    new Map();
 
   @state() private items: WhiteboardItem[] = [];
   @state() private canvasCoords: { x: number; y: number; zoom: number } = {
@@ -211,12 +217,6 @@ export class SimpleWhiteboard extends LitElement {
       throw new Error("Canvas context not found");
     }
     this.canvasContext = canvasContext;
-
-    this.toolsMenu = this.shadowRoot?.querySelector(".tools") || undefined;
-    if (!this.toolsMenu) {
-      throw new Error("Tools menu not found");
-    }
-
     this.handleResize();
   }
 
@@ -656,9 +656,33 @@ export class SimpleWhiteboard extends LitElement {
   handleToolChange(event: Event, tool: string) {
     event.stopPropagation();
     this.currentTool = tool;
-    this.toolsMenu?.querySelectorAll("button").forEach((button) => {
-      button.classList.toggle("tools--active", button === event.currentTarget);
-    });
+    // this.toolsMenu?.querySelectorAll("button").forEach((button) => {
+    //   button.classList.toggle("tools--active", button === event.currentTarget);
+    // });
+  }
+
+  public registerTool(tool: SimpleWhiteboardTool) {
+    if (!tool || !tool.tagName) {
+      console.error("Invalid tool");
+      return;
+    }
+
+    const tagName = tool.tagName.toLowerCase();
+
+    console.log("Registering tool", tool);
+    console.log("Tag name", tagName);
+
+    this.registeredTools.set(tagName, tool);
+    this.requestUpdate();
+  }
+
+  requestUpdate(
+    name?: PropertyKey | undefined,
+    oldValue?: unknown,
+    options?: PropertyDeclaration<unknown, unknown> | undefined
+  ): void {
+    console.log("Request update", name, oldValue, options);
+    super.requestUpdate(name, oldValue, options);
   }
 
   resetWhiteboard() {
@@ -818,53 +842,37 @@ export class SimpleWhiteboard extends LitElement {
     return html`<div class="tools-options">${options}</div>`;
   }
 
+  renderToolsList() {
+    const tools = [];
+
+    for (const [toolName, tool] of this.registeredTools) {
+      const icon = tool.getToolIcon();
+      if (!icon) {
+        continue;
+      }
+
+      const button = html`<button
+        @click=${(e: Event) => this.handleToolChange(e, toolName)}
+      >
+        ${icon}
+      </button>`;
+
+      tools.push(button);
+    }
+
+    if (tools.length === 0) {
+      return null;
+    }
+
+    return html`<div class="tools">${tools}</div>`;
+  }
+
   render() {
     return html`
       <div class="root">
         <slot name="tools"></slot>
-        <div class="tools">
-          <button
-            @click="${(e: Event) => this.handleToolChange(e, "move")}"
-            title="Move Tool"
-          >
-            ${unsafeHTML(svgs.move)}
-          </button>
-          <button
-            @click="${(e: Event) => this.handleToolChange(e, "pointer")}"
-            title="Pointer Tool"
-          >
-            ${unsafeHTML(svgs.pointer)}
-          </button>
-          <button
-            @click="${(e: Event) => this.handleToolChange(e, "rect")}"
-            title="Rectangle Tool"
-          >
-            ${unsafeHTML(svgs.rect)}
-          </button>
-          <button
-            @click="${(e: Event) => this.handleToolChange(e, "circle")}"
-            title="Circle Tool"
-          >
-            ${unsafeHTML(svgs.circle)}
-          </button>
-          <button
-            @click="${(e: Event) => this.handleToolChange(e, "line")}"
-            title="Line Tool"
-          >
-            ${unsafeHTML(svgs.line)}
-          </button>
-          <button
-            @click="${(e: Event) => this.handleToolChange(e, "pen")}"
-            title="Pen Tool"
-          >
-            ${unsafeHTML(svgs.pen)}
-          </button>
-          <button @click="${this.clearWhiteboard}" title="Clear Whiteboard">
-            ${unsafeHTML(svgs.clear)}
-          </button>
-        </div>
 
-        ${this.renderToolsOptions()}
+        ${this.renderToolsList()} ${this.renderToolsOptions()}
 
         <canvas
           @mousedown="${this.handleMouseDown}"
