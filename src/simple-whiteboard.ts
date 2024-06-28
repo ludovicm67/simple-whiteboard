@@ -60,13 +60,24 @@ type WhiteboardPointer = {
   x: number;
   y: number;
 };
+type WhiteboardPicture = {
+  kind: "picture";
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  src: string;
+  options: Record<string, any>;
+};
 type WhiteboardItem =
   | WhiteboardRect
   | WhiteboardCircle
   | WhiteboardLine
   | WhiteboardPen
   | WhiteboardMove
-  | WhiteboardPointer;
+  | WhiteboardPointer
+  | WhiteboardPicture;
 type WhiteboardDrawableItem = Exclude<
   WhiteboardItem,
   WhiteboardMove | WhiteboardPointer
@@ -82,6 +93,7 @@ const svgs = {
   line: icons.minus.toSvg(svgOptions),
   pen: icons["edit-2"].toSvg(svgOptions),
   clear: icons["trash-2"].toSvg(svgOptions),
+  picture: icons.image.toSvg(svgOptions),
 };
 
 type CurrentToolOptions = {
@@ -103,6 +115,8 @@ export class SimpleWhiteboard extends LitElement {
   private canvas?: HTMLCanvasElement;
   private canvasContext?: CanvasRenderingContext2D;
   private toolsMenu?: HTMLDivElement;
+
+  private pictureCache: Map<string, HTMLImageElement> = new Map();
 
   @state() private items: WhiteboardItem[] = [];
   @state() private canvasCoords: { x: number; y: number; zoom: number } = {
@@ -284,6 +298,32 @@ export class SimpleWhiteboard extends LitElement {
         context.fill(path);
         context.fillStyle = prevFillStyle;
         break;
+      case "picture":
+        const cachedImage = this.pictureCache.get(item.src);
+        if (cachedImage) {
+          context.drawImage(
+            cachedImage,
+            item.x + this.canvasCoords.x,
+            item.y + this.canvasCoords.y,
+            item.width,
+            item.height
+          );
+          break;
+        } else {
+          const img = new Image();
+          img.onload = () => {
+            this.pictureCache.set(item.src, img);
+            context.drawImage(
+              img,
+              item.x + this.canvasCoords.x,
+              item.y + this.canvasCoords.y,
+              item.width,
+              item.height
+            );
+          };
+          img.src = item.src;
+        }
+        break;
     }
   }
 
@@ -320,6 +360,12 @@ export class SimpleWhiteboard extends LitElement {
         y = Math.min(...yValues);
         width = Math.max(...xValues) - x;
         height = Math.max(...yValues) - y;
+        break;
+      case "picture":
+        x = item.x;
+        y = item.y;
+        width = item.width;
+        height = item.height;
         break;
       default:
         return { x, y, width, height };
@@ -359,7 +405,10 @@ export class SimpleWhiteboard extends LitElement {
 
     if (this.selectedItemId) {
       const drawableItems = this.items.filter((item) => {
-        if (!item || !this.drawableItems.includes(item.kind)) {
+        if (
+          !item ||
+          (!this.drawableItems.includes(item.kind) && item.kind !== "picture")
+        ) {
           return false;
         }
         return true;
@@ -532,7 +581,10 @@ export class SimpleWhiteboard extends LitElement {
       const { x: pointerX, y: pointerY } = this.currentDrawing;
       // Get all items that are under the pointer
       const potentialItems = this.items.filter((item) => {
-        if (!this.currentDrawing || !this.drawableItems.includes(item.kind)) {
+        if (
+          !this.currentDrawing ||
+          (!this.drawableItems.includes(item.kind) && item.kind !== "picture")
+        ) {
           return false;
         }
         const { x, y, width, height } = this.getBoundingRect(item);
@@ -740,7 +792,10 @@ export class SimpleWhiteboard extends LitElement {
 
     if (this.selectedItemId) {
       currentItem = this.items.find((item) => {
-        if (!this.drawableItems.includes(item.kind)) {
+        if (
+          !this.drawableItems.includes(item.kind) &&
+          item.kind !== "picture"
+        ) {
           return false;
         }
         const drawableItem = item as WhiteboardDrawableItem;
@@ -767,6 +822,42 @@ export class SimpleWhiteboard extends LitElement {
         currentItem.id
       );
       handleFillColorChange = this.handleItemFillColorChange(currentItem.id);
+    }
+
+    if (tool === "picture") {
+      const srcParam = html`<p>Source</p>
+        <input
+          type="file"
+          accept="image/*"
+          @change=${(e: Event) => {
+            const fileInput = e.target as HTMLInputElement;
+            const file = fileInput.files?.[0];
+            if (!file) {
+              return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const img = new Image();
+              img.onload = () => {
+                const item: WhiteboardPicture = {
+                  kind: "picture",
+                  id: uuidv4(),
+                  x: 0,
+                  y: 0,
+                  width: img.width,
+                  height: img.height,
+                  src: img.src,
+                  options: {},
+                };
+                this.addItem(item);
+              };
+              img.src = e.target?.result as string;
+            };
+            reader.readAsDataURL(file);
+          }}
+        />`;
+      options.push(srcParam);
     }
 
     if (this.drawableItems.includes(tool)) {
@@ -835,6 +926,12 @@ export class SimpleWhiteboard extends LitElement {
             title="Pen Tool"
           >
             ${unsafeHTML(svgs.pen)}
+          </button>
+          <button
+            @click="${(e: Event) => this.handleToolChange(e, "picture")}"
+            title="Picture Tool"
+          >
+            ${unsafeHTML(svgs.picture)}
           </button>
           <button @click="${this.clearWhiteboard}" title="Clear Whiteboard">
             ${unsafeHTML(svgs.clear)}
