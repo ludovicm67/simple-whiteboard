@@ -10,4 +10,8 @@ export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
   public getToolIcon() {
     return html`${unsafeHTML(getIconSvg("circle"))}`;
   }
+
+  public getToolName() {
+    return "circle";
+  }
 }

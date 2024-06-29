@@ -20,6 +20,18 @@ abstract class SimpleWhiteboardTool
   }
 
   /**
+   * Get the name of the tool.
+   * It's the name that will be used to identify the tool internally.
+   * It should be unique.
+   * By default, it returns the tag name of the tool in lowercase.
+   *
+   * @returns The name of the tool.
+   */
+  public getToolName(): string {
+    return this.tagName.toLowerCase();
+  }
+
+  /**
    * Get the nearest `SimpleWhiteboard` element.
    *
    * @returns The nearest `SimpleWhiteboard` element.
@@ -43,9 +55,12 @@ abstract class SimpleWhiteboardTool
 
   protected firstUpdated(): void {
     const simpleWhiteboard = this.findNearestCustomElement();
-    console.log("firstUpdated", simpleWhiteboard);
     if (simpleWhiteboard) {
       simpleWhiteboard.registerTool(this);
+    } else {
+      console.error(
+        `Failed to register tool: ${this.tagName} (no <simple-whiteboard> parent found)`
+      );
     }
   }
 }

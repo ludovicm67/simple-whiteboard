@@ -10,4 +10,8 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
   public getToolIcon() {
     return html`${unsafeHTML(getIconSvg("edit-2"))}`;
   }
+
+  public getToolName() {
+    return "pen";
+  }
 }

@@ -662,17 +662,17 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   public registerTool(tool: SimpleWhiteboardTool) {
-    if (!tool || !tool.tagName) {
+    if (!tool || !tool.tagName || !tool.getToolName) {
       console.error("Invalid tool");
       return;
     }
 
-    const tagName = tool.tagName.toLowerCase();
+    const toolName = tool.getToolName();
 
     console.log("Registering tool", tool);
-    console.log("Tag name", tagName);
+    console.log("Tool name", toolName);
 
-    this.registeredTools.set(tagName, tool);
+    this.registeredTools.set(toolName, tool);
     this.requestUpdate();
   }
 

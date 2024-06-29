@@ -10,4 +10,8 @@ export class SimpleWhiteboardToolMove extends SimpleWhiteboardTool {
   public getToolIcon() {
     return html`${unsafeHTML(getIconSvg("move"))}`;
   }
+
+  public getToolName() {
+    return "move";
+  }
 }

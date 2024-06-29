@@ -10,4 +10,8 @@ export class SimpleWhiteboardToolPointer extends SimpleWhiteboardTool {
   public getToolIcon() {
     return html`${unsafeHTML(getIconSvg("mouse-pointer"))}`;
   }
+
+  public getToolName() {
+    return "pointer";
+  }
 }

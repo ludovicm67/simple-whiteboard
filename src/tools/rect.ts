@@ -10,4 +10,8 @@ export class SimpleWhiteboardToolRect extends SimpleWhiteboardTool {
   public getToolIcon() {
     return html`${unsafeHTML(getIconSvg("square"))}`;
   }
+
+  public getToolName() {
+    return "rect";
+  }
 }

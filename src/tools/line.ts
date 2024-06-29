@@ -10,4 +10,8 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
   public getToolIcon() {
     return html`${unsafeHTML(getIconSvg("minus"))}`;
   }
+
+  public getToolName() {
+    return "line";
+  }
 }

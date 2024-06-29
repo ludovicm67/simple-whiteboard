@@ -10,4 +10,8 @@ export class SimpleWhiteboardToolClear extends SimpleWhiteboardTool {
   public getToolIcon() {
     return html`${unsafeHTML(getIconSvg("trash-2"))}`;
   }
+
+  public getToolName() {
+    return "clear";
+  }
 }
