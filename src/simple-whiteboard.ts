@@ -6,15 +6,12 @@ import {
   html,
 } from "lit";
 import rough from "roughjs";
-import { icons } from "feather-icons";
-import getStroke from "perfect-freehand";
 import { v4 as uuidv4 } from "uuid";
 import { customElement, state } from "lit/decorators.js";
 import { RoughCanvas } from "roughjs/bin/canvas";
-import { Options as RoughCanvasOptions } from "roughjs/bin/core";
-import { unsafeHTML } from "lit/directives/unsafe-html.js";
-import { getSvgPathFromStroke } from "./lib/svg";
-import SimpleWhiteboardTool from "./lib/SimpleWhiteboardTool";
+import SimpleWhiteboardTool, {
+  WhiteboardItem,
+} from "./lib/SimpleWhiteboardTool";
 
 type BoundingRect = {
   x: number;
@@ -23,40 +20,6 @@ type BoundingRect = {
   height: number;
 };
 
-type WhiteboardRect = {
-  kind: "rect";
-  id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  options: RoughCanvasOptions;
-};
-type WhiteboardCircle = {
-  kind: "circle";
-  id: string;
-  x: number;
-  y: number;
-  diameter: number;
-  options: RoughCanvasOptions;
-};
-type WhiteboardLine = {
-  kind: "line";
-  id: string;
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-  options: RoughCanvasOptions;
-};
-type WhiteboardPen = {
-  kind: "pen";
-  id: string;
-  path: { x: number; y: number }[];
-  options: {
-    color?: string;
-  };
-};
 type WhiteboardMove = {
   kind: "move";
   x: number;
@@ -67,13 +30,6 @@ type WhiteboardPointer = {
   x: number;
   y: number;
 };
-type WhiteboardItem =
-  | WhiteboardRect
-  | WhiteboardCircle
-  | WhiteboardLine
-  | WhiteboardPen
-  | WhiteboardMove
-  | WhiteboardPointer;
 type WhiteboardDrawableItem = Exclude<
   WhiteboardItem,
   WhiteboardMove | WhiteboardPointer
@@ -82,18 +38,6 @@ type WhiteboardDrawableItem = Exclude<
 type Point = {
   x: number;
   y: number;
-};
-
-const svgOptions = { width: 16, height: 16 };
-
-const svgs = {
-  move: icons.move.toSvg(svgOptions),
-  pointer: icons["mouse-pointer"].toSvg(svgOptions),
-  rect: icons.square.toSvg(svgOptions),
-  circle: icons.circle.toSvg(svgOptions),
-  line: icons.minus.toSvg(svgOptions),
-  pen: icons["edit-2"].toSvg(svgOptions),
-  clear: icons["trash-2"].toSvg(svgOptions),
 };
 
 type CurrentToolOptions = {
@@ -124,7 +68,7 @@ export class SimpleWhiteboard extends LitElement {
     y: 0,
     zoom: 1,
   };
-  private currentDrawing: WhiteboardItem | undefined;
+  private currentDrawing: WhiteboardItem | any | undefined;
   @state() private currentTool = "none";
   @state() private selectedItemId?: string = undefined;
   @state() private currentToolOptions: CurrentToolOptions = {
@@ -258,61 +202,20 @@ export class SimpleWhiteboard extends LitElement {
     context: CanvasRenderingContext2D,
     item: WhiteboardItem
   ) {
-    switch (item.kind) {
-      case "rect":
-        const { x: rectX, y: rectY } = this.coordsToCanvasCoords(
-          item.x,
-          item.y
-        );
-        rc.rectangle(rectX, rectY, item.width, item.height, item.options);
-        break;
-      case "circle":
-        const { x: circleX, y: circleY } = this.coordsToCanvasCoords(
-          item.x,
-          item.y
-        );
-        rc.circle(circleX, circleY, item.diameter, item.options);
-        break;
-      case "line":
-        const { x: lineX1, y: lineY1 } = this.coordsToCanvasCoords(
-          item.x1,
-          item.y1
-        );
-        const { x: lineX2, y: lineY2 } = this.coordsToCanvasCoords(
-          item.x2,
-          item.y2
-        );
-        rc.line(lineX1, lineY1, lineX2, lineY2, item.options);
-        break;
-      case "pen":
-        const outlinePoints = getStroke(
-          item.path.map((p) => {
-            const { x, y } = this.coordsToCanvasCoords(p.x, p.y);
-            return { x, y };
-          }),
-          {
-            size: 6,
-            smoothing: 0.5,
-            thinning: 0.5,
-            streamline: 0.5,
-          }
-        );
-        const pathData = getSvgPathFromStroke(outlinePoints);
-
-        const path = new Path2D(pathData);
-        const prevFillStyle = context.fillStyle;
-        context.fillStyle = item.options.color || "black";
-        context.fill(path);
-        context.fillStyle = prevFillStyle;
-        break;
+    const tool = this.registeredTools.get(item.kind);
+    if (tool) {
+      tool.drawItem(rc, context, item);
+      return;
     }
   }
 
-  getBoundingRect(item: WhiteboardItem): BoundingRect {
+  getBoundingRect(item2: WhiteboardItem): BoundingRect {
     let x = 0;
     let y = 0;
     let width = 0;
     let height = 0;
+
+    const item = item2 as any;
 
     // Get the bounding box of the item
     switch (item.kind) {
@@ -335,8 +238,8 @@ export class SimpleWhiteboard extends LitElement {
         height = Math.abs(item.y2 - item.y1);
         break;
       case "pen":
-        const xValues = item.path.map((p) => p.x);
-        const yValues = item.path.map((p) => p.y);
+        const xValues = item.path.map((p: Point) => p.x);
+        const yValues = item.path.map((p: Point) => p.y);
         x = Math.min(...xValues);
         y = Math.min(...yValues);
         width = Math.max(...xValues) - x;

@@ -1,14 +1,44 @@
 import { LitElement, TemplateResult } from "lit";
 import { SimpleWhiteboard } from "../simple-whiteboard";
+import { RoughCanvas as LocalRoughCanvas } from "roughjs/bin/canvas";
+import { Options as LocalRoughCanvasOptions } from "roughjs/bin/core";
 
-interface SimpleWhiteboardToolInterface {
-  getToolIcon: () => TemplateResult | null;
+export interface WhiteboardItem {
+  kind: string;
+  id: string;
+  options: Record<string, any>;
 }
+
+export interface SimpleWhiteboardToolInterface {
+  getSimpleWhiteboardInstance(): SimpleWhiteboard | null;
+  getToolIcon: () => TemplateResult | null;
+  getToolName: () => string;
+  lookupSimpleWhiteboardInstance(): SimpleWhiteboard | null;
+  drawItem(
+    rc: RoughCanvas,
+    context: CanvasRenderingContext2D,
+    item: WhiteboardItem
+  ): void;
+}
+
+export type RoughCanvas = LocalRoughCanvas;
+export type RoughCanvasOptions = LocalRoughCanvasOptions;
 
 abstract class SimpleWhiteboardTool
   extends LitElement
   implements SimpleWhiteboardToolInterface
 {
+  private simpleWhiteboardInstance: SimpleWhiteboard | null = null;
+
+  /**
+   * Get the `SimpleWhiteboard` instance.
+   *
+   * @returns The current `SimpleWhiteboard` instance or `null` if not found.
+   */
+  public getSimpleWhiteboardInstance(): SimpleWhiteboard | null {
+    return this.simpleWhiteboardInstance;
+  }
+
   /**
    * Get the icon of the tool.
    * Return `null` if the tool does not have an icon.
@@ -32,11 +62,11 @@ abstract class SimpleWhiteboardTool
   }
 
   /**
-   * Get the nearest `SimpleWhiteboard` element.
+   * Get the nearest `SimpleWhiteboard` element as parent.
    *
-   * @returns The nearest `SimpleWhiteboard` element.
+   * @returns The nearest `SimpleWhiteboard` element or `null` if not found.
    */
-  public getSimpleWhiteboardInstance(): SimpleWhiteboard | null {
+  public lookupSimpleWhiteboardInstance(): SimpleWhiteboard | null {
     let current: Node | null = this;
 
     while (current) {
@@ -53,9 +83,18 @@ abstract class SimpleWhiteboardTool
     return null;
   }
 
+  public drawItem(
+    _rc: RoughCanvas,
+    _context: CanvasRenderingContext2D,
+    _item: WhiteboardItem
+  ): void {
+    // Implement this method in the tool class to draw the item.
+  }
+
   protected firstUpdated(): void {
-    const simpleWhiteboard = this.getSimpleWhiteboardInstance();
+    const simpleWhiteboard = this.lookupSimpleWhiteboardInstance();
     if (simpleWhiteboard) {
+      this.simpleWhiteboardInstance = simpleWhiteboard;
       simpleWhiteboard.registerTool(this);
     } else {
       console.error(
