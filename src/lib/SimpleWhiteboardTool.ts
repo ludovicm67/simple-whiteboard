@@ -36,7 +36,7 @@ abstract class SimpleWhiteboardTool
    *
    * @returns The nearest `SimpleWhiteboard` element.
    */
-  public findNearestCustomElement(): SimpleWhiteboard | null {
+  public getSimpleWhiteboardInstance(): SimpleWhiteboard | null {
     let current: Node | null = this;
 
     while (current) {
@@ -54,7 +54,7 @@ abstract class SimpleWhiteboardTool
   }
 
   protected firstUpdated(): void {
-    const simpleWhiteboard = this.findNearestCustomElement();
+    const simpleWhiteboard = this.getSimpleWhiteboardInstance();
     if (simpleWhiteboard) {
       simpleWhiteboard.registerTool(this);
     } else {

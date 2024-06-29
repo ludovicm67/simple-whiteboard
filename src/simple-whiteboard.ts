@@ -653,15 +653,25 @@ export class SimpleWhiteboard extends LitElement {
     this.draw();
   }
 
-  handleToolChange(event: Event, tool: string) {
-    event.stopPropagation();
+  /**
+   * Handle the change of the tool.
+   *
+   * @param tool The name of the tool that was selected.
+   * @param event Event that triggered the change of the tool and that needs to stop the propagation.
+   */
+  private handleToolChange(tool: string, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
     this.currentTool = tool;
-    // this.toolsMenu?.querySelectorAll("button").forEach((button) => {
-    //   button.classList.toggle("tools--active", button === event.currentTarget);
-    // });
   }
 
-  public registerTool(tool: SimpleWhiteboardTool) {
+  /**
+   * Register a tool.
+   *
+   * @param tool The tool to register.
+   */
+  public registerTool(tool: SimpleWhiteboardTool): void {
     if (!tool || !tool.tagName || !tool.getToolName) {
       console.error("Invalid tool");
       return;
@@ -852,7 +862,8 @@ export class SimpleWhiteboard extends LitElement {
       }
 
       const button = html`<button
-        @click=${(e: Event) => this.handleToolChange(e, toolName)}
+        class=${this.currentTool === toolName ? "tools--active" : ""}
+        @click=${(e: Event) => this.handleToolChange(toolName, e)}
       >
         ${icon}
       </button>`;
