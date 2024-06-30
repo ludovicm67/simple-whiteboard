@@ -14,4 +14,18 @@ export class SimpleWhiteboardToolClear extends SimpleWhiteboardTool {
   public getToolName() {
     return "clear";
   }
+
+  public onToolSelected(): void {
+    const simpleWhiteboard = this.getSimpleWhiteboardInstance();
+    if (!simpleWhiteboard) {
+      return;
+    }
+    simpleWhiteboard.clearWhiteboard();
+
+    // Select the previous tool
+    const previousTool = simpleWhiteboard.getPreviousTool();
+    if (previousTool && previousTool !== this.getToolName()) {
+      simpleWhiteboard.setCurrentTool(previousTool, false);
+    }
+  }
 }

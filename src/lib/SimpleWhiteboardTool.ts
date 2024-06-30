@@ -27,6 +27,7 @@ export interface SimpleWhiteboardToolInterface {
     item: WhiteboardItem
   ): void;
   getBoundingRect(item: WhiteboardItem): BoundingRect | null;
+  onToolSelected(): void;
 }
 
 export type RoughCanvas = LocalRoughCanvas;
@@ -120,6 +121,14 @@ abstract class SimpleWhiteboardTool
   public getBoundingRect(_item: WhiteboardItem): BoundingRect | null {
     // Implement this method in the tool class to get the bounding rect of the item if needed.
     return null;
+  }
+
+  /**
+   * Called when the tool is selected.
+   * This method should be implemented in the tool class if needed.
+   */
+  public onToolSelected(): void {
+    // Implement this method in the tool class if needed.
   }
 
   protected firstUpdated(): void {

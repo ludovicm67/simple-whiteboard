@@ -63,7 +63,10 @@ export class SimpleWhiteboard extends LitElement {
     zoom: 1,
   };
   private currentDrawing: WhiteboardItem | any | undefined;
-  @state() private currentTool = "none";
+
+  @state() private currentTool = "";
+  @state() private previousTool = "";
+
   @state() private selectedItemId?: string = undefined;
   @state() private currentToolOptions: CurrentToolOptions = {
     strokeColor: "#000000",
@@ -533,7 +536,7 @@ export class SimpleWhiteboard extends LitElement {
     if (event) {
       event.stopPropagation();
     }
-    this.currentTool = tool;
+    this.setCurrentTool(tool);
   }
 
   /**
@@ -548,10 +551,6 @@ export class SimpleWhiteboard extends LitElement {
     }
 
     const toolName = tool.getToolName();
-
-    console.log("Registering tool", tool);
-    console.log("Tool name", toolName);
-
     this.registeredTools.set(toolName, tool);
     this.requestUpdate();
   }
@@ -570,7 +569,7 @@ export class SimpleWhiteboard extends LitElement {
     this.selectedItemId = undefined;
   }
 
-  clearWhiteboard() {
+  public clearWhiteboard() {
     this.resetWhiteboard();
     this.canvasCoords = { x: 0, y: 0, zoom: 1 };
     this.draw();
@@ -795,5 +794,25 @@ export class SimpleWhiteboard extends LitElement {
   public clear() {
     this.resetWhiteboard();
     this.draw();
+  }
+
+  public getPreviousTool() {
+    return this.previousTool;
+  }
+
+  public getCurrentTool() {
+    return this.currentTool;
+  }
+
+  public setCurrentTool(tool: string, updatePreviousTool = true) {
+    if (updatePreviousTool) {
+      this.previousTool = this.currentTool;
+    }
+    this.currentTool = tool;
+
+    const toolInstance = this.registeredTools.get(tool);
+    if (toolInstance) {
+      toolInstance.onToolSelected();
+    }
   }
 }
