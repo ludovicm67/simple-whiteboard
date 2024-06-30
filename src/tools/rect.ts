@@ -52,4 +52,31 @@ export class SimpleWhiteboardToolRect extends SimpleWhiteboardTool {
       height: item.height,
     };
   }
+
+  public handleDrawingMove(x: number, y: number): void {
+    const simpleWhiteboard = super.getSimpleWhiteboardInstance();
+    if (!simpleWhiteboard) {
+      return;
+    }
+
+    const currentDrawing = simpleWhiteboard.getCurrentDrawing();
+    if (!currentDrawing) {
+      return;
+    }
+
+    if (currentDrawing.kind !== this.getToolName()) {
+      return;
+    }
+
+    const rectItem = currentDrawing as RectItem;
+    const { x: currentX, y: currentY } = rectItem;
+
+    const { x: canvasX, y: canvasY } = simpleWhiteboard.getCanvasCoords();
+
+    simpleWhiteboard.setCurrentDrawing({
+      ...rectItem,
+      width: x - currentX - canvasX,
+      height: y - currentY - canvasY,
+    } as RectItem);
+  }
 }

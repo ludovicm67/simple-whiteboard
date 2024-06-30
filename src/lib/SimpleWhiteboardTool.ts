@@ -28,6 +28,8 @@ export interface SimpleWhiteboardToolInterface {
   ): void;
   getBoundingRect(item: WhiteboardItem): BoundingRect | null;
   onToolSelected(): void;
+
+  handleDrawingMove(x: number, y: number): void;
 }
 
 export type RoughCanvas = LocalRoughCanvas;
@@ -128,6 +130,17 @@ abstract class SimpleWhiteboardTool
    * This method should be implemented in the tool class if needed.
    */
   public onToolSelected(): void {
+    // Implement this method in the tool class if needed.
+  }
+
+  /**
+   * Called when the mouse moves while drawing.
+   * This method should be implemented in the tool class if needed.
+   *
+   * @param _x The x coordinate of the mouse.
+   * @param _y The y coordinate of the mouse.
+   */
+  public handleDrawingMove(_x: number, _y: number): void {
     // Implement this method in the tool class if needed.
   }
 

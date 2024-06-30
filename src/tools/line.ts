@@ -56,4 +56,30 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
       height: Math.abs(item.y2 - item.y1),
     };
   }
+
+  public handleDrawingMove(x: number, y: number): void {
+    const simpleWhiteboard = super.getSimpleWhiteboardInstance();
+    if (!simpleWhiteboard) {
+      return;
+    }
+
+    const currentDrawing = simpleWhiteboard.getCurrentDrawing();
+    if (!currentDrawing) {
+      return;
+    }
+
+    if (currentDrawing.kind !== this.getToolName()) {
+      return;
+    }
+
+    const lineItem = currentDrawing as LineItem;
+
+    const { x: canvasX, y: canvasY } = simpleWhiteboard.getCanvasCoords();
+
+    simpleWhiteboard.setCurrentDrawing({
+      ...lineItem,
+      x2: x - canvasX,
+      y2: y - canvasY,
+    } as LineItem);
+  }
 }

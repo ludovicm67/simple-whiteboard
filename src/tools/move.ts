@@ -2,8 +2,15 @@ import { html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
-import SimpleWhiteboardTool from "../lib/SimpleWhiteboardTool";
+import SimpleWhiteboardTool, {
+  WhiteboardItem,
+} from "../lib/SimpleWhiteboardTool";
 import { getIconSvg } from "../lib/icons";
+
+interface MoveItem extends WhiteboardItem {
+  x: number;
+  y: number;
+}
 
 @customElement("simple-whiteboard--tool-move")
 export class SimpleWhiteboardToolMove extends SimpleWhiteboardTool {
@@ -13,5 +20,42 @@ export class SimpleWhiteboardToolMove extends SimpleWhiteboardTool {
 
   public getToolName() {
     return "move";
+  }
+
+  public handleDrawingMove(x: number, y: number): void {
+    const simpleWhiteboard = super.getSimpleWhiteboardInstance();
+    if (!simpleWhiteboard) {
+      return;
+    }
+
+    const currentDrawing = simpleWhiteboard.getCurrentDrawing();
+    if (!currentDrawing) {
+      return;
+    }
+
+    if (currentDrawing.kind !== this.getToolName()) {
+      return;
+    }
+
+    const moveItem = currentDrawing as MoveItem;
+    const { x: startX, y: startY } = moveItem;
+
+    const canvasCoords = simpleWhiteboard.getCanvasCoords();
+    const { x: canvasX, y: canvasY } = canvasCoords;
+
+    const moveX = x - startX;
+    const moveY = y - startY;
+
+    simpleWhiteboard.setCanvasCoords({
+      ...canvasCoords,
+      x: canvasX + moveX,
+      y: canvasY + moveY,
+    });
+
+    simpleWhiteboard.setCurrentDrawing({
+      ...moveItem,
+      x: x,
+      y: y,
+    } as MoveItem);
   }
 }

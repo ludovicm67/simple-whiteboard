@@ -51,4 +51,35 @@ export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
       height: item.diameter,
     };
   }
+
+  public handleDrawingMove(x: number, y: number): void {
+    const simpleWhiteboard = super.getSimpleWhiteboardInstance();
+    if (!simpleWhiteboard) {
+      return;
+    }
+
+    const currentDrawing = simpleWhiteboard.getCurrentDrawing();
+    if (!currentDrawing) {
+      return;
+    }
+
+    if (currentDrawing.kind !== this.getToolName()) {
+      return;
+    }
+
+    const circleItem = currentDrawing as CircleItem;
+    const { x: x1, y: y1 } = circleItem;
+
+    const { x: canvasX, y: canvasY } = simpleWhiteboard.getCanvasCoords();
+
+    const x2 = x - canvasX;
+    const y2 = y - canvasY;
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+
+    simpleWhiteboard.setCurrentDrawing({
+      ...circleItem,
+      diameter: Math.sqrt(dx * dx + dy * dy) * 2,
+    } as CircleItem);
+  }
 }

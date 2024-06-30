@@ -62,10 +62,10 @@ export class SimpleWhiteboard extends LitElement {
     y: 0,
     zoom: 1,
   };
-  private currentDrawing: WhiteboardItem | any | undefined;
 
-  @state() private currentTool = "";
-  @state() private previousTool = "";
+  @state() private currentTool: string = "";
+  @state() private previousTool: string = "";
+  @state() private currentDrawing: WhiteboardItem | null = null;
 
   @state() private selectedItemId?: string = undefined;
   @state() private currentToolOptions: CurrentToolOptions = {
@@ -278,7 +278,7 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   handleDrawingStart(x: number, y: number) {
-    this.currentDrawing = undefined;
+    this.currentDrawing = null;
     this.selectedItemId = undefined;
 
     const itemId = uuidv4();
@@ -371,45 +371,12 @@ export class SimpleWhiteboard extends LitElement {
       return;
     }
 
-    switch (this.currentDrawing.kind) {
-      case "rect":
-        const { x: currentX, y: currentY } = this.currentDrawing;
-        this.currentDrawing.width = x - currentX - this.canvasCoords.x;
-        this.currentDrawing.height = y - currentY - this.canvasCoords.y;
-        break;
-      case "circle":
-        const { x: x1, y: y1 } = this.currentDrawing;
-        const x2 = x - this.canvasCoords.x;
-        const y2 = y - this.canvasCoords.y;
-        const dx = x2 - x1;
-        const dy = y2 - y1;
-        this.currentDrawing.diameter = Math.sqrt(dx * dx + dy * dy) * 2;
-        break;
-      case "line":
-        this.currentDrawing.x2 = x - this.canvasCoords.x;
-        this.currentDrawing.y2 = y - this.canvasCoords.y;
-        break;
-      case "pen":
-        this.currentDrawing.path.push({
-          x: x - this.canvasCoords.x,
-          y: y - this.canvasCoords.y,
-        });
-        break;
-      case "move":
-        const { x: startX, y: startY } = this.currentDrawing;
-        const moveX = x - startX;
-        const moveY = y - startY;
-
-        this.canvasCoords.x += moveX;
-        this.canvasCoords.y += moveY;
-
-        this.currentDrawing.x = x;
-        this.currentDrawing.y = y;
-
-        break;
+    const tool = this.registeredTools.get(this.currentTool);
+    if (!tool) {
+      return;
     }
 
-    this.draw();
+    tool.handleDrawingMove(x, y);
   }
 
   handleDrawingEnd() {
@@ -420,27 +387,28 @@ export class SimpleWhiteboard extends LitElement {
     const kind = this.currentDrawing.kind;
 
     if (kind === "pointer") {
-      const { x: pointerX, y: pointerY } = this.currentDrawing;
-      // Get all items that are under the pointer
-      const potentialItems = this.items.filter((item) => {
-        if (!this.currentDrawing || !this.drawableItems.includes(item.kind)) {
-          return false;
-        }
-        const boundingRect = this.getBoundingRect(item);
-        if (!boundingRect) {
-          return false;
-        }
-        const { x, y, width, height } = boundingRect;
-        return (
-          pointerX > x &&
-          pointerX < x + width &&
-          pointerY > y &&
-          pointerY < y + height
-        );
-      }) as WhiteboardDrawableItem[];
-      if (potentialItems.length > 0) {
-        this.selectedItemId = potentialItems[0].id;
-      }
+      // @TODO: Move this in the Pointer tool
+      // const { x: pointerX, y: pointerY } = this.currentDrawing;
+      // // Get all items that are under the pointer
+      // const potentialItems = this.items.filter((item) => {
+      //   if (!this.currentDrawing || !this.drawableItems.includes(item.kind)) {
+      //     return false;
+      //   }
+      //   const boundingRect = this.getBoundingRect(item);
+      //   if (!boundingRect) {
+      //     return false;
+      //   }
+      //   const { x, y, width, height } = boundingRect;
+      //   return (
+      //     pointerX > x &&
+      //     pointerX < x + width &&
+      //     pointerY > y &&
+      //     pointerY < y + height
+      //   );
+      // }) as WhiteboardDrawableItem[];
+      // if (potentialItems.length > 0) {
+      //   this.selectedItemId = potentialItems[0].id;
+      // }
     }
 
     if (this.drawableItems.includes(kind)) {
@@ -455,7 +423,7 @@ export class SimpleWhiteboard extends LitElement {
       });
       this.dispatchEvent(itemsUpdatedEvent);
     }
-    this.currentDrawing = undefined;
+    this.currentDrawing = null;
 
     this.draw();
   }
@@ -521,7 +489,7 @@ export class SimpleWhiteboard extends LitElement {
       return;
     }
 
-    this.currentDrawing = undefined;
+    this.currentDrawing = null;
 
     this.draw();
   }
@@ -814,5 +782,23 @@ export class SimpleWhiteboard extends LitElement {
     if (toolInstance) {
       toolInstance.onToolSelected();
     }
+  }
+
+  public setCurrentDrawing(item: WhiteboardItem | null) {
+    this.currentDrawing = item;
+    this.draw();
+  }
+
+  public getCurrentDrawing(): WhiteboardItem | null {
+    return this.currentDrawing;
+  }
+
+  public getCanvasCoords() {
+    return this.canvasCoords;
+  }
+
+  public setCanvasCoords(coords: { x: number; y: number; zoom: number }) {
+    this.canvasCoords = coords;
+    this.draw();
   }
 }
