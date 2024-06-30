@@ -11,14 +11,8 @@ import { customElement, state } from "lit/decorators.js";
 import { RoughCanvas } from "roughjs/bin/canvas";
 import SimpleWhiteboardTool, {
   WhiteboardItem,
+  BoundingRect,
 } from "./lib/SimpleWhiteboardTool";
-
-type BoundingRect = {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-};
 
 type WhiteboardMove = {
   kind: "move";
@@ -209,51 +203,20 @@ export class SimpleWhiteboard extends LitElement {
     }
   }
 
-  getBoundingRect(item2: WhiteboardItem): BoundingRect {
-    let x = 0;
-    let y = 0;
-    let width = 0;
-    let height = 0;
-
-    const item = item2 as any;
-
-    // Get the bounding box of the item
-    switch (item.kind) {
-      case "rect":
-        x = item.x;
-        y = item.y;
-        width = item.width;
-        height = item.height;
-        break;
-      case "circle":
-        x = item.x - item.diameter / 2;
-        y = item.y - item.diameter / 2;
-        width = item.diameter;
-        height = item.diameter;
-        break;
-      case "line":
-        x = Math.min(item.x1, item.x2);
-        y = Math.min(item.y1, item.y2);
-        width = Math.abs(item.x2 - item.x1);
-        height = Math.abs(item.y2 - item.y1);
-        break;
-      case "pen":
-        const xValues = item.path.map((p: Point) => p.x);
-        const yValues = item.path.map((p: Point) => p.y);
-        x = Math.min(...xValues);
-        y = Math.min(...yValues);
-        width = Math.max(...xValues) - x;
-        height = Math.max(...yValues) - y;
-        break;
-      default:
-        return { x, y, width, height };
+  getBoundingRect(item: WhiteboardItem): BoundingRect | null {
+    const tool = this.registeredTools.get(item.kind);
+    if (!tool) {
+      return null;
     }
-
-    return { x, y, width, height };
+    return tool.getBoundingRect(item);
   }
 
-  drawItemBox(context: CanvasRenderingContext2D, item: WhiteboardItem) {
-    const { x, y, width, height } = this.getBoundingRect(item);
+  drawItemBox(context: CanvasRenderingContext2D, item: WhiteboardItem): void {
+    const boundingRect = this.getBoundingRect(item);
+    if (!boundingRect) {
+      return;
+    }
+    const { x, y, width, height } = boundingRect;
     const { x: coordX, y: coordY } = this.coordsToCanvasCoords(x, y);
 
     context.strokeStyle = "#135aa0";
@@ -460,7 +423,11 @@ export class SimpleWhiteboard extends LitElement {
         if (!this.currentDrawing || !this.drawableItems.includes(item.kind)) {
           return false;
         }
-        const { x, y, width, height } = this.getBoundingRect(item);
+        const boundingRect = this.getBoundingRect(item);
+        if (!boundingRect) {
+          return false;
+        }
+        const { x, y, width, height } = boundingRect;
         return (
           pointerX > x &&
           pointerX < x + width &&

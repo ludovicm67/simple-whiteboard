@@ -3,6 +3,7 @@ import { customElement } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 import SimpleWhiteboardTool, {
+  BoundingRect,
   RoughCanvas,
   RoughCanvasOptions,
   WhiteboardItem,
@@ -41,5 +42,14 @@ export class SimpleWhiteboardToolRect extends SimpleWhiteboardTool {
       item.y
     );
     rc.rectangle(rectX, rectY, item.width, item.height, item.options);
+  }
+
+  public getBoundingRect(item: RectItem): BoundingRect | null {
+    return {
+      x: item.x,
+      y: item.y,
+      width: item.width,
+      height: item.height,
+    };
   }
 }

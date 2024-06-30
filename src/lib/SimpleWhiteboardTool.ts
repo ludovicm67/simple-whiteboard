@@ -9,6 +9,13 @@ export interface WhiteboardItem {
   options: Record<string, any>;
 }
 
+export type BoundingRect = {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
+
 export interface SimpleWhiteboardToolInterface {
   getSimpleWhiteboardInstance(): SimpleWhiteboard | null;
   getToolIcon: () => TemplateResult | null;
@@ -19,6 +26,7 @@ export interface SimpleWhiteboardToolInterface {
     context: CanvasRenderingContext2D,
     item: WhiteboardItem
   ): void;
+  getBoundingRect(item: WhiteboardItem): BoundingRect | null;
 }
 
 export type RoughCanvas = LocalRoughCanvas;
@@ -83,12 +91,35 @@ abstract class SimpleWhiteboardTool
     return null;
   }
 
+  /**
+   * Draw the item on the canvas.
+   * This method should be implemented in the tool class if needed.
+   * If the tool does not need to draw anything, you can leave it empty.
+   *
+   * @param _rc The rough canvas instance.
+   * @param _context The canvas rendering context.
+   * @param _item The item to draw.
+   */
   public drawItem(
     _rc: RoughCanvas,
     _context: CanvasRenderingContext2D,
     _item: WhiteboardItem
   ): void {
-    // Implement this method in the tool class to draw the item.
+    // Implement this method in the tool class to draw the item if needed.
+  }
+
+  /**
+   * Get the bounding rect of the item.
+   * This method should be implemented in the tool class if needed.
+   * The bounding rect is used to calculate the size of the item on the canvas.
+   * It should be the smallest rectangle that contains the item.
+   *
+   * @param _item The item to get the bounding rect.
+   * @returns The bounding rect of the item or `null` if not needed.
+   */
+  public getBoundingRect(_item: WhiteboardItem): BoundingRect | null {
+    // Implement this method in the tool class to get the bounding rect of the item if needed.
+    return null;
   }
 
   protected firstUpdated(): void {

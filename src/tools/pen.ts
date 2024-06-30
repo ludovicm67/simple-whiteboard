@@ -3,6 +3,7 @@ import { customElement } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 import SimpleWhiteboardTool, {
+  BoundingRect,
   RoughCanvas,
   WhiteboardItem,
 } from "../lib/SimpleWhiteboardTool";
@@ -55,5 +56,18 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
     context.fillStyle = item.options.color || "black";
     context.fill(path);
     context.fillStyle = prevFillStyle;
+  }
+
+  public getBoundingRect(item: PenItem): BoundingRect | null {
+    return {
+      x: Math.min(...item.path.map((p) => p.x)),
+      y: Math.min(...item.path.map((p) => p.y)),
+      width:
+        Math.max(...item.path.map((p) => p.x)) -
+        Math.min(...item.path.map((p) => p.x)),
+      height:
+        Math.max(...item.path.map((p) => p.y)) -
+        Math.min(...item.path.map((p) => p.y)),
+    };
   }
 }
