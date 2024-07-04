@@ -278,92 +278,12 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   handleDrawingStart(x: number, y: number) {
-    this.currentDrawing = null;
-    this.selectedItemId = undefined;
-
-    const itemId = uuidv4();
-
-    const strokeColor = this.currentToolOptions.strokeColor;
-    let fillColor = this.currentToolOptions.fillColor;
-    const fillStyle = this.currentToolOptions.fillStyle;
-    const noFill = this.currentToolOptions.noFill;
-    if (noFill) {
-      fillColor = "transparent";
+    const tool = this.registeredTools.get(this.currentTool);
+    if (!tool) {
+      return;
     }
 
-    switch (this.currentTool) {
-      case "rect":
-        const { x: rectX, y: rectY } = this.coordsFromCanvasCoords(x, y);
-        this.currentDrawing = {
-          kind: "rect",
-          id: itemId,
-          x: rectX,
-          y: rectY,
-          width: 0,
-          height: 0,
-          options: {
-            stroke: strokeColor,
-            fill: fillColor,
-            fillStyle,
-          },
-        };
-        break;
-      case "circle":
-        const { x: circleX, y: circleY } = this.coordsFromCanvasCoords(x, y);
-        this.currentDrawing = {
-          kind: "circle",
-          id: itemId,
-          x: circleX,
-          y: circleY,
-          diameter: 0,
-          options: {
-            stroke: strokeColor,
-            fill: fillColor,
-            fillStyle,
-          },
-        };
-        break;
-      case "line":
-        const { x: lineX, y: lineY } = this.coordsFromCanvasCoords(x, y);
-        this.currentDrawing = {
-          kind: "line",
-          id: itemId,
-          x1: lineX,
-          y1: lineY,
-          x2: lineX,
-          y2: lineY,
-          options: {
-            stroke: strokeColor,
-          },
-        };
-        break;
-      case "pen":
-        const { x: penX, y: penY } = this.coordsFromCanvasCoords(x, y);
-        this.currentDrawing = {
-          kind: "pen",
-          id: itemId,
-          path: [{ x: penX, y: penY }],
-          options: {
-            color: strokeColor,
-          },
-        };
-        break;
-      case "move":
-        this.currentDrawing = {
-          kind: "move",
-          x: x,
-          y: y,
-        };
-        break;
-      case "pointer":
-        const { x: pointerX, y: pointerY } = this.coordsFromCanvasCoords(x, y);
-        this.currentDrawing = {
-          kind: "pointer",
-          x: pointerX,
-          y: pointerY,
-        };
-        break;
-    }
+    tool.handleDrawingStart(x, y);
   }
 
   handleDrawingMove(x: number, y: number) {
@@ -500,10 +420,8 @@ export class SimpleWhiteboard extends LitElement {
    * @param tool The name of the tool that was selected.
    * @param event Event that triggered the change of the tool and that needs to stop the propagation.
    */
-  private handleToolChange(tool: string, event?: Event): void {
-    if (event) {
-      event.stopPropagation();
-    }
+  private handleToolChange(tool: string, event: Event): void {
+    event.stopPropagation();
     this.setCurrentTool(tool);
   }
 

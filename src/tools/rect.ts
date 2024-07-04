@@ -53,6 +53,31 @@ export class SimpleWhiteboardToolRect extends SimpleWhiteboardTool {
     };
   }
 
+  public handleDrawingStart(x: number, y: number): void {
+    const simpleWhiteboard = super.getSimpleWhiteboardInstance();
+    if (!simpleWhiteboard) {
+      return;
+    }
+    const itemId = super.generateId();
+
+    const { x: itemX, y: itemY } = simpleWhiteboard.coordsFromCanvasCoords(
+      x,
+      y
+    );
+
+    const item: RectItem = {
+      kind: this.getToolName(),
+      id: itemId,
+      x: itemX,
+      y: itemY,
+      width: 0,
+      height: 0,
+      options: {},
+    };
+
+    simpleWhiteboard.setCurrentDrawing(item);
+  }
+
   public handleDrawingMove(x: number, y: number): void {
     const simpleWhiteboard = super.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {

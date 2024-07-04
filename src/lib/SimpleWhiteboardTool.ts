@@ -1,7 +1,8 @@
 import { LitElement, TemplateResult } from "lit";
-import { SimpleWhiteboard } from "../simple-whiteboard";
+import { v4 as uuidv4 } from "uuid";
 import { RoughCanvas as LocalRoughCanvas } from "roughjs/bin/canvas";
 import { Options as LocalRoughCanvasOptions } from "roughjs/bin/core";
+import { SimpleWhiteboard } from "../simple-whiteboard";
 
 export interface WhiteboardItem {
   kind: string;
@@ -18,6 +19,7 @@ export type BoundingRect = {
 
 export interface SimpleWhiteboardToolInterface {
   getSimpleWhiteboardInstance(): SimpleWhiteboard | null;
+  generateId: () => string;
   getToolIcon: () => TemplateResult | null;
   getToolName: () => string;
   lookupSimpleWhiteboardInstance(): SimpleWhiteboard | null;
@@ -29,6 +31,7 @@ export interface SimpleWhiteboardToolInterface {
   getBoundingRect(item: WhiteboardItem): BoundingRect | null;
   onToolSelected(): void;
 
+  handleDrawingStart(x: number, y: number): void;
   handleDrawingMove(x: number, y: number): void;
 }
 
@@ -48,6 +51,15 @@ abstract class SimpleWhiteboardTool
    */
   public getSimpleWhiteboardInstance(): SimpleWhiteboard | null {
     return this.simpleWhiteboardInstance;
+  }
+
+  /**
+   * Generate a unique ID.
+   *
+   * @returns A unique ID.
+   */
+  public generateId(): string {
+    return uuidv4();
   }
 
   /**
@@ -130,6 +142,17 @@ abstract class SimpleWhiteboardTool
    * This method should be implemented in the tool class if needed.
    */
   public onToolSelected(): void {
+    // Implement this method in the tool class if needed.
+  }
+
+  /**
+   * Called when the mouse is pressed to start drawing.
+   * This method should be implemented in the tool class if needed.
+   *
+   * @param _x The x coordinate of the mouse.
+   * @param _y The y coordinate of the mouse.
+   */
+  public handleDrawingStart(_x: number, _y: number): void {
     // Implement this method in the tool class if needed.
   }
 

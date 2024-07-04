@@ -22,6 +22,24 @@ export class SimpleWhiteboardToolMove extends SimpleWhiteboardTool {
     return "move";
   }
 
+  public handleDrawingStart(x: number, y: number): void {
+    const simpleWhiteboard = super.getSimpleWhiteboardInstance();
+    if (!simpleWhiteboard) {
+      return;
+    }
+    const itemId = super.generateId();
+
+    const item: MoveItem = {
+      kind: this.getToolName(),
+      id: itemId,
+      x,
+      y,
+      options: {},
+    };
+
+    simpleWhiteboard.setCurrentDrawing(item);
+  }
+
   public handleDrawingMove(x: number, y: number): void {
     const simpleWhiteboard = super.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {

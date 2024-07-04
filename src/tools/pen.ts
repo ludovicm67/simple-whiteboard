@@ -71,6 +71,28 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
     };
   }
 
+  public handleDrawingStart(x: number, y: number): void {
+    const simpleWhiteboard = super.getSimpleWhiteboardInstance();
+    if (!simpleWhiteboard) {
+      return;
+    }
+    const itemId = super.generateId();
+
+    const { x: itemX, y: itemY } = simpleWhiteboard.coordsFromCanvasCoords(
+      x,
+      y
+    );
+
+    const item: PenItem = {
+      kind: this.getToolName(),
+      id: itemId,
+      path: [{ x: itemX, y: itemY }],
+      options: {},
+    };
+
+    simpleWhiteboard.setCurrentDrawing(item);
+  }
+
   public handleDrawingMove(x: number, y: number): void {
     const simpleWhiteboard = super.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {
