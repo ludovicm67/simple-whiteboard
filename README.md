@@ -1,9 +1,5 @@
 # Simple Whiteboard
 
-> [!WARNING]
-> This is an early version of the whiteboard.
-> It is not yet ready for production use.
-
 Simple Whiteboard is a simple web-based whiteboard application that allows users to draw on a canvas.
 
 The application is built as a Web Component using [LitElement](https://lit.dev/).
