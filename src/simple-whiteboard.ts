@@ -461,7 +461,9 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   public updateItem(itemId: string, item: WhiteboardItem) {
-    const index = this.items.findIndex((item: any) => item.id === itemId);
+    const index = this.items.findIndex(
+      (item: WhiteboardItem) => item.id === itemId
+    );
     if (index === -1) {
       return;
     }
@@ -542,7 +544,9 @@ export class SimpleWhiteboard extends LitElement {
     item: WhiteboardItem,
     sendEvent = false
   ) {
-    const index = this.items.findIndex((item: any) => item.id === itemId);
+    const index = this.items.findIndex(
+      (item: WhiteboardItem) => item.id === itemId
+    );
     if (index === -1) {
       return;
     }
@@ -560,5 +564,31 @@ export class SimpleWhiteboard extends LitElement {
       });
       this.dispatchEvent(itemsUpdatedEvent);
     }
+
+    this.requestUpdate();
+  }
+
+  public removeItemById(itemId: string, sendEvent = false) {
+    const index = this.items.findIndex(
+      (item: WhiteboardItem) => item.id === itemId
+    );
+    if (index === -1) {
+      return;
+    }
+
+    this.items.splice(index, 1);
+    this.draw();
+
+    if (sendEvent) {
+      const itemsUpdatedEvent = new CustomEvent("items-updated", {
+        detail: {
+          type: "remove",
+          itemId,
+        },
+      });
+      this.dispatchEvent(itemsUpdatedEvent);
+    }
+
+    this.requestUpdate();
   }
 }

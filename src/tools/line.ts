@@ -212,6 +212,13 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
           );
         }}
       />
+      <button
+        @click=${() => {
+          simpleWhiteboard.removeItemById(item.id, true);
+        }}
+      >
+        Delete
+      </button>
     `;
   }
 }

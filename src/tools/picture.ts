@@ -170,6 +170,13 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
           reader.readAsDataURL(file);
         }}
       />
+      <button
+        @click=${() => {
+          simpleWhiteboard.removeItemById(item.id, true);
+        }}
+      >
+        Delete
+      </button>
     `;
   }
 }

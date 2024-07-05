@@ -241,6 +241,13 @@ export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
           );
         }}
       />
+      <button
+        @click=${() => {
+          simpleWhiteboard.removeItemById(item.id, true);
+        }}
+      >
+        Delete
+      </button>
     `;
   }
 }
