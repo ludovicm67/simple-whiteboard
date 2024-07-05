@@ -12,10 +12,11 @@ This allows the whiteboard to be easily embedded in any web application regardle
 ## Features
 
 - Different drawing tools:
-  - Pen
   - Rectangle
   - Circle
   - Line
+  - Pen
+  - Picture
 - Move the canvas using the Move tool
 - Clear the canvas
 - Support mouse and touch input
