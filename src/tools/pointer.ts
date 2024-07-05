@@ -1,4 +1,4 @@
-import { html } from "lit";
+import { TemplateResult, html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
@@ -63,14 +63,13 @@ export class SimpleWhiteboardToolPointer extends SimpleWhiteboardTool {
     const { x: pointerX, y: pointerY } = currentDrawing as PointerItem;
 
     // Get all items that are under the pointer
-    const items = simpleWhiteboard.getItems();
+    const items = [...simpleWhiteboard.getItems()].reverse();
     const potentialItems = items.filter((item) => {
       const tool = simpleWhiteboard.getToolInstance(item.kind);
       if (!tool) {
         return false;
       }
       const boundingRect = tool.getBoundingRect(item);
-      console.log(item, boundingRect);
       if (!boundingRect) {
         return false;
       }
@@ -89,5 +88,24 @@ export class SimpleWhiteboardToolPointer extends SimpleWhiteboardTool {
     }
 
     simpleWhiteboard.setCurrentDrawing(null);
+  }
+
+  public override renderToolOptions(
+    item: WhiteboardItem | null
+  ): TemplateResult | null {
+    const simpleWhiteboard = super.getSimpleWhiteboardInstance();
+    if (!simpleWhiteboard) {
+      return null;
+    }
+
+    if (!item) {
+      return html` <p>Select an item by clicking on it.</p> `;
+    } else {
+      const tool = simpleWhiteboard.getToolInstance(item.kind);
+      if (!tool) {
+        return null;
+      }
+      return tool.renderToolOptions(item);
+    }
   }
 }

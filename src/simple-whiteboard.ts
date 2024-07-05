@@ -13,38 +13,9 @@ import SimpleWhiteboardTool, {
   BoundingRect,
 } from "./lib/SimpleWhiteboardTool";
 
-type WhiteboardMove = {
-  kind: "move";
-  x: number;
-  y: number;
-};
-type WhiteboardPointer = {
-  kind: "pointer";
-  x: number;
-  y: number;
-};
-type WhiteboardDrawableItem = Exclude<
-  WhiteboardItem,
-  WhiteboardMove | WhiteboardPointer
->;
-
 type Point = {
   x: number;
   y: number;
-};
-
-type CurrentToolOptions = {
-  strokeColor: string;
-  fillColor: string;
-  fillStyle:
-    | "solid"
-    | "hachure"
-    | "zigzag"
-    | "cross-hatch"
-    | "dots"
-    | "dashed"
-    | "zigzag-line";
-  noFill: boolean;
 };
 
 @customElement("simple-whiteboard")
@@ -67,14 +38,6 @@ export class SimpleWhiteboard extends LitElement {
   @state() private currentDrawing: WhiteboardItem | null = null;
 
   @state() private selectedItemId: string | null = null;
-  @state() private currentToolOptions: CurrentToolOptions = {
-    strokeColor: "#000000",
-    fillColor: "#000000",
-    fillStyle: "hachure",
-    noFill: true,
-  };
-
-  private drawableItems = ["rect", "circle", "line", "pen"];
 
   static styles = css`
     .root {
@@ -242,19 +205,9 @@ export class SimpleWhiteboard extends LitElement {
       this.drawItem(rc, context, this.currentDrawing);
     }
 
-    if (this.selectedItemId) {
-      const drawableItems = this.items.filter((item) => {
-        if (!item || !this.drawableItems.includes(item.kind)) {
-          return false;
-        }
-        return true;
-      }) as WhiteboardDrawableItem[];
-      const selectedItem = drawableItems.find(
-        (item) => item.id === this.selectedItemId
-      );
-      if (selectedItem) {
-        this.drawItemBox(context, selectedItem);
-      }
+    const selectedItem = this.getSelectedItem();
+    if (selectedItem) {
+      this.drawItemBox(context, selectedItem);
     }
   }
 
@@ -422,179 +375,15 @@ export class SimpleWhiteboard extends LitElement {
     this.dispatchEvent(itemsUpdatedEvent);
   }
 
-  handleItemStrokeColorChange(itemId: string) {
-    const item = this.items.find(
-      (item: any) => item.id === itemId
-    ) as WhiteboardDrawableItem;
-    if (!item || !this.drawableItems.includes(item.kind)) {
-      return (_event: Event) => {};
+  renderToolsOptions(): TemplateResult | null {
+    const selectedItem = this.getSelectedItem();
+
+    const tool = this.registeredTools.get(this.currentTool);
+    if (!tool) {
+      return null;
     }
-
-    return (event: Event) => {
-      const input = event.target as HTMLInputElement;
-      if (item.kind === "pen") {
-        item.options.color = input.value;
-      } else {
-        item.options.stroke = input.value;
-      }
-
-      this.draw();
-
-      const itemsUpdatedEvent = new CustomEvent("items-updated", {
-        detail: {
-          type: "update",
-          itemId,
-          item: item,
-        },
-      });
-      this.dispatchEvent(itemsUpdatedEvent);
-    };
-  }
-
-  handleItemFillColorChange(itemId: string) {
-    const item = this.items.find((item: any) => item.id === itemId) as any;
-    if (
-      !item ||
-      !this.drawableItems.includes(item.kind) ||
-      !item.options.fill
-    ) {
-      return (_event: Event) => {};
-    }
-
-    return (event: Event) => {
-      const input = event.target as HTMLInputElement;
-      const value = input.value;
-      item.options.fillColor = value;
-
-      this.draw();
-
-      const itemsUpdatedEvent = new CustomEvent("items-updated", {
-        detail: {
-          type: "update",
-          itemId,
-          item: item,
-        },
-      });
-      this.dispatchEvent(itemsUpdatedEvent);
-    };
-  }
-
-  handleStrokeColorChange(event: Event) {
-    const input = event.target as HTMLInputElement;
-    this.currentToolOptions.strokeColor = input.value;
-  }
-  handleFillColorChange(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const value = input.value;
-    if (value === "checkbox") {
-      this.currentToolOptions.noFill = input.checked;
-    } else {
-      this.currentToolOptions.fillColor = value;
-    }
-  }
-
-  renderToolsOptions() {
-    const options: TemplateResult[] = [];
-
-    let tool = this.currentTool;
-    // const currentToolOptions = { ...this.currentToolOptions };
-    // let handleStrokeColorChange = this.handleStrokeColorChange;
-    // let handleFillColorChange = this.handleFillColorChange;
-
-    // let currentItem;
-
-    // if (this.selectedItemId) {
-    //   currentItem = this.items.find((item) => {
-    //     if (!this.drawableItems.includes(item.kind)) {
-    //       return false;
-    //     }
-    //     const drawableItem = item as WhiteboardDrawableItem;
-    //     return drawableItem.id === this.selectedItemId;
-    //   }) as WhiteboardDrawableItem;
-    // }
-    // if (currentItem) {
-    //   tool = currentItem.kind || this.currentTool;
-    //   if (currentItem.kind === "pen") {
-    //     currentToolOptions.strokeColor = currentItem.options.color || "#000000";
-    //   }
-    //   if (currentItem.kind === "rect" || currentItem.kind === "circle") {
-    //     currentToolOptions.fillColor = currentItem.options.fill || "#000000";
-    //   }
-    //   if (
-    //     currentItem.kind === "rect" ||
-    //     currentItem.kind === "circle" ||
-    //     currentItem.kind === "line"
-    //   ) {
-    //     currentToolOptions.strokeColor =
-    //       currentItem.options.stroke || "#000000";
-    //   }
-    //   handleStrokeColorChange = this.handleItemStrokeColorChange(
-    //     currentItem.id
-    //   );
-    //   handleFillColorChange = this.handleItemFillColorChange(currentItem.id);
-    // }
-
-    if (tool === "picture") {
-      const toolInstance = this.registeredTools.get(tool);
-      if (!toolInstance) {
-        return null;
-      }
-      const srcParam = html`<p>Source</p>
-        <input
-          type="file"
-          accept="image/*"
-          @change=${(e: Event) => {
-            const fileInput = e.target as HTMLInputElement;
-            const file = fileInput.files?.[0];
-            if (!file) {
-              return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-              const img = new Image();
-              img.onload = () => {
-                const item: any = {
-                  kind: "picture",
-                  id: toolInstance.generateId(),
-                  x: 0,
-                  y: 0,
-                  width: img.width,
-                  height: img.height,
-                  src: img.src,
-                  options: {},
-                };
-                this.addItem(item, true);
-              };
-              img.src = e.target?.result as string;
-            };
-            reader.readAsDataURL(file);
-          }}
-        />`;
-      options.push(srcParam);
-    }
-
-    // if (this.drawableItems.includes(tool)) {
-    //   const colorOption = html`<p>Stroke color</p>
-    //     <input
-    //       type="color"
-    //       .value=${currentToolOptions.strokeColor}
-    //       @input=${handleStrokeColorChange}
-    //     />`;
-    //   options.push(colorOption);
-    // }
-
-    // if (tool === "rect" || tool === "circle") {
-    //   const fillOption = html`<p>Fill color</p>
-    //     <input
-    //       type="color"
-    //       .value=${currentToolOptions.fillColor}
-    //       @input=${handleFillColorChange}
-    //     />`;
-    //   options.push(fillOption);
-    // }
-
-    if (options.length === 0) {
+    const options = tool.renderToolOptions(selectedItem);
+    if (!options) {
       return null;
     }
 
@@ -657,7 +446,7 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   public addItem(item: WhiteboardItem, sendEvent: boolean = false) {
-    this.items.unshift(item);
+    this.items.push(item);
     this.draw();
 
     if (sendEvent) {
@@ -672,7 +461,9 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   public updateItem(itemId: string, item: WhiteboardItem) {
-    const index = this.items.findIndex((item: any) => item.id === itemId);
+    const index = this.items.findIndex(
+      (item: WhiteboardItem) => item.id === itemId
+    );
     if (index === -1) {
       return;
     }
@@ -734,5 +525,70 @@ export class SimpleWhiteboard extends LitElement {
 
   public getToolInstance(toolName: string): SimpleWhiteboardTool | undefined {
     return this.registeredTools.get(toolName);
+  }
+
+  public getItemById(itemId: string): WhiteboardItem | null {
+    return this.items.find((item) => item.id === itemId) || null;
+  }
+
+  public getSelectedItem(): WhiteboardItem | null {
+    if (!this.selectedItemId) {
+      return null;
+    }
+
+    return this.getItemById(this.selectedItemId);
+  }
+
+  public updateItemById(
+    itemId: string,
+    item: WhiteboardItem,
+    sendEvent = false
+  ) {
+    const index = this.items.findIndex(
+      (item: WhiteboardItem) => item.id === itemId
+    );
+    if (index === -1) {
+      return;
+    }
+
+    this.items[index] = item;
+    this.draw();
+
+    if (sendEvent) {
+      const itemsUpdatedEvent = new CustomEvent("items-updated", {
+        detail: {
+          type: "update",
+          itemId,
+          item,
+        },
+      });
+      this.dispatchEvent(itemsUpdatedEvent);
+    }
+
+    this.requestUpdate();
+  }
+
+  public removeItemById(itemId: string, sendEvent = false) {
+    const index = this.items.findIndex(
+      (item: WhiteboardItem) => item.id === itemId
+    );
+    if (index === -1) {
+      return;
+    }
+
+    this.items.splice(index, 1);
+    this.draw();
+
+    if (sendEvent) {
+      const itemsUpdatedEvent = new CustomEvent("items-updated", {
+        detail: {
+          type: "remove",
+          itemId,
+        },
+      });
+      this.dispatchEvent(itemsUpdatedEvent);
+    }
+
+    this.requestUpdate();
   }
 }
