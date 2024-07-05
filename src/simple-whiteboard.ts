@@ -33,20 +33,6 @@ type Point = {
   y: number;
 };
 
-type CurrentToolOptions = {
-  strokeColor: string;
-  fillColor: string;
-  fillStyle:
-    | "solid"
-    | "hachure"
-    | "zigzag"
-    | "cross-hatch"
-    | "dots"
-    | "dashed"
-    | "zigzag-line";
-  noFill: boolean;
-};
-
 @customElement("simple-whiteboard")
 export class SimpleWhiteboard extends LitElement {
   private canvas?: HTMLCanvasElement;
@@ -67,12 +53,6 @@ export class SimpleWhiteboard extends LitElement {
   @state() private currentDrawing: WhiteboardItem | null = null;
 
   @state() private selectedItemId: string | null = null;
-  @state() private currentToolOptions: CurrentToolOptions = {
-    strokeColor: "#000000",
-    fillColor: "#000000",
-    fillStyle: "hachure",
-    noFill: true,
-  };
 
   private drawableItems = ["rect", "circle", "line", "pen"];
 
@@ -422,77 +402,6 @@ export class SimpleWhiteboard extends LitElement {
     this.dispatchEvent(itemsUpdatedEvent);
   }
 
-  handleItemStrokeColorChange(itemId: string) {
-    const item = this.items.find(
-      (item: any) => item.id === itemId
-    ) as WhiteboardDrawableItem;
-    if (!item || !this.drawableItems.includes(item.kind)) {
-      return (_event: Event) => {};
-    }
-
-    return (event: Event) => {
-      const input = event.target as HTMLInputElement;
-      if (item.kind === "pen") {
-        item.options.color = input.value;
-      } else {
-        item.options.stroke = input.value;
-      }
-
-      this.draw();
-
-      const itemsUpdatedEvent = new CustomEvent("items-updated", {
-        detail: {
-          type: "update",
-          itemId,
-          item: item,
-        },
-      });
-      this.dispatchEvent(itemsUpdatedEvent);
-    };
-  }
-
-  handleItemFillColorChange(itemId: string) {
-    const item = this.items.find((item: any) => item.id === itemId) as any;
-    if (
-      !item ||
-      !this.drawableItems.includes(item.kind) ||
-      !item.options.fill
-    ) {
-      return (_event: Event) => {};
-    }
-
-    return (event: Event) => {
-      const input = event.target as HTMLInputElement;
-      const value = input.value;
-      item.options.fillColor = value;
-
-      this.draw();
-
-      const itemsUpdatedEvent = new CustomEvent("items-updated", {
-        detail: {
-          type: "update",
-          itemId,
-          item: item,
-        },
-      });
-      this.dispatchEvent(itemsUpdatedEvent);
-    };
-  }
-
-  handleStrokeColorChange(event: Event) {
-    const input = event.target as HTMLInputElement;
-    this.currentToolOptions.strokeColor = input.value;
-  }
-  handleFillColorChange(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const value = input.value;
-    if (value === "checkbox") {
-      this.currentToolOptions.noFill = input.checked;
-    } else {
-      this.currentToolOptions.fillColor = value;
-    }
-  }
-
   renderToolsOptions(): TemplateResult | null {
     const selectedItem = this.getSelectedItem();
 
@@ -506,63 +415,6 @@ export class SimpleWhiteboard extends LitElement {
     }
 
     return html`<div class="tools-options">${options}</div>`;
-
-    // const currentToolOptions = { ...this.currentToolOptions };
-    // let handleStrokeColorChange = this.handleStrokeColorChange;
-    // let handleFillColorChange = this.handleFillColorChange;
-
-    // let currentItem;
-
-    // if (this.selectedItemId) {
-    //   currentItem = this.items.find((item) => {
-    //     if (!this.drawableItems.includes(item.kind)) {
-    //       return false;
-    //     }
-    //     const drawableItem = item as WhiteboardDrawableItem;
-    //     return drawableItem.id === this.selectedItemId;
-    //   }) as WhiteboardDrawableItem;
-    // }
-    // if (currentItem) {
-    //   tool = currentItem.kind || this.currentTool;
-    //   if (currentItem.kind === "pen") {
-    //     currentToolOptions.strokeColor = currentItem.options.color || "#000000";
-    //   }
-    //   if (currentItem.kind === "rect" || currentItem.kind === "circle") {
-    //     currentToolOptions.fillColor = currentItem.options.fill || "#000000";
-    //   }
-    //   if (
-    //     currentItem.kind === "rect" ||
-    //     currentItem.kind === "circle" ||
-    //     currentItem.kind === "line"
-    //   ) {
-    //     currentToolOptions.strokeColor =
-    //       currentItem.options.stroke || "#000000";
-    //   }
-    //   handleStrokeColorChange = this.handleItemStrokeColorChange(
-    //     currentItem.id
-    //   );
-    //   handleFillColorChange = this.handleItemFillColorChange(currentItem.id);
-    // }
-
-    // if (this.drawableItems.includes(tool)) {
-    //   const colorOption = html`<p>Stroke color</p>
-    //     <input
-    //       type="color"
-    //       .value=${currentToolOptions.strokeColor}
-    //       @input=${handleStrokeColorChange}
-    //     />`;
-    //   options.push(colorOption);
-    // }
-
-    // if (tool === "rect" || tool === "circle") {
-    //   const fillOption = html`<p>Fill color</p>
-    //     <input
-    //       type="color"
-    //       .value=${currentToolOptions.fillColor}
-    //       @input=${handleFillColorChange}
-    //     />`;
-    //   options.push(fillOption);
-    // }
   }
 
   renderToolsList() {
