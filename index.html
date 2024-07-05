@@ -64,6 +64,12 @@
                 type: "clear",
               });
               break;
+            case "remove":
+              bc.postMessage({
+                type: "item-remove",
+                itemId: e.detail.itemId,
+              });
+              break;
           }
         });
 
@@ -85,6 +91,9 @@
               break;
             case "item-update":
               app.updateItem(e.data.itemId, e.data.item);
+              break;
+            case "item-remove":
+              app.removeItemById(e.data.itemId);
               break;
             case "join":
               bc.postMessage({
