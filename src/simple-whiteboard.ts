@@ -592,7 +592,7 @@ export class SimpleWhiteboard extends LitElement {
       <div class="root">
         <slot name="tools"></slot>
 
-        ${this.renderToolsList()} ${this.renderToolsOptions()}
+        ${this.renderToolsList()}
 
         <canvas
           @mousedown="${this.handleMouseDown}"
