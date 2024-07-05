@@ -63,14 +63,13 @@ export class SimpleWhiteboardToolPointer extends SimpleWhiteboardTool {
     const { x: pointerX, y: pointerY } = currentDrawing as PointerItem;
 
     // Get all items that are under the pointer
-    const items = simpleWhiteboard.getItems();
+    const items = [...simpleWhiteboard.getItems()].reverse();
     const potentialItems = items.filter((item) => {
       const tool = simpleWhiteboard.getToolInstance(item.kind);
       if (!tool) {
         return false;
       }
       const boundingRect = tool.getBoundingRect(item);
-      console.log(item, boundingRect);
       if (!boundingRect) {
         return false;
       }

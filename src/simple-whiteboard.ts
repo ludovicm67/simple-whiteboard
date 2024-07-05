@@ -446,7 +446,7 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   public addItem(item: WhiteboardItem, sendEvent: boolean = false) {
-    this.items.unshift(item);
+    this.items.push(item);
     this.draw();
 
     if (sendEvent) {
