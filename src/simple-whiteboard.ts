@@ -497,62 +497,102 @@ export class SimpleWhiteboard extends LitElement {
     const options: TemplateResult[] = [];
 
     let tool = this.currentTool;
-    const currentToolOptions = { ...this.currentToolOptions };
-    let handleStrokeColorChange = this.handleStrokeColorChange;
-    let handleFillColorChange = this.handleFillColorChange;
+    // const currentToolOptions = { ...this.currentToolOptions };
+    // let handleStrokeColorChange = this.handleStrokeColorChange;
+    // let handleFillColorChange = this.handleFillColorChange;
 
-    let currentItem;
+    // let currentItem;
 
-    if (this.selectedItemId) {
-      currentItem = this.items.find((item) => {
-        if (!this.drawableItems.includes(item.kind)) {
-          return false;
-        }
-        const drawableItem = item as WhiteboardDrawableItem;
-        return drawableItem.id === this.selectedItemId;
-      }) as WhiteboardDrawableItem;
-    }
-    if (currentItem) {
-      tool = currentItem.kind || this.currentTool;
-      if (currentItem.kind === "pen") {
-        currentToolOptions.strokeColor = currentItem.options.color || "#000000";
-      }
-      if (currentItem.kind === "rect" || currentItem.kind === "circle") {
-        currentToolOptions.fillColor = currentItem.options.fill || "#000000";
-      }
-      if (
-        currentItem.kind === "rect" ||
-        currentItem.kind === "circle" ||
-        currentItem.kind === "line"
-      ) {
-        currentToolOptions.strokeColor =
-          currentItem.options.stroke || "#000000";
-      }
-      handleStrokeColorChange = this.handleItemStrokeColorChange(
-        currentItem.id
-      );
-      handleFillColorChange = this.handleItemFillColorChange(currentItem.id);
-    }
+    // if (this.selectedItemId) {
+    //   currentItem = this.items.find((item) => {
+    //     if (!this.drawableItems.includes(item.kind)) {
+    //       return false;
+    //     }
+    //     const drawableItem = item as WhiteboardDrawableItem;
+    //     return drawableItem.id === this.selectedItemId;
+    //   }) as WhiteboardDrawableItem;
+    // }
+    // if (currentItem) {
+    //   tool = currentItem.kind || this.currentTool;
+    //   if (currentItem.kind === "pen") {
+    //     currentToolOptions.strokeColor = currentItem.options.color || "#000000";
+    //   }
+    //   if (currentItem.kind === "rect" || currentItem.kind === "circle") {
+    //     currentToolOptions.fillColor = currentItem.options.fill || "#000000";
+    //   }
+    //   if (
+    //     currentItem.kind === "rect" ||
+    //     currentItem.kind === "circle" ||
+    //     currentItem.kind === "line"
+    //   ) {
+    //     currentToolOptions.strokeColor =
+    //       currentItem.options.stroke || "#000000";
+    //   }
+    //   handleStrokeColorChange = this.handleItemStrokeColorChange(
+    //     currentItem.id
+    //   );
+    //   handleFillColorChange = this.handleItemFillColorChange(currentItem.id);
+    // }
 
-    if (this.drawableItems.includes(tool)) {
-      const colorOption = html`<p>Stroke color</p>
+    if (tool === "picture") {
+      const toolInstance = this.registeredTools.get(tool);
+      if (!toolInstance) {
+        return null;
+      }
+      const srcParam = html`<p>Source</p>
         <input
-          type="color"
-          .value=${currentToolOptions.strokeColor}
-          @input=${handleStrokeColorChange}
+          type="file"
+          accept="image/*"
+          @change=${(e: Event) => {
+            const fileInput = e.target as HTMLInputElement;
+            const file = fileInput.files?.[0];
+            if (!file) {
+              return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const img = new Image();
+              img.onload = () => {
+                const item: any = {
+                  kind: "picture",
+                  id: toolInstance.generateId(),
+                  x: 0,
+                  y: 0,
+                  width: img.width,
+                  height: img.height,
+                  src: img.src,
+                  options: {},
+                };
+                this.addItem(item, true);
+              };
+              img.src = e.target?.result as string;
+            };
+            reader.readAsDataURL(file);
+          }}
         />`;
-      options.push(colorOption);
+      options.push(srcParam);
     }
 
-    if (tool === "rect" || tool === "circle") {
-      const fillOption = html`<p>Fill color</p>
-        <input
-          type="color"
-          .value=${currentToolOptions.fillColor}
-          @input=${handleFillColorChange}
-        />`;
-      options.push(fillOption);
-    }
+    // if (this.drawableItems.includes(tool)) {
+    //   const colorOption = html`<p>Stroke color</p>
+    //     <input
+    //       type="color"
+    //       .value=${currentToolOptions.strokeColor}
+    //       @input=${handleStrokeColorChange}
+    //     />`;
+    //   options.push(colorOption);
+    // }
+
+    // if (tool === "rect" || tool === "circle") {
+    //   const fillOption = html`<p>Fill color</p>
+    //     <input
+    //       type="color"
+    //       .value=${currentToolOptions.fillColor}
+    //       @input=${handleFillColorChange}
+    //     />`;
+    //   options.push(fillOption);
+    // }
 
     if (options.length === 0) {
       return null;
@@ -592,7 +632,7 @@ export class SimpleWhiteboard extends LitElement {
       <div class="root">
         <slot name="tools"></slot>
 
-        ${this.renderToolsList()}
+        ${this.renderToolsList()} ${this.renderToolsOptions()}
 
         <canvas
           @mousedown="${this.handleMouseDown}"
