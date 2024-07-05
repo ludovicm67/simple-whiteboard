@@ -150,7 +150,7 @@ export class SimpleWhiteboardToolRect extends SimpleWhiteboardTool {
     // Case: no item selected = new item
     if (!item) {
       return html`
-        <p><label for="rect-stroke">Stroke:</label></p>
+        <p>Stroke:</p>
         <input
           type="color"
           .value=${this.stroke}
@@ -159,7 +159,7 @@ export class SimpleWhiteboardToolRect extends SimpleWhiteboardTool {
             this.stroke = target.value;
           }}
         />
-        <p><label for="rect-stroke-width">Stroke width:</label></p>
+        <p>Stroke width:</p>
         <input
           type="number"
           .value=${this.strokeWidth}
@@ -168,7 +168,7 @@ export class SimpleWhiteboardToolRect extends SimpleWhiteboardTool {
             this.strokeWidth = parseInt(target.value, 10);
           }}
         />
-        <p><label for="rect-fill">Fill:</label></p>
+        <p>Fill:</p>
         <input
           type="color"
           .value=${this.fill}
@@ -182,7 +182,7 @@ export class SimpleWhiteboardToolRect extends SimpleWhiteboardTool {
 
     // Case: item selected
     return html`
-      <p><label for="rect-stroke">Stroke:</label></p>
+      <p>Stroke:</p>
       <input
         type="color"
         .value=${item.options.stroke}
@@ -197,7 +197,7 @@ export class SimpleWhiteboardToolRect extends SimpleWhiteboardTool {
           });
         }}
       />
-      <p><label for="rect-stroke-width">Stroke width:</label></p>
+      <p>Stroke width:</p>
       <input
         type="number"
         .value=${item.options.strokeWidth}
@@ -212,7 +212,7 @@ export class SimpleWhiteboardToolRect extends SimpleWhiteboardTool {
           });
         }}
       />
-      <p><label for="rect-fill">Fill:</label></p>
+      <p>Fill:</p>
       <input
         type="color"
         .value=${item.options.fill}
