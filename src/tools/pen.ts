@@ -15,11 +15,21 @@ interface PenItem extends WhiteboardItem {
   path: { x: number; y: number }[];
   options: {
     color?: string;
+    size?: number;
+    smoothing?: number;
+    thinning?: number;
+    streamline?: number;
   };
 }
 
 @customElement("simple-whiteboard--tool-pen")
 export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
+  private size = 6;
+  private smoothing = 0.5;
+  private thinning = 0.5;
+  private streamline = 0.5;
+  private color = "#000000";
+
   public override getToolIcon() {
     return html`${unsafeHTML(getIconSvg("edit-2"))}`;
   }
@@ -43,17 +53,17 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
         return { x, y };
       }),
       {
-        size: 6,
-        smoothing: 0.5,
-        thinning: 0.5,
-        streamline: 0.5,
+        size: item.options.size || 6,
+        smoothing: item.options.smoothing || 0.5,
+        thinning: item.options.thinning || 0.5,
+        streamline: item.options.streamline || 0.5,
       }
     );
     const pathData = getSvgPathFromStroke(outlinePoints);
 
     const path = new Path2D(pathData);
     const prevFillStyle = context.fillStyle;
-    context.fillStyle = item.options.color || "black";
+    context.fillStyle = item.options.color || "#000000";
     context.fill(path);
     context.fillStyle = prevFillStyle;
   }
@@ -87,7 +97,13 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
       kind: this.getToolName(),
       id: itemId,
       path: [{ x: itemX, y: itemY }],
-      options: {},
+      options: {
+        color: this.color,
+        size: this.size,
+        smoothing: this.smoothing,
+        thinning: this.thinning,
+        streamline: this.streamline,
+      },
     };
 
     simpleWhiteboard.setCurrentDrawing(item);
@@ -132,5 +148,98 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
     const item = currentDrawing as PenItem;
     simpleWhiteboard.addItem(item, true);
     simpleWhiteboard.setCurrentDrawing(null);
+  }
+
+  public override onToolSelected(): void {
+    const simpleWhiteboard = this.getSimpleWhiteboardInstance();
+    if (!simpleWhiteboard) {
+      return;
+    }
+    simpleWhiteboard.setSelectedItemId(null);
+  }
+
+  public override renderToolOptions(item: PenItem | null) {
+    const simpleWhiteboard = super.getSimpleWhiteboardInstance();
+    if (!simpleWhiteboard) {
+      return null;
+    }
+
+    // Case: no item selected = new item
+    if (!item) {
+      return html`
+        <div>
+          <p>Size:</p>
+          <input
+            type="range"
+            min="1"
+            max="50"
+            .value=${this.size}
+            @input=${(e: Event) => {
+              const target = e.target as HTMLInputElement;
+              this.size = Number(target.value);
+            }}
+          />
+        </div>
+        <div>
+          <p>Color:</p>
+          <input
+            type="color"
+            .value=${this.color}
+            @input=${(e: Event) => {
+              const target = e.target as HTMLInputElement;
+              this.color = target.value;
+            }}
+          />
+        </div>
+      `;
+    }
+
+    // Case: item selected
+    return html`
+      <div>
+        <p>Size:</p>
+        <input
+          type="range"
+          min="1"
+          max="50"
+          .value=${item.options.size}
+          @input=${(e: Event) => {
+            const target = e.target as HTMLInputElement;
+            simpleWhiteboard.updateItemById(
+              item.id,
+              {
+                ...item,
+                options: {
+                  ...item.options,
+                  size: target.value,
+                },
+              },
+              true
+            );
+          }}
+        />
+      </div>
+      <div>
+        <p>Color:</p>
+        <input
+          type="color"
+          .value=${item.options.color}
+          @input=${(e: Event) => {
+            const target = e.target as HTMLInputElement;
+            simpleWhiteboard.updateItemById(
+              item.id,
+              {
+                ...item,
+                options: {
+                  ...item.options,
+                  color: target.value,
+                },
+              },
+              true
+            );
+          }}
+        />
+      </div>
+    `;
   }
 }
