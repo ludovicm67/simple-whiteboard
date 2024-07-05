@@ -495,6 +495,7 @@ export class SimpleWhiteboard extends LitElement {
 
   renderToolsOptions(): TemplateResult | null {
     const selectedItem = this.getSelectedItem();
+
     const tool = this.registeredTools.get(this.currentTool);
     if (!tool) {
       return null;

@@ -20,6 +20,10 @@ interface RectItem extends WhiteboardItem {
 
 @customElement("simple-whiteboard--tool-rect")
 export class SimpleWhiteboardToolRect extends SimpleWhiteboardTool {
+  private stroke = "#000000";
+  private strokeWidth = 2;
+  private fill = "#000000";
+
   public override getToolIcon() {
     return html`${unsafeHTML(getIconSvg("square"))}`;
   }
@@ -72,7 +76,11 @@ export class SimpleWhiteboardToolRect extends SimpleWhiteboardTool {
       y: itemY,
       width: 0,
       height: 0,
-      options: {},
+      options: {
+        stroke: this.stroke,
+        strokeWidth: this.strokeWidth,
+        fill: this.fill,
+      },
     };
 
     simpleWhiteboard.setCurrentDrawing(item);
@@ -123,5 +131,102 @@ export class SimpleWhiteboardToolRect extends SimpleWhiteboardTool {
     const item = currentDrawing as RectItem;
     simpleWhiteboard.addItem(item, true);
     simpleWhiteboard.setCurrentDrawing(null);
+  }
+
+  public override onToolSelected(): void {
+    const simpleWhiteboard = this.getSimpleWhiteboardInstance();
+    if (!simpleWhiteboard) {
+      return;
+    }
+    simpleWhiteboard.setSelectedItemId(null);
+  }
+
+  public override renderToolOptions(item: RectItem | null) {
+    const simpleWhiteboard = super.getSimpleWhiteboardInstance();
+    if (!simpleWhiteboard) {
+      return null;
+    }
+
+    // Case: no item selected = new item
+    if (!item) {
+      return html`
+        <p><label for="rect-stroke">Stroke:</label></p>
+        <input
+          type="color"
+          .value=${this.stroke}
+          @input=${(e: Event) => {
+            const target = e.target as HTMLInputElement;
+            this.stroke = target.value;
+          }}
+        />
+        <p><label for="rect-stroke-width">Stroke width:</label></p>
+        <input
+          type="number"
+          .value=${this.strokeWidth}
+          @input=${(e: Event) => {
+            const target = e.target as HTMLInputElement;
+            this.strokeWidth = parseInt(target.value, 10);
+          }}
+        />
+        <p><label for="rect-fill">Fill:</label></p>
+        <input
+          type="color"
+          .value=${this.fill}
+          @input=${(e: Event) => {
+            const target = e.target as HTMLInputElement;
+            this.fill = target.value;
+          }}
+        />
+      `;
+    }
+
+    // Case: item selected
+    return html`
+      <p><label for="rect-stroke">Stroke:</label></p>
+      <input
+        type="color"
+        .value=${item.options.stroke}
+        @input=${(e: Event) => {
+          const target = e.target as HTMLInputElement;
+          simpleWhiteboard.updateItemById(item.id, {
+            ...item,
+            options: {
+              ...item.options,
+              stroke: target.value,
+            },
+          });
+        }}
+      />
+      <p><label for="rect-stroke-width">Stroke width:</label></p>
+      <input
+        type="number"
+        .value=${item.options.strokeWidth}
+        @input=${(e: Event) => {
+          const target = e.target as HTMLInputElement;
+          simpleWhiteboard.updateItemById(item.id, {
+            ...item,
+            options: {
+              ...item.options,
+              strokeWidth: parseInt(target.value, 10),
+            },
+          });
+        }}
+      />
+      <p><label for="rect-fill">Fill:</label></p>
+      <input
+        type="color"
+        .value=${item.options.fill}
+        @input=${(e: Event) => {
+          const target = e.target as HTMLInputElement;
+          simpleWhiteboard.updateItemById(item.id, {
+            ...item,
+            options: {
+              ...item.options,
+              fill: target.value,
+            },
+          });
+        }}
+      />
+    `;
   }
 }
