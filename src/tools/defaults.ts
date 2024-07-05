@@ -1,0 +1,37 @@
+import { LitElement, html } from "lit";
+import { customElement } from "lit/decorators.js";
+
+// Import all the tools
+import "./move";
+import "./pointer";
+import "./rect";
+import "./circle";
+import "./line";
+import "./pen";
+import "./clear";
+
+@customElement("simple-whiteboard--tool-defaults")
+export class SimpleWhiteboardToolDefaults extends LitElement {
+  // This is a workaround to prevent LitElement from creating a shadow root.
+  createRenderRoot() {
+    return this;
+  }
+
+  public render() {
+    return html`
+      <simple-whiteboard--tool-move slot="tools"></simple-whiteboard--tool-move>
+      <simple-whiteboard--tool-pointer
+        slot="tools"
+      ></simple-whiteboard--tool-pointer>
+      <simple-whiteboard--tool-rect slot="tools"></simple-whiteboard--tool-rect>
+      <simple-whiteboard--tool-circle
+        slot="tools"
+      ></simple-whiteboard--tool-circle>
+      <simple-whiteboard--tool-line slot="tools"></simple-whiteboard--tool-line>
+      <simple-whiteboard--tool-pen slot="tools"></simple-whiteboard--tool-pen>
+      <simple-whiteboard--tool-clear
+        slot="tools"
+      ></simple-whiteboard--tool-clear>
+    `;
+  }
+}
