@@ -180,13 +180,17 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
         .value=${item.options.stroke}
         @input=${(e: Event) => {
           const target = e.target as HTMLInputElement;
-          simpleWhiteboard.updateItemById(item.id, {
-            ...item,
-            options: {
-              ...item.options,
-              stroke: target.value,
+          simpleWhiteboard.updateItemById(
+            item.id,
+            {
+              ...item,
+              options: {
+                ...item.options,
+                stroke: target.value,
+              },
             },
-          });
+            true
+          );
         }}
       />
       <p>Stroke width:</p>
@@ -195,13 +199,17 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
         .value=${item.options.strokeWidth}
         @input=${(e: Event) => {
           const target = e.target as HTMLInputElement;
-          simpleWhiteboard.updateItemById(item.id, {
-            ...item,
-            options: {
-              ...item.options,
-              strokeWidth: parseInt(target.value, 10),
+          simpleWhiteboard.updateItemById(
+            item.id,
+            {
+              ...item,
+              options: {
+                ...item.options,
+                strokeWidth: parseInt(target.value, 10),
+              },
             },
-          });
+            true
+          );
         }}
       />
     `;
