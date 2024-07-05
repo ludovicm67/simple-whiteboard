@@ -13,21 +13,6 @@ import SimpleWhiteboardTool, {
   BoundingRect,
 } from "./lib/SimpleWhiteboardTool";
 
-type WhiteboardMove = {
-  kind: "move";
-  x: number;
-  y: number;
-};
-type WhiteboardPointer = {
-  kind: "pointer";
-  x: number;
-  y: number;
-};
-type WhiteboardDrawableItem = Exclude<
-  WhiteboardItem,
-  WhiteboardMove | WhiteboardPointer
->;
-
 type Point = {
   x: number;
   y: number;
@@ -53,8 +38,6 @@ export class SimpleWhiteboard extends LitElement {
   @state() private currentDrawing: WhiteboardItem | null = null;
 
   @state() private selectedItemId: string | null = null;
-
-  private drawableItems = ["rect", "circle", "line", "pen"];
 
   static styles = css`
     .root {
@@ -222,19 +205,9 @@ export class SimpleWhiteboard extends LitElement {
       this.drawItem(rc, context, this.currentDrawing);
     }
 
-    if (this.selectedItemId) {
-      const drawableItems = this.items.filter((item) => {
-        if (!item || !this.drawableItems.includes(item.kind)) {
-          return false;
-        }
-        return true;
-      }) as WhiteboardDrawableItem[];
-      const selectedItem = drawableItems.find(
-        (item) => item.id === this.selectedItemId
-      );
-      if (selectedItem) {
-        this.drawItemBox(context, selectedItem);
-      }
+    const selectedItem = this.getSelectedItem();
+    if (selectedItem) {
+      this.drawItemBox(context, selectedItem);
     }
   }
 
