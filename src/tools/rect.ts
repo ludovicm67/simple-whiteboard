@@ -170,6 +170,18 @@ export class SimpleWhiteboardToolRect extends SimpleWhiteboardTool {
         />
         <p>Fill:</p>
         <input
+          type="checkbox"
+          .checked=${this.fill !== "transparent"}
+          @change=${(e: Event) => {
+            const target = e.target as HTMLInputElement;
+            this.fill = target.checked
+              ? this.fill === "transparent"
+                ? "#000000"
+                : this.fill
+              : "transparent";
+          }}
+        />
+        <input
           type="color"
           .value=${this.fill}
           @input=${(e: Event) => {
@@ -221,6 +233,28 @@ export class SimpleWhiteboardToolRect extends SimpleWhiteboardTool {
         }}
       />
       <p>Fill:</p>
+      <input
+        type="checkbox"
+        .checked=${item.options.fill !== "transparent"}
+        @change=${(e: Event) => {
+          const target = e.target as HTMLInputElement;
+          simpleWhiteboard.updateItemById(
+            item.id,
+            {
+              ...item,
+              options: {
+                ...item.options,
+                fill: target.checked
+                  ? this.fill === "transparent"
+                    ? "#000000"
+                    : this.fill
+                  : "transparent",
+              },
+            },
+            true
+          );
+        }}
+      />
       <input
         type="color"
         .value=${item.options.fill}
