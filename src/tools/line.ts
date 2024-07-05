@@ -20,15 +20,15 @@ interface LineItem extends WhiteboardItem {
 
 @customElement("simple-whiteboard--tool-line")
 export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
-  public getToolIcon() {
+  public override getToolIcon() {
     return html`${unsafeHTML(getIconSvg("minus"))}`;
   }
 
-  public getToolName() {
+  public override getToolName() {
     return "line";
   }
 
-  public drawItem(
+  public override drawItem(
     rc: RoughCanvas,
     _context: CanvasRenderingContext2D,
     item: LineItem
@@ -48,7 +48,7 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
     rc.line(x1, y1, x2, y2, item.options);
   }
 
-  public getBoundingRect(item: LineItem): BoundingRect | null {
+  public override getBoundingRect(item: LineItem): BoundingRect | null {
     return {
       x: Math.min(item.x1, item.x2),
       y: Math.min(item.y1, item.y2),
@@ -57,7 +57,7 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
     };
   }
 
-  public handleDrawingStart(x: number, y: number): void {
+  public override handleDrawingStart(x: number, y: number): void {
     const simpleWhiteboard = super.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {
       return;
@@ -82,7 +82,7 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
     simpleWhiteboard.setCurrentDrawing(item);
   }
 
-  public handleDrawingMove(x: number, y: number): void {
+  public override handleDrawingMove(x: number, y: number): void {
     const simpleWhiteboard = super.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {
       return;
@@ -106,5 +106,25 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
       x2: x - canvasX,
       y2: y - canvasY,
     } as LineItem);
+  }
+
+  public override handleDrawingEnd(): void {
+    const simpleWhiteboard = super.getSimpleWhiteboardInstance();
+    if (!simpleWhiteboard) {
+      return;
+    }
+
+    const currentDrawing = simpleWhiteboard.getCurrentDrawing();
+    if (!currentDrawing) {
+      return;
+    }
+
+    if (currentDrawing.kind !== this.getToolName()) {
+      return;
+    }
+
+    const item = currentDrawing as LineItem;
+    simpleWhiteboard.addItem(item, true);
+    simpleWhiteboard.setCurrentDrawing(null);
   }
 }

@@ -33,6 +33,7 @@ export interface SimpleWhiteboardToolInterface {
 
   handleDrawingStart(x: number, y: number): void;
   handleDrawingMove(x: number, y: number): void;
+  handleDrawingEnd(): void;
 }
 
 export type RoughCanvas = LocalRoughCanvas;
@@ -164,6 +165,14 @@ abstract class SimpleWhiteboardTool
    * @param _y The y coordinate of the mouse.
    */
   public handleDrawingMove(_x: number, _y: number): void {
+    // Implement this method in the tool class if needed.
+  }
+
+  /**
+   * Called when the mouse is released to end drawing.
+   * This method should be implemented in the tool class if needed.
+   */
+  public handleDrawingEnd(): void {
     // Implement this method in the tool class if needed.
   }
 

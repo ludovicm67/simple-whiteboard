@@ -19,15 +19,15 @@ interface CircleItem extends WhiteboardItem {
 
 @customElement("simple-whiteboard--tool-circle")
 export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
-  public getToolIcon() {
+  public override getToolIcon() {
     return html`${unsafeHTML(getIconSvg("circle"))}`;
   }
 
-  public getToolName() {
+  public override getToolName() {
     return "circle";
   }
 
-  public drawItem(
+  public override drawItem(
     rc: RoughCanvas,
     _context: CanvasRenderingContext2D,
     item: CircleItem
@@ -43,7 +43,7 @@ export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
     rc.circle(circleX, circleY, item.diameter, item.options);
   }
 
-  public getBoundingRect(item: CircleItem): BoundingRect | null {
+  public override getBoundingRect(item: CircleItem): BoundingRect | null {
     return {
       x: item.x - item.diameter / 2,
       y: item.y - item.diameter / 2,
@@ -52,7 +52,7 @@ export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
     };
   }
 
-  public handleDrawingStart(x: number, y: number): void {
+  public override handleDrawingStart(x: number, y: number): void {
     const simpleWhiteboard = super.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {
       return;
@@ -76,7 +76,7 @@ export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
     simpleWhiteboard.setCurrentDrawing(item);
   }
 
-  public handleDrawingMove(x: number, y: number): void {
+  public override handleDrawingMove(x: number, y: number): void {
     const simpleWhiteboard = super.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {
       return;
@@ -105,5 +105,25 @@ export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
       ...circleItem,
       diameter: Math.sqrt(dx * dx + dy * dy) * 2,
     } as CircleItem);
+  }
+
+  public override handleDrawingEnd(): void {
+    const simpleWhiteboard = super.getSimpleWhiteboardInstance();
+    if (!simpleWhiteboard) {
+      return;
+    }
+
+    const currentDrawing = simpleWhiteboard.getCurrentDrawing();
+    if (!currentDrawing) {
+      return;
+    }
+
+    if (currentDrawing.kind !== this.getToolName()) {
+      return;
+    }
+
+    const item = currentDrawing as CircleItem;
+    simpleWhiteboard.addItem(item, true);
+    simpleWhiteboard.setCurrentDrawing(null);
   }
 }

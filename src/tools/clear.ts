@@ -7,15 +7,15 @@ import { getIconSvg } from "../lib/icons";
 
 @customElement("simple-whiteboard--tool-clear")
 export class SimpleWhiteboardToolClear extends SimpleWhiteboardTool {
-  public getToolIcon() {
+  public override getToolIcon() {
     return html`${unsafeHTML(getIconSvg("trash-2"))}`;
   }
 
-  public getToolName() {
+  public override getToolName() {
     return "clear";
   }
 
-  public onToolSelected(): void {
+  public override onToolSelected(): void {
     const simpleWhiteboard = this.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {
       return;

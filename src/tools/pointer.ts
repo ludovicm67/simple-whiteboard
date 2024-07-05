@@ -14,15 +14,15 @@ interface PointerItem extends WhiteboardItem {
 
 @customElement("simple-whiteboard--tool-pointer")
 export class SimpleWhiteboardToolPointer extends SimpleWhiteboardTool {
-  public getToolIcon() {
+  public override getToolIcon() {
     return html`${unsafeHTML(getIconSvg("mouse-pointer"))}`;
   }
 
-  public getToolName() {
+  public override getToolName() {
     return "pointer";
   }
 
-  public handleDrawingStart(x: number, y: number): void {
+  public override handleDrawingStart(x: number, y: number): void {
     const simpleWhiteboard = super.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {
       return;
@@ -43,5 +43,51 @@ export class SimpleWhiteboardToolPointer extends SimpleWhiteboardTool {
     };
 
     simpleWhiteboard.setCurrentDrawing(item);
+  }
+
+  public override handleDrawingEnd(): void {
+    const simpleWhiteboard = super.getSimpleWhiteboardInstance();
+    if (!simpleWhiteboard) {
+      return;
+    }
+
+    const currentDrawing = simpleWhiteboard.getCurrentDrawing();
+    if (!currentDrawing) {
+      return;
+    }
+
+    if (currentDrawing.kind !== this.getToolName()) {
+      return;
+    }
+
+    const { x: pointerX, y: pointerY } = currentDrawing as PointerItem;
+
+    // Get all items that are under the pointer
+    const items = simpleWhiteboard.getItems();
+    const potentialItems = items.filter((item) => {
+      const tool = simpleWhiteboard.getToolInstance(item.kind);
+      if (!tool) {
+        return false;
+      }
+      const boundingRect = tool.getBoundingRect(item);
+      console.log(item, boundingRect);
+      if (!boundingRect) {
+        return false;
+      }
+      const { x, y, width, height } = boundingRect;
+      return (
+        pointerX > x &&
+        pointerX < x + width &&
+        pointerY > y &&
+        pointerY < y + height
+      );
+    });
+    if (potentialItems.length > 0) {
+      simpleWhiteboard.setSelectedItemId(potentialItems[0].id);
+    } else {
+      simpleWhiteboard.setSelectedItemId(null);
+    }
+
+    simpleWhiteboard.setCurrentDrawing(null);
   }
 }

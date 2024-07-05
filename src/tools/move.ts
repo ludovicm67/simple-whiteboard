@@ -14,15 +14,15 @@ interface MoveItem extends WhiteboardItem {
 
 @customElement("simple-whiteboard--tool-move")
 export class SimpleWhiteboardToolMove extends SimpleWhiteboardTool {
-  public getToolIcon() {
+  public override getToolIcon() {
     return html`${unsafeHTML(getIconSvg("move"))}`;
   }
 
-  public getToolName() {
+  public override getToolName() {
     return "move";
   }
 
-  public handleDrawingStart(x: number, y: number): void {
+  public override handleDrawingStart(x: number, y: number): void {
     const simpleWhiteboard = super.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {
       return;
@@ -40,7 +40,7 @@ export class SimpleWhiteboardToolMove extends SimpleWhiteboardTool {
     simpleWhiteboard.setCurrentDrawing(item);
   }
 
-  public handleDrawingMove(x: number, y: number): void {
+  public override handleDrawingMove(x: number, y: number): void {
     const simpleWhiteboard = super.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {
       return;
@@ -75,5 +75,14 @@ export class SimpleWhiteboardToolMove extends SimpleWhiteboardTool {
       x: x,
       y: y,
     } as MoveItem);
+  }
+
+  public override handleDrawingEnd(): void {
+    const simpleWhiteboard = super.getSimpleWhiteboardInstance();
+    if (!simpleWhiteboard) {
+      return;
+    }
+
+    simpleWhiteboard.setCurrentDrawing(null);
   }
 }

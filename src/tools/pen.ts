@@ -20,15 +20,15 @@ interface PenItem extends WhiteboardItem {
 
 @customElement("simple-whiteboard--tool-pen")
 export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
-  public getToolIcon() {
+  public override getToolIcon() {
     return html`${unsafeHTML(getIconSvg("edit-2"))}`;
   }
 
-  public getToolName() {
+  public override getToolName() {
     return "pen";
   }
 
-  public drawItem(
+  public override drawItem(
     _rc: RoughCanvas,
     context: CanvasRenderingContext2D,
     item: PenItem
@@ -58,7 +58,7 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
     context.fillStyle = prevFillStyle;
   }
 
-  public getBoundingRect(item: PenItem): BoundingRect | null {
+  public override getBoundingRect(item: PenItem): BoundingRect | null {
     return {
       x: Math.min(...item.path.map((p) => p.x)),
       y: Math.min(...item.path.map((p) => p.y)),
@@ -71,7 +71,7 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
     };
   }
 
-  public handleDrawingStart(x: number, y: number): void {
+  public override handleDrawingStart(x: number, y: number): void {
     const simpleWhiteboard = super.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {
       return;
@@ -93,7 +93,7 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
     simpleWhiteboard.setCurrentDrawing(item);
   }
 
-  public handleDrawingMove(x: number, y: number): void {
+  public override handleDrawingMove(x: number, y: number): void {
     const simpleWhiteboard = super.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {
       return;
@@ -112,5 +112,25 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
     penItem.path.push(simpleWhiteboard.coordsFromCanvasCoords(x, y));
 
     simpleWhiteboard.setCurrentDrawing(penItem);
+  }
+
+  public override handleDrawingEnd(): void {
+    const simpleWhiteboard = super.getSimpleWhiteboardInstance();
+    if (!simpleWhiteboard) {
+      return;
+    }
+
+    const currentDrawing = simpleWhiteboard.getCurrentDrawing();
+    if (!currentDrawing) {
+      return;
+    }
+
+    if (currentDrawing.kind !== this.getToolName()) {
+      return;
+    }
+
+    const item = currentDrawing as PenItem;
+    simpleWhiteboard.addItem(item, true);
+    simpleWhiteboard.setCurrentDrawing(null);
   }
 }

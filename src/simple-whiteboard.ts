@@ -6,7 +6,6 @@ import {
   html,
 } from "lit";
 import rough from "roughjs";
-import { v4 as uuidv4 } from "uuid";
 import { customElement, state } from "lit/decorators.js";
 import { RoughCanvas } from "roughjs/bin/canvas";
 import SimpleWhiteboardTool, {
@@ -67,7 +66,7 @@ export class SimpleWhiteboard extends LitElement {
   @state() private previousTool: string = "";
   @state() private currentDrawing: WhiteboardItem | null = null;
 
-  @state() private selectedItemId?: string = undefined;
+  @state() private selectedItemId: string | null = null;
   @state() private currentToolOptions: CurrentToolOptions = {
     strokeColor: "#000000",
     fillColor: "#000000",
@@ -287,10 +286,6 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   handleDrawingMove(x: number, y: number) {
-    if (!this.currentDrawing) {
-      return;
-    }
-
     const tool = this.registeredTools.get(this.currentTool);
     if (!tool) {
       return;
@@ -300,52 +295,11 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   handleDrawingEnd() {
-    if (!this.currentDrawing || !this.canvasContext) {
+    const tool = this.registeredTools.get(this.currentTool);
+    if (!tool) {
       return;
     }
-
-    const kind = this.currentDrawing.kind;
-
-    if (kind === "pointer") {
-      // @TODO: Move this in the Pointer tool
-      // const { x: pointerX, y: pointerY } = this.currentDrawing;
-      // // Get all items that are under the pointer
-      // const potentialItems = this.items.filter((item) => {
-      //   if (!this.currentDrawing || !this.drawableItems.includes(item.kind)) {
-      //     return false;
-      //   }
-      //   const boundingRect = this.getBoundingRect(item);
-      //   if (!boundingRect) {
-      //     return false;
-      //   }
-      //   const { x, y, width, height } = boundingRect;
-      //   return (
-      //     pointerX > x &&
-      //     pointerX < x + width &&
-      //     pointerY > y &&
-      //     pointerY < y + height
-      //   );
-      // }) as WhiteboardDrawableItem[];
-      // if (potentialItems.length > 0) {
-      //   this.selectedItemId = potentialItems[0].id;
-      // }
-    }
-
-    if (this.drawableItems.includes(kind)) {
-      // Add the current drawing to the items list (at the start)
-      this.items.unshift(this.currentDrawing);
-
-      const itemsUpdatedEvent = new CustomEvent("items-updated", {
-        detail: {
-          type: "add",
-          item: this.currentDrawing,
-        },
-      });
-      this.dispatchEvent(itemsUpdatedEvent);
-    }
-    this.currentDrawing = null;
-
-    this.draw();
+    tool.handleDrawingEnd();
   }
 
   handleMouseDown(e: MouseEvent) {
@@ -452,7 +406,7 @@ export class SimpleWhiteboard extends LitElement {
 
   resetWhiteboard() {
     this.items = [];
-    this.selectedItemId = undefined;
+    this.selectedItemId = null;
   }
 
   public clearWhiteboard() {
@@ -662,9 +616,19 @@ export class SimpleWhiteboard extends LitElement {
     this.draw();
   }
 
-  public addItem(item: WhiteboardItem) {
+  public addItem(item: WhiteboardItem, sendEvent: boolean = false) {
     this.items.unshift(item);
     this.draw();
+
+    if (sendEvent) {
+      const itemsUpdatedEvent = new CustomEvent("items-updated", {
+        detail: {
+          type: "add",
+          item: this.currentDrawing,
+        },
+      });
+      this.dispatchEvent(itemsUpdatedEvent);
+    }
   }
 
   public updateItem(itemId: string, item: WhiteboardItem) {
@@ -718,5 +682,17 @@ export class SimpleWhiteboard extends LitElement {
   public setCanvasCoords(coords: { x: number; y: number; zoom: number }) {
     this.canvasCoords = coords;
     this.draw();
+  }
+
+  public setSelectedItemId(itemId: string | null) {
+    this.selectedItemId = itemId;
+  }
+
+  public getSelectedItemId(): string | null {
+    return this.selectedItemId;
+  }
+
+  public getToolInstance(toolName: string): SimpleWhiteboardTool | undefined {
+    return this.registeredTools.get(toolName);
   }
 }
