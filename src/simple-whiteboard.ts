@@ -493,10 +493,19 @@ export class SimpleWhiteboard extends LitElement {
     }
   }
 
-  renderToolsOptions() {
-    const options: TemplateResult[] = [];
+  renderToolsOptions(): TemplateResult | null {
+    const selectedItem = this.getSelectedItem();
+    const tool = this.registeredTools.get(this.currentTool);
+    if (!tool) {
+      return null;
+    }
+    const options = tool.renderToolOptions(selectedItem);
+    if (!options) {
+      return null;
+    }
 
-    let tool = this.currentTool;
+    return html`<div class="tools-options">${options}</div>`;
+
     // const currentToolOptions = { ...this.currentToolOptions };
     // let handleStrokeColorChange = this.handleStrokeColorChange;
     // let handleFillColorChange = this.handleFillColorChange;
@@ -534,46 +543,6 @@ export class SimpleWhiteboard extends LitElement {
     //   handleFillColorChange = this.handleItemFillColorChange(currentItem.id);
     // }
 
-    if (tool === "picture") {
-      const toolInstance = this.registeredTools.get(tool);
-      if (!toolInstance) {
-        return null;
-      }
-      const srcParam = html`<p>Source</p>
-        <input
-          type="file"
-          accept="image/*"
-          @change=${(e: Event) => {
-            const fileInput = e.target as HTMLInputElement;
-            const file = fileInput.files?.[0];
-            if (!file) {
-              return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = (e) => {
-              const img = new Image();
-              img.onload = () => {
-                const item: any = {
-                  kind: "picture",
-                  id: toolInstance.generateId(),
-                  x: 0,
-                  y: 0,
-                  width: img.width,
-                  height: img.height,
-                  src: img.src,
-                  options: {},
-                };
-                this.addItem(item, true);
-              };
-              img.src = e.target?.result as string;
-            };
-            reader.readAsDataURL(file);
-          }}
-        />`;
-      options.push(srcParam);
-    }
-
     // if (this.drawableItems.includes(tool)) {
     //   const colorOption = html`<p>Stroke color</p>
     //     <input
@@ -593,12 +562,6 @@ export class SimpleWhiteboard extends LitElement {
     //     />`;
     //   options.push(fillOption);
     // }
-
-    if (options.length === 0) {
-      return null;
-    }
-
-    return html`<div class="tools-options">${options}</div>`;
   }
 
   renderToolsList() {
@@ -734,5 +697,42 @@ export class SimpleWhiteboard extends LitElement {
 
   public getToolInstance(toolName: string): SimpleWhiteboardTool | undefined {
     return this.registeredTools.get(toolName);
+  }
+
+  public getItemById(itemId: string): WhiteboardItem | null {
+    return this.items.find((item) => item.id === itemId) || null;
+  }
+
+  public getSelectedItem(): WhiteboardItem | null {
+    if (!this.selectedItemId) {
+      return null;
+    }
+
+    return this.getItemById(this.selectedItemId);
+  }
+
+  public updateItemById(
+    itemId: string,
+    item: WhiteboardItem,
+    sendEvent = false
+  ) {
+    const index = this.items.findIndex((item: any) => item.id === itemId);
+    if (index === -1) {
+      return;
+    }
+
+    this.items[index] = item;
+    this.draw();
+
+    if (sendEvent) {
+      const itemsUpdatedEvent = new CustomEvent("items-updated", {
+        detail: {
+          type: "update",
+          itemId,
+          item,
+        },
+      });
+      this.dispatchEvent(itemsUpdatedEvent);
+    }
   }
 }

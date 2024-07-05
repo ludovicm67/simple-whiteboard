@@ -34,6 +34,8 @@ export interface SimpleWhiteboardToolInterface {
   handleDrawingStart(x: number, y: number): void;
   handleDrawingMove(x: number, y: number): void;
   handleDrawingEnd(): void;
+
+  renderToolOptions(item: WhiteboardItem | null): TemplateResult | null;
 }
 
 export type RoughCanvas = LocalRoughCanvas;
@@ -174,6 +176,22 @@ abstract class SimpleWhiteboardTool
    */
   public handleDrawingEnd(): void {
     // Implement this method in the tool class if needed.
+  }
+
+  /**
+   * Render the tool options.
+   * This method should be implemented in the tool class if needed.
+   * The tool options are the settings that the user can change for the tool.
+   * It should return a template result with the options or `null` if not needed.
+   * The `item` parameter is the selected item on the canvas ; it can be `null` if no item is selected, in that case you can assume it's for a new item.
+   *
+   * @param _item The selected item on the canvas or `null` if no item is selected.
+   * @returns The template result with the tool options or `null` if not needed.
+   */
+  public renderToolOptions(
+    _item: WhiteboardItem | null
+  ): TemplateResult | null {
+    return null;
   }
 
   protected firstUpdated(): void {

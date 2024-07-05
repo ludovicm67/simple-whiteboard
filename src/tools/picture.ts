@@ -61,6 +61,14 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
     }
   }
 
+  public override onToolSelected(): void {
+    const simpleWhiteboard = this.getSimpleWhiteboardInstance();
+    if (!simpleWhiteboard) {
+      return;
+    }
+    simpleWhiteboard.setSelectedItemId(null);
+  }
+
   public override getBoundingRect(item: PictureItem): BoundingRect | null {
     return {
       x: item.x,
@@ -70,76 +78,98 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
     };
   }
 
-  public override handleDrawingStart(x: number, y: number): void {
+  public override renderToolOptions(item: PictureItem | null) {
     const simpleWhiteboard = super.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {
-      return;
-    }
-    const itemId = super.generateId();
-
-    const { x: itemX, y: itemY } = simpleWhiteboard.coordsFromCanvasCoords(
-      x,
-      y
-    );
-
-    const item: PictureItem = {
-      kind: this.getToolName(),
-      id: itemId,
-      x: itemX,
-      y: itemY,
-      width: 0,
-      height: 0,
-      src: "",
-      options: {},
-    };
-
-    simpleWhiteboard.setCurrentDrawing(item);
-  }
-
-  public override handleDrawingMove(x: number, y: number): void {
-    const simpleWhiteboard = super.getSimpleWhiteboardInstance();
-    if (!simpleWhiteboard) {
-      return;
+      return null;
     }
 
-    const currentDrawing = simpleWhiteboard.getCurrentDrawing();
-    if (!currentDrawing) {
-      return;
+    // Case: no item selected = new item
+    if (!item) {
+      return html`
+        <label for="picture-src">Image URL:</label>
+        <input
+          type="file"
+          accept="image/*"
+          @change=${(e: Event) => {
+            const id = super.generateId();
+            const target = e.target as HTMLInputElement;
+            const file = target.files?.[0];
+            if (!file) {
+              return;
+            }
+
+            const item: PictureItem = {
+              kind: this.getToolName(),
+              id,
+              options: {},
+              x: 0,
+              y: 0,
+              width: 0,
+              height: 0,
+              src: "",
+            };
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const img = new Image();
+              img.onload = () => {
+                const updatedItem: PictureItem = {
+                  ...item,
+                  src: img.src,
+                  width: img.width,
+                  height: img.height,
+                };
+                simpleWhiteboard.updateItemById(
+                  updatedItem.id,
+                  updatedItem,
+                  true
+                );
+                simpleWhiteboard.addItem(updatedItem, true);
+                simpleWhiteboard.setSelectedItemId(id);
+              };
+              img.src = e.target?.result as string;
+            };
+            reader.readAsDataURL(file);
+          }}
+        />
+      `;
     }
 
-    if (currentDrawing.kind !== this.getToolName()) {
-      return;
-    }
+    // Case: item selected => we want to be able to edit the instance
+    return html`
+      <label for="picture-src">Edit Image URL:</label>
+      <input
+        type="file"
+        accept="image/*"
+        @change=${(e: Event) => {
+          const target = e.target as HTMLInputElement;
+          const file = target.files?.[0];
+          if (!file) {
+            return;
+          }
 
-    const rectItem = currentDrawing as PictureItem;
-    const { x: currentX, y: currentY } = rectItem;
-
-    const { x: canvasX, y: canvasY } = simpleWhiteboard.getCanvasCoords();
-
-    simpleWhiteboard.setCurrentDrawing({
-      ...rectItem,
-      width: x - currentX - canvasX,
-      height: y - currentY - canvasY,
-    } as PictureItem);
-  }
-
-  public override handleDrawingEnd(): void {
-    const simpleWhiteboard = super.getSimpleWhiteboardInstance();
-    if (!simpleWhiteboard) {
-      return;
-    }
-
-    const currentDrawing = simpleWhiteboard.getCurrentDrawing();
-    if (!currentDrawing) {
-      return;
-    }
-
-    if (currentDrawing.kind !== this.getToolName()) {
-      return;
-    }
-
-    const item = currentDrawing as PictureItem;
-    simpleWhiteboard.addItem(item, true);
-    simpleWhiteboard.setCurrentDrawing(null);
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+              const updatedItem: PictureItem = {
+                ...item,
+                src: img.src,
+                width: img.width,
+                height: img.height,
+              };
+              simpleWhiteboard.updateItemById(
+                updatedItem.id,
+                updatedItem,
+                true
+              );
+            };
+            img.src = e.target?.result as string;
+          };
+          reader.readAsDataURL(file);
+        }}
+      />
+    `;
   }
 }
