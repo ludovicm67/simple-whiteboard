@@ -497,42 +497,42 @@ export class SimpleWhiteboard extends LitElement {
     const options: TemplateResult[] = [];
 
     let tool = this.currentTool;
-    const currentToolOptions = { ...this.currentToolOptions };
-    let handleStrokeColorChange = this.handleStrokeColorChange;
-    let handleFillColorChange = this.handleFillColorChange;
+    // const currentToolOptions = { ...this.currentToolOptions };
+    // let handleStrokeColorChange = this.handleStrokeColorChange;
+    // let handleFillColorChange = this.handleFillColorChange;
 
-    let currentItem;
+    // let currentItem;
 
-    if (this.selectedItemId) {
-      currentItem = this.items.find((item) => {
-        if (!this.drawableItems.includes(item.kind)) {
-          return false;
-        }
-        const drawableItem = item as WhiteboardDrawableItem;
-        return drawableItem.id === this.selectedItemId;
-      }) as WhiteboardDrawableItem;
-    }
-    if (currentItem) {
-      tool = currentItem.kind || this.currentTool;
-      if (currentItem.kind === "pen") {
-        currentToolOptions.strokeColor = currentItem.options.color || "#000000";
-      }
-      if (currentItem.kind === "rect" || currentItem.kind === "circle") {
-        currentToolOptions.fillColor = currentItem.options.fill || "#000000";
-      }
-      if (
-        currentItem.kind === "rect" ||
-        currentItem.kind === "circle" ||
-        currentItem.kind === "line"
-      ) {
-        currentToolOptions.strokeColor =
-          currentItem.options.stroke || "#000000";
-      }
-      handleStrokeColorChange = this.handleItemStrokeColorChange(
-        currentItem.id
-      );
-      handleFillColorChange = this.handleItemFillColorChange(currentItem.id);
-    }
+    // if (this.selectedItemId) {
+    //   currentItem = this.items.find((item) => {
+    //     if (!this.drawableItems.includes(item.kind)) {
+    //       return false;
+    //     }
+    //     const drawableItem = item as WhiteboardDrawableItem;
+    //     return drawableItem.id === this.selectedItemId;
+    //   }) as WhiteboardDrawableItem;
+    // }
+    // if (currentItem) {
+    //   tool = currentItem.kind || this.currentTool;
+    //   if (currentItem.kind === "pen") {
+    //     currentToolOptions.strokeColor = currentItem.options.color || "#000000";
+    //   }
+    //   if (currentItem.kind === "rect" || currentItem.kind === "circle") {
+    //     currentToolOptions.fillColor = currentItem.options.fill || "#000000";
+    //   }
+    //   if (
+    //     currentItem.kind === "rect" ||
+    //     currentItem.kind === "circle" ||
+    //     currentItem.kind === "line"
+    //   ) {
+    //     currentToolOptions.strokeColor =
+    //       currentItem.options.stroke || "#000000";
+    //   }
+    //   handleStrokeColorChange = this.handleItemStrokeColorChange(
+    //     currentItem.id
+    //   );
+    //   handleFillColorChange = this.handleItemFillColorChange(currentItem.id);
+    // }
 
     if (tool === "picture") {
       const toolInstance = this.registeredTools.get(tool);
