@@ -60,6 +60,10 @@ export class SimpleWhiteboard extends LitElement {
       left: 50%;
       transform: translateX(-50%);
       box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+      overflow-x: auto;
+      white-space: nowrap;
+      max-width: calc(100% - 64px);
+      scrollbar-width: thin;
     }
 
     .tools button {
@@ -91,6 +95,12 @@ export class SimpleWhiteboard extends LitElement {
       background-color: #fff;
       border-radius: 8px;
       padding: 8px 12px;
+    }
+
+    @media (max-width: 450px) {
+      .tools-options {
+        width: calc(100% - 64px);
+      }
     }
 
     .tools-options p {
