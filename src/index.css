@@ -34,7 +34,7 @@ main {
   padding: 0;
   box-sizing: border-box;
   flex: 1;
-  height: 90svh;
+  height: 92svh;
   border-top: 1px solid #e0e0e0;
   border-bottom: 1px solid #e0e0e0;
 }
@@ -46,11 +46,21 @@ footer {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 10svh;
+  height: 8svh;
   border-top: 1px solid #e0e0e0;
 }
 
 footer a {
   display: inline-block;
   padding: 0 8px;
+}
+
+@media screen and (max-width: 450px) {
+  main {
+    height: 95svh;
+  }
+  footer {
+    height: 5svh;
+    font-size: 0.8rem;
+  }
 }
