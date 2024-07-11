@@ -120,11 +120,6 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
                   width: img.width,
                   height: img.height,
                 };
-                simpleWhiteboard.updateItemById(
-                  updatedItem.id,
-                  updatedItem,
-                  true
-                );
                 simpleWhiteboard.addItem(updatedItem, true);
                 simpleWhiteboard.setSelectedItemId(id);
               };

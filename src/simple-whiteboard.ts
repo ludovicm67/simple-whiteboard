@@ -463,7 +463,7 @@ export class SimpleWhiteboard extends LitElement {
       const itemsUpdatedEvent = new CustomEvent("items-updated", {
         detail: {
           type: "add",
-          item: this.currentDrawing,
+          item,
         },
       });
       this.dispatchEvent(itemsUpdatedEvent);
