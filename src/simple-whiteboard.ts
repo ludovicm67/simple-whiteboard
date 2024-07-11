@@ -6,7 +6,7 @@ import {
   html,
 } from "lit";
 import rough from "roughjs";
-import { customElement, state } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
 import { RoughCanvas } from "roughjs/bin/canvas";
 import SimpleWhiteboardTool, {
   WhiteboardItem,
@@ -20,6 +20,9 @@ type Point = {
 
 @customElement("simple-whiteboard")
 export class SimpleWhiteboard extends LitElement {
+  @property({ type: Boolean })
+  debug = false;
+
   private canvas?: HTMLCanvasElement;
   private canvasContext?: CanvasRenderingContext2D;
 
@@ -363,7 +366,9 @@ export class SimpleWhiteboard extends LitElement {
     oldValue?: unknown,
     options?: PropertyDeclaration<unknown, unknown> | undefined
   ): void {
-    console.log("Request update", name, oldValue, options);
+    if (this.debug) {
+      console.log("Request update", name, oldValue, options);
+    }
     super.requestUpdate(name, oldValue, options);
   }
 
