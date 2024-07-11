@@ -1,5 +1,12 @@
 # @ludovicm67/whiteboard
 
+## 0.2.2
+
+### Patch Changes
+
+- e84af68: Add `debug` property
+- aa8124b: Fix an issue where the picture add event had a null value
+
 ## 0.2.1
 
 ### Patch Changes
