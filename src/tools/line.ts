@@ -21,7 +21,7 @@ interface LineItem extends WhiteboardItem {
 @customElement("simple-whiteboard--tool-line")
 export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
   private stroke = "#000000";
-  private strokeWidth = 2;
+  private strokeWidth = 1;
 
   public override getToolIcon() {
     return html`${unsafeHTML(getIconSvg("minus"))}`;
@@ -179,6 +179,7 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
           type="range"
           min="1"
           max="50"
+          step="7"
           .value=${this.strokeWidth}
           @input=${(e: Event) => {
             const target = e.target as HTMLInputElement;
@@ -206,6 +207,7 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
         type="range"
         min="1"
         max="50"
+        step="7"
         .value=${item.options.strokeWidth}
         @input=${(e: Event) => {
           const target = e.target as HTMLInputElement;

@@ -53,7 +53,7 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
         return { x, y };
       }),
       {
-        size: item.options.size || 6,
+        size: item.options.size || 8,
         smoothing: item.options.smoothing || 0.5,
         thinning: item.options.thinning || 0.5,
         streamline: item.options.streamline || 0.5,
@@ -208,6 +208,7 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
             type="range"
             min="1"
             max="50"
+            step="7"
             .value=${this.size}
             @input=${(e: Event) => {
               const target = e.target as HTMLInputElement;
@@ -239,6 +240,7 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
           type="range"
           min="1"
           max="50"
+          step="7"
           .value=${item.options.size}
           @input=${(e: Event) => {
             const target = e.target as HTMLInputElement;

@@ -20,7 +20,7 @@ interface CircleItem extends WhiteboardItem {
 @customElement("simple-whiteboard--tool-circle")
 export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
   private stroke = "#000000";
-  private strokeWidth = 2;
+  private strokeWidth = 1;
   private fill = "transparent";
 
   public override getToolIcon() {
@@ -176,6 +176,7 @@ export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
           type="range"
           min="1"
           max="50"
+          step="7"
           .value=${this.strokeWidth}
           @input=${(e: Event) => {
             const target = e.target as HTMLInputElement;
@@ -226,6 +227,7 @@ export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
         type="range"
         min="1"
         max="50"
+        step="7"
         .value=${item.options.strokeWidth}
         @input=${(e: Event) => {
           const target = e.target as HTMLInputElement;
