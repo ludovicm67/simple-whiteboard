@@ -52,11 +52,13 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
   }
 
   public override getBoundingRect(item: LineItem): BoundingRect | null {
+    const strokeWidth = item.options.strokeWidth || 1;
+    const halfStrokeWidth = strokeWidth / 2;
     return {
-      x: Math.min(item.x1, item.x2),
-      y: Math.min(item.y1, item.y2),
-      width: Math.abs(item.x2 - item.x1),
-      height: Math.abs(item.y2 - item.y1),
+      x: Math.min(item.x1, item.x2) - halfStrokeWidth,
+      y: Math.min(item.y1, item.y2) - halfStrokeWidth,
+      width: Math.abs(item.x2 - item.x1) + strokeWidth,
+      height: Math.abs(item.y2 - item.y1) + strokeWidth,
     };
   }
 
