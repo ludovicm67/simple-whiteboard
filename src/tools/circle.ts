@@ -48,12 +48,13 @@ export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
   }
 
   public override getBoundingRect(item: CircleItem): BoundingRect | null {
-    const strokeWidth = (item.options.strokeWidth || 1) / 2;
+    const strokeWidth = item.options.strokeWidth || 1;
+    const halfStrokeWidth = strokeWidth / 2;
     return {
-      x: item.x - item.diameter / 2 - strokeWidth,
-      y: item.y - item.diameter / 2 - strokeWidth,
-      width: item.diameter + strokeWidth * 2,
-      height: item.diameter + strokeWidth * 2,
+      x: item.x - item.diameter / 2 - halfStrokeWidth,
+      y: item.y - item.diameter / 2 - halfStrokeWidth,
+      width: item.diameter + strokeWidth,
+      height: item.diameter + strokeWidth,
     };
   }
 

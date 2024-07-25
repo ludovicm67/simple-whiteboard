@@ -49,11 +49,13 @@ export class SimpleWhiteboardToolRect extends SimpleWhiteboardTool {
   }
 
   public override getBoundingRect(item: RectItem): BoundingRect | null {
+    const strokeWidth = item.options.strokeWidth || 1;
+    const halfStrokeWidth = strokeWidth / 2;
     return {
-      x: item.x,
-      y: item.y,
-      width: item.width,
-      height: item.height,
+      x: item.x - halfStrokeWidth,
+      y: item.y - halfStrokeWidth,
+      width: item.width + strokeWidth,
+      height: item.height + strokeWidth,
     };
   }
 
