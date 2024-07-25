@@ -146,7 +146,11 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
     return { x: item.x1, y: item.y1 };
   }
 
-  public override setCoordsItem(item: LineItem, x: number, y: number): PenItem {
+  public override setCoordsItem(
+    item: LineItem,
+    x: number,
+    y: number
+  ): LineItem {
     const deltaX = x - item.x1;
     const deltaY = y - item.y1;
     return {
