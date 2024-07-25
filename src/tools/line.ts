@@ -21,7 +21,7 @@ interface LineItem extends WhiteboardItem {
 @customElement("simple-whiteboard--tool-line")
 export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
   private stroke = "#000000";
-  private strokeWidth = 2;
+  private strokeWidth = 1;
 
   public override getToolIcon() {
     return html`${unsafeHTML(getIconSvg("minus"))}`;
@@ -52,11 +52,13 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
   }
 
   public override getBoundingRect(item: LineItem): BoundingRect | null {
+    const strokeWidth = item.options.strokeWidth || 1;
+    const halfStrokeWidth = strokeWidth / 2;
     return {
-      x: Math.min(item.x1, item.x2),
-      y: Math.min(item.y1, item.y2),
-      width: Math.abs(item.x2 - item.x1),
-      height: Math.abs(item.y2 - item.y1),
+      x: Math.min(item.x1, item.x2) - halfStrokeWidth,
+      y: Math.min(item.y1, item.y2) - halfStrokeWidth,
+      width: Math.abs(item.x2 - item.x1) + strokeWidth,
+      height: Math.abs(item.y2 - item.y1) + strokeWidth,
     };
   }
 
@@ -171,8 +173,22 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
     // Case: no item selected = new item
     if (!item) {
       return html`
+        <p>Stroke width:</p>
+        <input
+          class="width-100-percent"
+          type="range"
+          min="1"
+          max="50"
+          step="7"
+          .value=${this.strokeWidth}
+          @input=${(e: Event) => {
+            const target = e.target as HTMLInputElement;
+            this.strokeWidth = parseInt(target.value, 10);
+          }}
+        />
         <p>Stroke:</p>
         <input
+          class="width-100-percent"
           type="color"
           .value=${this.stroke}
           @input=${(e: Event) => {
@@ -180,22 +196,37 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
             this.stroke = target.value;
           }}
         />
-        <p>Stroke width:</p>
-        <input
-          type="number"
-          .value=${this.strokeWidth}
-          @input=${(e: Event) => {
-            const target = e.target as HTMLInputElement;
-            this.strokeWidth = parseInt(target.value, 10);
-          }}
-        />
       `;
     }
 
     // Case: item selected
     return html`
+      <p>Stroke width:</p>
+      <input
+        class="width-100-percent"
+        type="range"
+        min="1"
+        max="50"
+        step="7"
+        .value=${item.options.strokeWidth}
+        @input=${(e: Event) => {
+          const target = e.target as HTMLInputElement;
+          simpleWhiteboard.updateItemById(
+            item.id,
+            {
+              ...item,
+              options: {
+                ...item.options,
+                strokeWidth: parseInt(target.value, 10),
+              },
+            },
+            true
+          );
+        }}
+      />
       <p>Stroke:</p>
       <input
+        class="width-100-percent"
         type="color"
         .value=${item.options.stroke}
         @input=${(e: Event) => {
@@ -213,26 +244,8 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
           );
         }}
       />
-      <p>Stroke width:</p>
-      <input
-        type="number"
-        .value=${item.options.strokeWidth}
-        @input=${(e: Event) => {
-          const target = e.target as HTMLInputElement;
-          simpleWhiteboard.updateItemById(
-            item.id,
-            {
-              ...item,
-              options: {
-                ...item.options,
-                strokeWidth: parseInt(target.value, 10),
-              },
-            },
-            true
-          );
-        }}
-      />
       <button
+        class="width-100-percent"
         @click=${() => {
           simpleWhiteboard.removeItemById(item.id, true);
         }}

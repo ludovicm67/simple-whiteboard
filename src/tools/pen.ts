@@ -53,7 +53,7 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
         return { x, y };
       }),
       {
-        size: item.options.size || 6,
+        size: item.options.size || 8,
         smoothing: item.options.smoothing || 0.5,
         thinning: item.options.thinning || 0.5,
         streamline: item.options.streamline || 0.5,
@@ -69,15 +69,29 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
   }
 
   public override getBoundingRect(item: PenItem): BoundingRect | null {
+    const strokeWidth = item.options.size || 1;
+    const halfStrokeWidth = strokeWidth / 2;
+
+    const maxX = Math.max(...item.path.map((p) => p.x));
+    const minX = Math.min(...item.path.map((p) => p.x));
+    const maxY = Math.max(...item.path.map((p) => p.y));
+    const minY = Math.min(...item.path.map((p) => p.y));
+
+    console.log("Bounding rect", {
+      x: minX - halfStrokeWidth,
+      y: minY - halfStrokeWidth,
+      width: maxX - minX + strokeWidth,
+      height: maxY - minY + strokeWidth,
+      maxX,
+      minY,
+      strokeWidth,
+    });
+
     return {
-      x: Math.min(...item.path.map((p) => p.x)),
-      y: Math.min(...item.path.map((p) => p.y)),
-      width:
-        Math.max(...item.path.map((p) => p.x)) -
-        Math.min(...item.path.map((p) => p.x)),
-      height:
-        Math.max(...item.path.map((p) => p.y)) -
-        Math.min(...item.path.map((p) => p.y)),
+      x: minX - halfStrokeWidth,
+      y: minY - halfStrokeWidth,
+      width: maxX - minX + strokeWidth,
+      height: maxY - minY + strokeWidth,
     };
   }
 
@@ -190,19 +204,22 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
         <div>
           <p>Size:</p>
           <input
+            class="width-100-percent"
             type="range"
             min="1"
             max="50"
+            step="7"
             .value=${this.size}
             @input=${(e: Event) => {
               const target = e.target as HTMLInputElement;
-              this.size = Number(target.value);
+              this.size = parseInt(target.value, 10);
             }}
           />
         </div>
         <div>
           <p>Color:</p>
           <input
+            class="width-100-percent"
             type="color"
             .value=${this.color}
             @input=${(e: Event) => {
@@ -219,9 +236,11 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
       <div>
         <p>Size:</p>
         <input
+          class="width-100-percent"
           type="range"
           min="1"
           max="50"
+          step="7"
           .value=${item.options.size}
           @input=${(e: Event) => {
             const target = e.target as HTMLInputElement;
@@ -231,7 +250,7 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
                 ...item,
                 options: {
                   ...item.options,
-                  size: target.value,
+                  size: parseInt(target.value, 10),
                 },
               },
               true
@@ -242,6 +261,7 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
       <div>
         <p>Color:</p>
         <input
+          class="width-100-percent"
           type="color"
           .value=${item.options.color}
           @input=${(e: Event) => {
@@ -261,6 +281,7 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
         />
       </div>
       <button
+        class="width-100-percent"
         @click=${() => {
           simpleWhiteboard.removeItemById(item.id, true);
         }}

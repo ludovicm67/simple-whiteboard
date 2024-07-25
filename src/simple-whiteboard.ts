@@ -50,6 +50,10 @@ export class SimpleWhiteboard extends LitElement {
       position: relative;
     }
 
+    .width-100-percent {
+      width: 100%;
+    }
+
     .tools {
       user-select: none;
       gap: 8px;
