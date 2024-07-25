@@ -135,6 +135,22 @@ export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
     simpleWhiteboard.setCurrentDrawing(null);
   }
 
+  public override getCoordsItem(item: CircleItem): { x: number; y: number } {
+    return { x: item.x, y: item.y };
+  }
+
+  public override setCoordsItem(
+    item: CircleItem,
+    x: number,
+    y: number
+  ): CircleItem {
+    return {
+      ...item,
+      x,
+      y,
+    };
+  }
+
   public override onToolSelected(): void {
     const simpleWhiteboard = this.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {
