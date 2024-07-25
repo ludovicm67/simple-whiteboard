@@ -141,6 +141,22 @@ export class SimpleWhiteboardToolRect extends SimpleWhiteboardTool {
     simpleWhiteboard.setSelectedItemId(null);
   }
 
+  public override getCoordsItem(item: RectItem): { x: number; y: number } {
+    return { x: item.x, y: item.y };
+  }
+
+  public override setCoordsItem(
+    item: RectItem,
+    x: number,
+    y: number
+  ): RectItem {
+    return {
+      ...item,
+      x,
+      y,
+    };
+  }
+
   public override renderToolOptions(item: RectItem | null) {
     const simpleWhiteboard = super.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {
