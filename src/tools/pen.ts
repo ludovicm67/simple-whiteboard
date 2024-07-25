@@ -150,6 +150,26 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
     simpleWhiteboard.setCurrentDrawing(null);
   }
 
+  public override getCoordsItem(item: PenItem): { x: number; y: number } {
+    const firstPoint = item.path[0];
+    return { x: firstPoint.x, y: firstPoint.y };
+  }
+
+  public override setCoordsItem(item: PenItem, x: number, y: number): PenItem {
+    const firstPoint = item.path[0];
+    const deltaX = x - firstPoint.x;
+    const deltaY = y - firstPoint.y;
+    return {
+      ...item,
+      path: item.path.map((p) => {
+        return {
+          x: p.x + deltaX,
+          y: p.y + deltaY,
+        };
+      }),
+    };
+  }
+
   public override onToolSelected(): void {
     const simpleWhiteboard = this.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {

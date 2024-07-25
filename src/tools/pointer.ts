@@ -6,10 +6,22 @@ import SimpleWhiteboardTool, {
   WhiteboardItem,
 } from "../lib/SimpleWhiteboardTool";
 import { getIconSvg } from "../lib/icons";
+import { SimpleWhiteboard } from "../simple-whiteboard";
+
+enum PointerAction {
+  SELECT = "select",
+  DRAG = "drag",
+}
 
 interface PointerItem extends WhiteboardItem {
   x: number;
   y: number;
+  options: {
+    selectedItemId: string | null;
+    clickedItemId: string | null;
+    action: PointerAction;
+    clickedItemCoords: { x: number; y: number } | null;
+  };
 }
 
 @customElement("simple-whiteboard--tool-pointer")
@@ -20,6 +32,43 @@ export class SimpleWhiteboardToolPointer extends SimpleWhiteboardTool {
 
   public override getToolName() {
     return "pointer";
+  }
+
+  private findSelectedItemUnderPointer(
+    simpleWhiteboard: SimpleWhiteboard,
+    x: number,
+    y: number
+  ): WhiteboardItem | null {
+    // Get all items that are under the pointer
+    const items = [...simpleWhiteboard.getItems()].reverse();
+    const potentialItems = items.filter((item) => {
+      const tool = simpleWhiteboard.getToolInstance(item.kind);
+      if (!tool) {
+        return false;
+      }
+      const boundingRect = tool.getBoundingRect(item);
+      if (!boundingRect) {
+        return false;
+      }
+      const {
+        x: bourdingRectX,
+        y: boundingRectY,
+        width,
+        height,
+      } = boundingRect;
+      return (
+        x > bourdingRectX &&
+        x < bourdingRectX + width &&
+        y > boundingRectY &&
+        y < boundingRectY + height
+      );
+    });
+
+    if (potentialItems.length > 0) {
+      return potentialItems[0];
+    }
+
+    return null;
   }
 
   public override handleDrawingStart(x: number, y: number): void {
@@ -34,15 +83,100 @@ export class SimpleWhiteboardToolPointer extends SimpleWhiteboardTool {
       y
     );
 
+    let action = PointerAction.SELECT;
+
+    const selectedItemId = simpleWhiteboard.getSelectedItemId();
+    const itemClicked = this.findSelectedItemUnderPointer(
+      simpleWhiteboard,
+      itemX,
+      itemY
+    );
+
+    let clickedItemCoords = null;
+    if (selectedItemId && itemClicked && selectedItemId === itemClicked.id) {
+      action = PointerAction.DRAG;
+      const tool = simpleWhiteboard.getToolInstance(itemClicked.kind);
+      if (tool) {
+        clickedItemCoords = tool.getCoordsItem(itemClicked);
+      }
+    }
+
     const item: PointerItem = {
       kind: this.getToolName(),
       id: itemId,
       x: itemX,
       y: itemY,
-      options: {},
+      options: {
+        clickedItemId: itemClicked ? itemClicked.id : null,
+        selectedItemId: simpleWhiteboard.getSelectedItemId(),
+        action,
+        clickedItemCoords,
+      },
     };
 
     simpleWhiteboard.setCurrentDrawing(item);
+  }
+
+  public override handleDrawingMove(x: number, y: number): void {
+    const simpleWhiteboard = super.getSimpleWhiteboardInstance();
+    if (!simpleWhiteboard) {
+      return;
+    }
+
+    const currentDrawing = simpleWhiteboard.getCurrentDrawing();
+    if (!currentDrawing) {
+      return;
+    }
+
+    if (currentDrawing.kind !== this.getToolName()) {
+      return;
+    }
+
+    if (currentDrawing.options.action !== PointerAction.DRAG) {
+      return;
+    }
+
+    const pointerItem = currentDrawing as PointerItem;
+    const pointerAction = pointerItem.options.action;
+    const clickedItemId = pointerItem.options.clickedItemId;
+    if (!clickedItemId || pointerAction !== PointerAction.DRAG) {
+      return;
+    }
+
+    const clickedItem = simpleWhiteboard.getItemById(clickedItemId);
+    if (!clickedItem) {
+      return;
+    }
+
+    const tool = simpleWhiteboard.getToolInstance(clickedItem.kind);
+    if (!tool) {
+      return;
+    }
+
+    const { x: startX, y: startY, options } = currentDrawing as PointerItem;
+    const { x: fixedX, y: fixedY } = simpleWhiteboard.coordsFromCanvasCoords(
+      x,
+      y
+    );
+    const { clickedItemCoords } = options;
+    if (!clickedItemCoords) {
+      return;
+    }
+    const { x: clickedItemX, y: clickedItemY } = clickedItemCoords;
+
+    const deltaX = fixedX - startX;
+    const deltaY = fixedY - startY;
+
+    const movedInstance = tool.setCoordsItem(
+      clickedItem,
+      clickedItemX + deltaX,
+      clickedItemY + deltaY
+    );
+    if (!movedInstance) {
+      return;
+    }
+
+    simpleWhiteboard.updateItemById(clickedItemId, movedInstance, true);
   }
 
   public override handleDrawingEnd(): void {
@@ -60,31 +194,14 @@ export class SimpleWhiteboardToolPointer extends SimpleWhiteboardTool {
       return;
     }
 
-    const { x: pointerX, y: pointerY } = currentDrawing as PointerItem;
+    const { options } = currentDrawing as PointerItem;
 
-    // Get all items that are under the pointer
-    const items = [...simpleWhiteboard.getItems()].reverse();
-    const potentialItems = items.filter((item) => {
-      const tool = simpleWhiteboard.getToolInstance(item.kind);
-      if (!tool) {
-        return false;
-      }
-      const boundingRect = tool.getBoundingRect(item);
-      if (!boundingRect) {
-        return false;
-      }
-      const { x, y, width, height } = boundingRect;
-      return (
-        pointerX > x &&
-        pointerX < x + width &&
-        pointerY > y &&
-        pointerY < y + height
-      );
-    });
-    if (potentialItems.length > 0) {
-      simpleWhiteboard.setSelectedItemId(potentialItems[0].id);
-    } else {
-      simpleWhiteboard.setSelectedItemId(null);
+    switch (options.action) {
+      case PointerAction.SELECT:
+        simpleWhiteboard.setSelectedItemId(options.clickedItemId);
+        break;
+      case PointerAction.DRAG:
+        break;
     }
 
     simpleWhiteboard.setCurrentDrawing(null);

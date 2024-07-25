@@ -35,6 +35,9 @@ export interface SimpleWhiteboardToolInterface {
   handleDrawingMove(x: number, y: number): void;
   handleDrawingEnd(): void;
 
+  getCoordsItem(item: WhiteboardItem): { x: number; y: number };
+  setCoordsItem(item: WhiteboardItem, x: number, y: number): WhiteboardItem;
+
   renderToolOptions(item: WhiteboardItem | null): TemplateResult | null;
 }
 
@@ -176,6 +179,36 @@ abstract class SimpleWhiteboardTool
    */
   public handleDrawingEnd(): void {
     // Implement this method in the tool class if needed.
+  }
+
+  /**
+   * Get the coordinates of the item.
+   * This method should be implemented in the tool class if needed.
+   * The coordinates are the x and y position of the item.
+   *
+   * @param _item The item to get the coordinates.
+   * @returns The coordinates of the item or `null` if not needed.
+   */
+  public getCoordsItem(_item: WhiteboardItem): { x: number; y: number } {
+    // Implement this method in the tool class if needed.
+    return { x: 0, y: 0 };
+  }
+
+  /**
+   * Set the coordinates of the item.
+   *
+   * @param item The item to move.
+   * @param _x The x coordinate to move the item.
+   * @param _y The y coordinate to move the item.
+   * @returns The moved item.
+   */
+  public setCoordsItem(
+    item: WhiteboardItem,
+    _x: number,
+    _y: number
+  ): WhiteboardItem {
+    // Implement this method in the tool class if needed.
+    return item;
   }
 
   /**
