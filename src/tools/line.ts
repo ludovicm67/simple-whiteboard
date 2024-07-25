@@ -173,17 +173,9 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
     // Case: no item selected = new item
     if (!item) {
       return html`
-        <p>Stroke:</p>
-        <input
-          type="color"
-          .value=${this.stroke}
-          @input=${(e: Event) => {
-            const target = e.target as HTMLInputElement;
-            this.stroke = target.value;
-          }}
-        />
         <p>Stroke width:</p>
         <input
+          class="width-100-percent"
           type="range"
           min="1"
           max="50"
@@ -193,32 +185,24 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
             this.strokeWidth = parseInt(target.value, 10);
           }}
         />
+        <p>Stroke:</p>
+        <input
+          class="width-100-percent"
+          type="color"
+          .value=${this.stroke}
+          @input=${(e: Event) => {
+            const target = e.target as HTMLInputElement;
+            this.stroke = target.value;
+          }}
+        />
       `;
     }
 
     // Case: item selected
     return html`
-      <p>Stroke:</p>
-      <input
-        type="color"
-        .value=${item.options.stroke}
-        @input=${(e: Event) => {
-          const target = e.target as HTMLInputElement;
-          simpleWhiteboard.updateItemById(
-            item.id,
-            {
-              ...item,
-              options: {
-                ...item.options,
-                stroke: target.value,
-              },
-            },
-            true
-          );
-        }}
-      />
       <p>Stroke width:</p>
       <input
+        class="width-100-percent"
         type="range"
         min="1"
         max="50"
@@ -238,7 +222,28 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
           );
         }}
       />
+      <p>Stroke:</p>
+      <input
+        class="width-100-percent"
+        type="color"
+        .value=${item.options.stroke}
+        @input=${(e: Event) => {
+          const target = e.target as HTMLInputElement;
+          simpleWhiteboard.updateItemById(
+            item.id,
+            {
+              ...item,
+              options: {
+                ...item.options,
+                stroke: target.value,
+              },
+            },
+            true
+          );
+        }}
+      />
       <button
+        class="width-100-percent"
         @click=${() => {
           simpleWhiteboard.removeItemById(item.id, true);
         }}

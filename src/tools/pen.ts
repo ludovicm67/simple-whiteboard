@@ -204,6 +204,7 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
         <div>
           <p>Size:</p>
           <input
+            class="width-100-percent"
             type="range"
             min="1"
             max="50"
@@ -217,6 +218,7 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
         <div>
           <p>Color:</p>
           <input
+            class="width-100-percent"
             type="color"
             .value=${this.color}
             @input=${(e: Event) => {
@@ -233,6 +235,7 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
       <div>
         <p>Size:</p>
         <input
+          class="width-100-percent"
           type="range"
           min="1"
           max="50"
@@ -256,6 +259,7 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
       <div>
         <p>Color:</p>
         <input
+          class="width-100-percent"
           type="color"
           .value=${item.options.color}
           @input=${(e: Event) => {
@@ -275,6 +279,7 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
         />
       </div>
       <button
+        class="width-100-percent"
         @click=${() => {
           simpleWhiteboard.removeItemById(item.id, true);
         }}

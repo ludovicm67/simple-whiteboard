@@ -105,6 +105,7 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
       return html`
         <label for="picture-src">Image URL:</label>
         <input
+          class="width-100-percent"
           type="file"
           accept="image/*"
           @change=${(e: Event) => {
@@ -151,6 +152,7 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
     return html`
       <label for="picture-src">Edit Image URL:</label>
       <input
+        class="width-100-percent"
         type="file"
         accept="image/*"
         @change=${(e: Event) => {
