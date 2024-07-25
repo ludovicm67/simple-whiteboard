@@ -1,5 +1,13 @@
 # @ludovicm67/whiteboard
 
+## 0.2.3
+
+### Patch Changes
+
+- 3017bb9: The user can now move items by using the Pointer tool.
+
+  Just click on an item to select it, click again on it and drag it to move it around.
+
 ## 0.2.2
 
 ### Patch Changes
