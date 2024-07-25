@@ -78,6 +78,22 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
     };
   }
 
+  public override getCoordsItem(item: PictureItem): { x: number; y: number } {
+    return { x: item.x, y: item.y };
+  }
+
+  public override setCoordsItem(
+    item: PictureItem,
+    x: number,
+    y: number
+  ): PictureItem {
+    return {
+      ...item,
+      x,
+      y,
+    };
+  }
+
   public override renderToolOptions(item: PictureItem | null) {
     const simpleWhiteboard = super.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {
