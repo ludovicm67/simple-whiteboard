@@ -21,7 +21,7 @@ interface CircleItem extends WhiteboardItem {
 export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
   private stroke = "#000000";
   private strokeWidth = 2;
-  private fill = "#000000";
+  private fill = "transparent";
 
   public override getToolIcon() {
     return html`${unsafeHTML(getIconSvg("circle"))}`;
