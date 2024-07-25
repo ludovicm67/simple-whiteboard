@@ -142,6 +142,22 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
     simpleWhiteboard.setSelectedItemId(null);
   }
 
+  public override getCoordsItem(item: LineItem): { x: number; y: number } {
+    return { x: item.x1, y: item.y1 };
+  }
+
+  public override setCoordsItem(item: LineItem, x: number, y: number): PenItem {
+    const deltaX = x - item.x1;
+    const deltaY = y - item.y1;
+    return {
+      ...item,
+      x1: x,
+      y1: y,
+      x2: item.x2 + deltaX,
+      y2: item.y2 + deltaY,
+    };
+  }
+
   public override renderToolOptions(item: LineItem | null) {
     const simpleWhiteboard = super.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {
