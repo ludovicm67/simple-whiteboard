@@ -179,7 +179,9 @@ export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
         />
         <p>Stroke width:</p>
         <input
-          type="number"
+          type="range"
+          min="1"
+          max="50"
           .value=${this.strokeWidth}
           @input=${(e: Event) => {
             const target = e.target as HTMLInputElement;
@@ -233,7 +235,9 @@ export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
       />
       <p>Stroke width:</p>
       <input
-        type="number"
+        type="range"
+        min="1"
+        max="50"
         .value=${item.options.strokeWidth}
         @input=${(e: Event) => {
           const target = e.target as HTMLInputElement;
