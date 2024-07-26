@@ -1,5 +1,15 @@
 # @ludovicm67/whiteboard
 
+## 0.2.4
+
+### Patch Changes
+
+- 1a92683: Improve tools options:
+
+  - more logical order
+  - full width
+  - use ranges (with defined steps) for the stroke width
+
 ## 0.2.3
 
 ### Patch Changes
