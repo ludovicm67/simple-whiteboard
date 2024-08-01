@@ -1,5 +1,11 @@
 # @ludovicm67/whiteboard
 
+## 0.2.5
+
+### Patch Changes
+
+- 162bdec: Improve color selection for the different tools
+
 ## 0.2.4
 
 ### Patch Changes
