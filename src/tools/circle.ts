@@ -2,6 +2,7 @@ import { html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
+import "../components/colorSelect";
 import SimpleWhiteboardTool, {
   BoundingRect,
   RoughCanvas,
@@ -161,6 +162,22 @@ export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
     simpleWhiteboard.setSelectedItemId(null);
   }
 
+  generateColorSelect(
+    colors: string[],
+    currentColor: string,
+    clickCallback: (color: string) => void
+  ) {
+    return colors.map((color) => {
+      return html`<color-select
+        color=${color}
+        .selected=${currentColor === color}
+        @color-click=${(e: CustomEvent) => {
+          clickCallback(e.detail.color);
+        }}
+      ></color-select>`;
+    });
+  }
+
   public override renderToolOptions(item: CircleItem | null) {
     const simpleWhiteboard = super.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {
@@ -184,38 +201,21 @@ export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
           }}
         />
         <p>Stroke:</p>
-        <input
-          class="width-100-percent"
-          type="color"
-          .value=${this.stroke}
-          @input=${(e: Event) => {
-            const target = e.target as HTMLInputElement;
-            this.stroke = target.value;
-          }}
-        />
+        ${this.generateColorSelect(
+          ["#000000", "#ff1a40", "#29b312", "#135aa0", "#fc8653"],
+          this.stroke,
+          (color) => {
+            this.stroke = color;
+          }
+        )}
         <p>Fill:</p>
-        <input
-          class="width-100-percent"
-          type="checkbox"
-          .checked=${this.fill !== "transparent"}
-          @change=${(e: Event) => {
-            const target = e.target as HTMLInputElement;
-            this.fill = target.checked
-              ? this.fill === "transparent"
-                ? "#000000"
-                : this.fill
-              : "transparent";
-          }}
-        />
-        <input
-          class="width-100-percent"
-          type="color"
-          .value=${this.fill}
-          @input=${(e: Event) => {
-            const target = e.target as HTMLInputElement;
-            this.fill = target.value;
-          }}
-        />
+        ${this.generateColorSelect(
+          ["transparent", "#ff8dad", "#9bff8c", "#8fddff", "#ffc7a9"],
+          this.fill,
+          (color) => {
+            this.fill = color;
+          }
+        )}
       `;
     }
 
@@ -245,68 +245,43 @@ export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
         }}
       />
       <p>Stroke:</p>
-      <input
-        class="width-100-percent"
-        type="color"
-        .value=${item.options.stroke}
-        @input=${(e: Event) => {
-          const target = e.target as HTMLInputElement;
+      ${this.generateColorSelect(
+        ["#000000", "#ff1a40", "#29b312", "#135aa0", "#fc8653"],
+        this.stroke,
+        (color) => {
+          this.stroke = color;
           simpleWhiteboard.updateItemById(
             item.id,
             {
               ...item,
               options: {
                 ...item.options,
-                stroke: target.value,
+                stroke: color,
               },
             },
             true
           );
-        }}
-      />
+        }
+      )}
       <p>Fill:</p>
-      <input
-        class="width-100-percent"
-        type="checkbox"
-        .checked=${item.options.fill !== "transparent"}
-        @change=${(e: Event) => {
-          const target = e.target as HTMLInputElement;
+      ${this.generateColorSelect(
+        ["transparent", "#ff8dad", "#9bff8c", "#8fddff", "#ffc7a9"],
+        this.fill,
+        (color) => {
+          this.fill = color;
           simpleWhiteboard.updateItemById(
             item.id,
             {
               ...item,
               options: {
                 ...item.options,
-                fill: target.checked
-                  ? this.fill === "transparent"
-                    ? "#000000"
-                    : this.fill
-                  : "transparent",
+                fill: color,
               },
             },
             true
           );
-        }}
-      />
-      <input
-        class="width-100-percent"
-        type="color"
-        .value=${item.options.fill}
-        @input=${(e: Event) => {
-          const target = e.target as HTMLInputElement;
-          simpleWhiteboard.updateItemById(
-            item.id,
-            {
-              ...item,
-              options: {
-                ...item.options,
-                fill: target.value,
-              },
-            },
-            true
-          );
-        }}
-      />
+        }
+      )}
       <button
         class="width-100-percent"
         @click=${() => {
