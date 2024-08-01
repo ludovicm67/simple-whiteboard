@@ -4,6 +4,10 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ludovicm67/simple-whiteboard.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
