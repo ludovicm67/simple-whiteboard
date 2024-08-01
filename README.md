@@ -12,6 +12,7 @@ This allows the whiteboard to be easily embedded in any web application regardle
   - Circle
   - Line
   - Pen
+  - Text
   - Picture
 - Move the canvas using the Move tool
 - Clear the canvas

@@ -8,6 +8,7 @@ import "./rect";
 import "./circle";
 import "./line";
 import "./pen";
+import "./text";
 import "./picture";
 import "./clear";
 
@@ -30,6 +31,7 @@ export class SimpleWhiteboardToolDefaults extends LitElement {
       ></simple-whiteboard--tool-circle>
       <simple-whiteboard--tool-line slot="tools"></simple-whiteboard--tool-line>
       <simple-whiteboard--tool-pen slot="tools"></simple-whiteboard--tool-pen>
+      <simple-whiteboard--tool-text slot="tools"></simple-whiteboard--tool-text>
       <simple-whiteboard--tool-picture
         slot="tools"
       ></simple-whiteboard--tool-picture>
