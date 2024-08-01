@@ -15,12 +15,13 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+      id-token: write
 
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4
         with:
-          # This makes Actions fetch all Git history so that Changesets can generate changelogs with the correct commits
+          # This makes GitHub Actions fetch all Git history so that Changesets can generate changelogs with the correct commits
           fetch-depth: 0
 
       - uses: actions/setup-node@v4
@@ -34,7 +35,7 @@ jobs:
       - name: Run the build
         run: npm run build
 
-      - name: Create release Pull Request or publish to NPM
+      - name: Create release PR or publish to NPM
         id: changesets
         uses: changesets/action@v1
         with:
