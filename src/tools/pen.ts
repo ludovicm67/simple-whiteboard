@@ -2,6 +2,7 @@ import { html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
+import "../components/colorSelect";
 import SimpleWhiteboardTool, {
   BoundingRect,
   RoughCanvas,
@@ -192,6 +193,22 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
     simpleWhiteboard.setSelectedItemId(null);
   }
 
+  generateColorSelect(
+    colors: string[],
+    currentColor: string,
+    clickCallback: (color: string) => void
+  ) {
+    return colors.map((color) => {
+      return html`<color-select
+        color=${color}
+        .selected=${currentColor === color}
+        @color-click=${(e: CustomEvent) => {
+          clickCallback(e.detail.color);
+        }}
+      ></color-select>`;
+    });
+  }
+
   public override renderToolOptions(item: PenItem | null) {
     const simpleWhiteboard = super.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {
@@ -215,71 +232,62 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
               this.size = parseInt(target.value, 10);
             }}
           />
-        </div>
-        <div>
           <p>Color:</p>
-          <input
-            class="width-100-percent"
-            type="color"
-            .value=${this.color}
-            @input=${(e: Event) => {
-              const target = e.target as HTMLInputElement;
-              this.color = target.value;
-            }}
-          />
+          ${this.generateColorSelect(
+            ["#000000", "#ff1a40", "#29b312", "#135aa0", "#fc8653"],
+            this.color,
+            (color) => {
+              this.color = color;
+            }
+          )}
         </div>
       `;
     }
 
     // Case: item selected
     return html`
-      <div>
-        <p>Size:</p>
-        <input
-          class="width-100-percent"
-          type="range"
-          min="1"
-          max="50"
-          step="7"
-          .value=${item.options.size}
-          @input=${(e: Event) => {
-            const target = e.target as HTMLInputElement;
-            simpleWhiteboard.updateItemById(
-              item.id,
-              {
-                ...item,
-                options: {
-                  ...item.options,
-                  size: parseInt(target.value, 10),
-                },
+      <p>Size:</p>
+      <input
+        class="width-100-percent"
+        type="range"
+        min="1"
+        max="50"
+        step="7"
+        .value=${item.options.size}
+        @input=${(e: Event) => {
+          const target = e.target as HTMLInputElement;
+          simpleWhiteboard.updateItemById(
+            item.id,
+            {
+              ...item,
+              options: {
+                ...item.options,
+                size: parseInt(target.value, 10),
               },
-              true
-            );
-          }}
-        />
-      </div>
-      <div>
-        <p>Color:</p>
-        <input
-          class="width-100-percent"
-          type="color"
-          .value=${item.options.color}
-          @input=${(e: Event) => {
-            const target = e.target as HTMLInputElement;
-            simpleWhiteboard.updateItemById(
-              item.id,
-              {
-                ...item,
-                options: {
-                  ...item.options,
-                  color: target.value,
-                },
+            },
+            true
+          );
+        }}
+      />
+      <p>Color:</p>
+      ${this.generateColorSelect(
+        ["#000000", "#ff1a40", "#29b312", "#135aa0", "#fc8653"],
+        this.color,
+        (color) => {
+          this.color = color;
+          simpleWhiteboard.updateItemById(
+            item.id,
+            {
+              ...item,
+              options: {
+                ...item.options,
+                color: color,
               },
-              true
-            );
-          }}
-        />
-      </div>
+            },
+            true
+          );
+        }
+      )}
       <button
         class="width-100-percent"
         @click=${() => {
