@@ -2,6 +2,7 @@ import { html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
+import "../components/colorSelect";
 import SimpleWhiteboardTool, {
   BoundingRect,
   RoughCanvas,
@@ -164,6 +165,22 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
     };
   }
 
+  generateColorSelect(
+    colors: string[],
+    currentColor: string,
+    clickCallback: (color: string) => void
+  ) {
+    return colors.map((color) => {
+      return html`<color-select
+        color=${color}
+        .selected=${currentColor === color}
+        @color-click=${(e: CustomEvent) => {
+          clickCallback(e.detail.color);
+        }}
+      ></color-select>`;
+    });
+  }
+
   public override renderToolOptions(item: LineItem | null) {
     const simpleWhiteboard = super.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {
@@ -187,15 +204,13 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
           }}
         />
         <p>Stroke:</p>
-        <input
-          class="width-100-percent"
-          type="color"
-          .value=${this.stroke}
-          @input=${(e: Event) => {
-            const target = e.target as HTMLInputElement;
-            this.stroke = target.value;
-          }}
-        />
+        ${this.generateColorSelect(
+          ["#000000", "#ff1a40", "#29b312", "#135aa0", "#fc8653"],
+          this.stroke,
+          (color) => {
+            this.stroke = color;
+          }
+        )}
       `;
     }
 
@@ -225,25 +240,24 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
         }}
       />
       <p>Stroke:</p>
-      <input
-        class="width-100-percent"
-        type="color"
-        .value=${item.options.stroke}
-        @input=${(e: Event) => {
-          const target = e.target as HTMLInputElement;
+      ${this.generateColorSelect(
+        ["#000000", "#ff1a40", "#29b312", "#135aa0", "#fc8653"],
+        this.stroke,
+        (color) => {
+          this.stroke = color;
           simpleWhiteboard.updateItemById(
             item.id,
             {
               ...item,
               options: {
                 ...item.options,
-                stroke: target.value,
+                stroke: color,
               },
             },
             true
           );
-        }}
-      />
+        }
+      )}
       <button
         class="width-100-percent"
         @click=${() => {
