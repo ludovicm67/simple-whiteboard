@@ -78,16 +78,6 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
     const maxY = Math.max(...item.path.map((p) => p.y));
     const minY = Math.min(...item.path.map((p) => p.y));
 
-    console.log("Bounding rect", {
-      x: minX - halfStrokeWidth,
-      y: minY - halfStrokeWidth,
-      width: maxX - minX + strokeWidth,
-      height: maxY - minY + strokeWidth,
-      maxX,
-      minY,
-      strokeWidth,
-    });
-
     return {
       x: minX - halfStrokeWidth,
       y: minY - halfStrokeWidth,
