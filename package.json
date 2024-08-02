@@ -4,16 +4,20 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ludovicm67/simple-whiteboard.git"
-  },
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "prepack": "npm run build",
     "release": "changeset publish"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ludovicm67/simple-whiteboard.git"
+  },
+  "author": {
+    "name": "Ludovic Muller",
+    "url": "https://ludovic-muller.fr/"
   },
   "dependencies": {
     "feather-icons": "^4.29.2",
@@ -42,6 +46,7 @@
     "webcomponent",
     "lit-element"
   ],
+  "license": "MIT",
   "publishConfig": {
     "access": "public",
     "provenance": true
