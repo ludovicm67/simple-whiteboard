@@ -1,5 +1,11 @@
 # @ludovicm67/whiteboard
 
+## 0.2.6
+
+### Patch Changes
+
+- f9f4415: Create Text tool
+
 ## 0.2.5
 
 ### Patch Changes
