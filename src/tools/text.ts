@@ -2,6 +2,7 @@ import { html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
+import "../components/colorSelect";
 import SimpleWhiteboardTool, {
   BoundingRect,
   RoughCanvas,
@@ -17,11 +18,13 @@ interface TextItem extends WhiteboardItem {
   text: string;
   fontSize: number;
   fontFamily: string;
+  color: string;
 }
 
 @customElement("simple-whiteboard--tool-text")
 export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
   private ctx: CanvasRenderingContext2D | null = null;
+  private color = "#000000";
 
   public override getToolIcon() {
     return html`${unsafeHTML(getIconSvg("type"))}`;
@@ -46,9 +49,13 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
       item.y
     );
     context.font = `${item.fontSize}px ${item.fontFamily}`;
+
+    const prevFillStyle = context.fillStyle;
+    context.fillStyle = item.options.color || "#000000";
     item.text.split("\n").forEach((line, i) => {
       context.fillText(line, textX, textY + (i + 1) * item.fontSize);
     });
+    context.fillStyle = prevFillStyle;
   }
 
   public override onToolSelected(): void {
@@ -68,6 +75,7 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
       text: "",
       fontSize: 24,
       fontFamily: "sans-serif",
+      color: this.color,
     };
     simpleWhiteboard.addItem(item, true);
     simpleWhiteboard.setSelectedItemId(id);
@@ -119,6 +127,22 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
     };
   }
 
+  generateColorSelect(
+    colors: string[],
+    currentColor: string,
+    clickCallback: (color: string) => void
+  ) {
+    return colors.map((color) => {
+      return html`<color-select
+        color=${color}
+        .selected=${currentColor === color}
+        @color-click=${(e: CustomEvent) => {
+          clickCallback(e.detail.color);
+        }}
+      ></color-select>`;
+    });
+  }
+
   public override renderToolOptions(item: TextItem | null) {
     const simpleWhiteboard = super.getSimpleWhiteboardInstance();
     if (!simpleWhiteboard) {
@@ -147,6 +171,25 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
         }}
         .value=${item.text}
       ></textarea>
+      <p>Color:</p>
+      ${this.generateColorSelect(
+        ["#000000", "#ff1a40", "#29b312", "#135aa0", "#fc8653"],
+        this.color,
+        (color) => {
+          this.color = color;
+          simpleWhiteboard.updateItemById(
+            item.id,
+            {
+              ...item,
+              options: {
+                ...item.options,
+                color: color,
+              },
+            },
+            true
+          );
+        }
+      )}
       <button
         @click=${() => {
           simpleWhiteboard.removeItemById(item.id, true);
