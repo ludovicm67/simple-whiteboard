@@ -16,9 +16,11 @@ interface TextItem extends WhiteboardItem {
   width: number;
   height: number;
   text: string;
-  fontSize: number;
-  fontFamily: string;
-  color: string;
+  options: {
+    fontSize: number;
+    fontFamily: string;
+    color: string;
+  };
 }
 
 @customElement("simple-whiteboard--tool-text")
@@ -48,12 +50,12 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
       item.x,
       item.y
     );
-    context.font = `${item.fontSize}px ${item.fontFamily}`;
+    context.font = `${item.options.fontSize}px ${item.options.fontFamily}`;
 
     const prevFillStyle = context.fillStyle;
     context.fillStyle = item.options.color || "#000000";
     item.text.split("\n").forEach((line, i) => {
-      context.fillText(line, textX, textY + (i + 1) * item.fontSize);
+      context.fillText(line, textX, textY + (i + 1) * item.options.fontSize);
     });
     context.fillStyle = prevFillStyle;
   }
@@ -67,15 +69,16 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
     const item: TextItem = {
       kind: this.getToolName(),
       id,
-      options: {},
+      options: {
+        fontSize: 16,
+        fontFamily: "sans-serif",
+        color: this.color,
+      },
       x: 0,
       y: 0,
       width: 0,
       height: 0,
       text: "",
-      fontSize: 24,
-      fontFamily: "sans-serif",
-      color: this.color,
     };
     simpleWhiteboard.addItem(item, true);
     simpleWhiteboard.setSelectedItemId(id);
@@ -83,7 +86,7 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
 
   public override getBoundingRect(item: TextItem): BoundingRect | null {
     const splittedText = item.text.split("\n");
-    const height = splittedText.length * item.fontSize;
+    const height = splittedText.length * item.options.fontSize;
 
     if (!this.ctx) {
       const textWidth = splittedText.reduce((maxWidth, line) => {
@@ -99,7 +102,11 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
     }
 
     const textWidth = splittedText.reduce((maxWidth, line) => {
-      const width = this.ctx?.measureText(line).width || 0;
+      if (!this.ctx) {
+        return maxWidth;
+      }
+      this.ctx.font = `${item.options.fontSize}px ${item.options.fontFamily}`;
+      const width = this.ctx.measureText(line).width || 0;
       return Math.max(maxWidth, width);
     }, 0);
 
@@ -171,6 +178,29 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
         }}
         .value=${item.text}
       ></textarea>
+      <p>Size:</p>
+      <input
+        class="width-100-percent"
+        type="range"
+        min="8"
+        max="240"
+        step="8"
+        .value=${item.options.fontSize}
+        @input=${(e: Event) => {
+          const target = e.target as HTMLInputElement;
+          simpleWhiteboard.updateItemById(
+            item.id,
+            {
+              ...item,
+              options: {
+                ...item.options,
+                fontSize: parseInt(target.value, 10),
+              },
+            },
+            true
+          );
+        }}
+      />
       <p>Color:</p>
       ${this.generateColorSelect(
         ["#000000", "#ff1a40", "#29b312", "#135aa0", "#fc8653"],
