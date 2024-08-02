@@ -1,5 +1,7 @@
 # Simple Whiteboard
 
+[![](https://badge.fury.io/js/@ludovicm67%2Fsimple-whiteboard.svg)](https://npm.im/@ludovicm67/simple-whiteboard)
+
 Simple Whiteboard is a simple web-based whiteboard application that allows users to draw on a canvas.
 
 The application is built as a Web Component using [LitElement](https://lit.dev/).
