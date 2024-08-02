@@ -1,8 +1,7 @@
 # Simple Whiteboard
+
+[![NPM](https://badge.fury.io/js/@ludovicm67%2Fsimple-whiteboard.svg)](https://npm.im/@ludovicm67/simple-whiteboard)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fludovicm67%2Fsimple-whiteboard.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fludovicm67%2Fsimple-whiteboard?ref=badge_shield)
-
-
-[![](https://badge.fury.io/js/@ludovicm67%2Fsimple-whiteboard.svg)](https://npm.im/@ludovicm67/simple-whiteboard)
 
 Simple Whiteboard is a simple web-based whiteboard application that allows users to draw on a canvas.
 
@@ -33,6 +32,5 @@ This allows the whiteboard to be easily embedded in any web application regardle
 ## License
 
 Simple Whiteboard is licensed under the [MIT License](./LICENSE).
-
 
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fludovicm67%2Fsimple-whiteboard.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fludovicm67%2Fsimple-whiteboard?ref=badge_large)
