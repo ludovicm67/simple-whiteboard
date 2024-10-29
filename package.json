@@ -24,7 +24,7 @@
     "lit": "^3.2.1",
     "perfect-freehand": "^1.2.2",
     "roughjs": "^4.6.6",
-    "uuid": "^10.0.0"
+    "uuid": "^11.0.2"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.9",
