@@ -10,6 +10,7 @@ import "./line";
 import "./pen";
 import "./text";
 import "./picture";
+import "./eraser";
 import "./clear";
 
 @customElement("simple-whiteboard--tool-defaults")
@@ -35,6 +36,9 @@ export class SimpleWhiteboardToolDefaults extends LitElement {
       <simple-whiteboard--tool-picture
         slot="tools"
       ></simple-whiteboard--tool-picture>
+      <simple-whiteboard--tool-eraser
+        slot="tools"
+      ></simple-whiteboard--tool-eraser>
       <simple-whiteboard--tool-clear
         slot="tools"
       ></simple-whiteboard--tool-clear>
