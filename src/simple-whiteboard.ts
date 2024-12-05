@@ -23,6 +23,8 @@ export class SimpleWhiteboard extends LitElement {
   @property({ type: Boolean })
   debug = false;
 
+  private mouseCoords: Point = { x: 0, y: 0 };
+
   private canvas?: HTMLCanvasElement;
   private canvasContext?: CanvasRenderingContext2D;
 
@@ -102,6 +104,17 @@ export class SimpleWhiteboard extends LitElement {
       background-color: #fff;
       border-radius: 8px;
       padding: 8px 12px;
+    }
+
+    .footer-tools {
+      position: absolute;
+      z-index: 1;
+      bottom: 0;
+      left: 0;
+      background-color: #e6e6e6;
+      padding: 8px;
+      border-top-right-radius: 8px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
     }
 
     @media (max-width: 450px) {
@@ -277,6 +290,8 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   handleMouseMove(e: MouseEvent) {
+    this.mouseCoords = { x: e.offsetX, y: e.offsetY };
+    this.requestUpdate();
     this.handleDrawingMove(e.offsetX, e.offsetY);
   }
 
@@ -435,12 +450,28 @@ export class SimpleWhiteboard extends LitElement {
     return html`<div class="tools">${tools}</div>`;
   }
 
+  renderFooterTools() {
+    return html`<div class="footer-tools">
+      <select>
+        <option value="0.25">25%</option>
+        <option value="0.5">50%</option>
+        <option value="0.75">75%</option>
+        <option value="1" selected>100%</option>
+        <option value="1.5">150%</option>
+        <option value="2">200%</option>
+        <option value="4">400%</option>
+      </select>
+      ${this.mouseCoords.x}x${this.mouseCoords.y}
+    </div>`;
+  }
+
   render() {
     return html`
       <div class="root">
         <slot name="tools"></slot>
 
         ${this.renderToolsList()} ${this.renderToolsOptions()}
+        ${this.renderFooterTools()}
 
         <canvas
           @mousedown="${this.handleMouseDown}"
