@@ -47,7 +47,7 @@ export class SimpleWhiteboardToolRect extends SimpleWhiteboardTool {
       item.x,
       item.y
     );
-    rc.rectangle(rectX, rectY, item.width, item.height, {
+    rc.rectangle(rectX, rectY, item.width * zoom, item.height * zoom, {
       ...item.options,
       strokeWidth: item.options.strokeWidth
         ? item.options.strokeWidth * zoom
@@ -113,7 +113,6 @@ export class SimpleWhiteboardToolRect extends SimpleWhiteboardTool {
     const rectItem = currentDrawing as RectItem;
     const { x: currentX, y: currentY } = rectItem;
 
-    const { zoom } = simpleWhiteboard.getCanvasCoords();
     const { x: canvasX, y: canvasY } = simpleWhiteboard.coordsFromCanvasCoords(
       x,
       y
@@ -121,8 +120,8 @@ export class SimpleWhiteboardToolRect extends SimpleWhiteboardTool {
 
     simpleWhiteboard.setCurrentDrawing({
       ...rectItem,
-      width: (canvasX - currentX) * zoom,
-      height: (canvasY - currentY) * zoom,
+      width: canvasX - currentX,
+      height: canvasY - currentY,
     } as RectItem);
   }
 

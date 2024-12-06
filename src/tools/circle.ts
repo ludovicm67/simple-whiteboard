@@ -46,7 +46,7 @@ export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
       item.x,
       item.y
     );
-    rc.circle(circleX, circleY, item.diameter, {
+    rc.circle(circleX, circleY, item.diameter * zoom, {
       ...item.options,
       strokeWidth: item.options.strokeWidth
         ? item.options.strokeWidth * zoom
@@ -111,7 +111,6 @@ export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
     const circleItem = currentDrawing as CircleItem;
     const { x: x1, y: y1 } = circleItem;
 
-    const { zoom } = simpleWhiteboard.getCanvasCoords();
     const { x: canvasX, y: canvasY } = simpleWhiteboard.coordsFromCanvasCoords(
       x,
       y
@@ -121,7 +120,7 @@ export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
 
     simpleWhiteboard.setCurrentDrawing({
       ...circleItem,
-      diameter: Math.sqrt(dx * dx + dy * dy) * 2 * zoom,
+      diameter: Math.sqrt(dx * dx + dy * dy) * 2,
     } as CircleItem);
   }
 
