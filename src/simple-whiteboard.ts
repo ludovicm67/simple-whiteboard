@@ -72,7 +72,7 @@ export class SimpleWhiteboard extends LitElement {
   @state() private canvasCoords: { x: number; y: number; zoom: number } = {
     x: 0,
     y: 0,
-    zoom: 0.2,
+    zoom: 1,
   };
 
   @state() private currentTool: string = "";
@@ -497,18 +497,43 @@ export class SimpleWhiteboard extends LitElement {
     return html`<div class="tools">${tools}</div>`;
   }
 
+  renderZoomSelect() {
+    const options = [
+      { value: 0.25, label: "25%" },
+      { value: 0.5, label: "50%" },
+      { value: 0.75, label: "75%" },
+      { value: 1, label: "100%" },
+      { value: 1.5, label: "150%" },
+      { value: 2, label: "200%" },
+      { value: 4, label: "400%" },
+    ];
+    const zoom = this.canvasCoords.zoom;
+    const select = html`<select
+      @change=${(e: Event) => {
+        const target = e.target as HTMLSelectElement;
+        this.canvasCoords = {
+          ...this.canvasCoords,
+          zoom: parseFloat(target.value),
+        };
+        console.log(this.canvasCoords);
+        this.draw();
+      }}
+    >
+      ${options.map(
+        (option) => html`<option
+          value=${option.value}
+          ?selected=${option.value === zoom}
+        >
+          ${option.label}
+        </option>`
+      )}
+    </select>`;
+    return select;
+  }
+
   renderFooterTools() {
     return html`<div class="footer-tools">
-      <select>
-        <option value="0.25">25%</option>
-        <option value="0.5">50%</option>
-        <option value="0.75">75%</option>
-        <option value="1" selected>100%</option>
-        <option value="1.5">150%</option>
-        <option value="2">200%</option>
-        <option value="4">400%</option>
-      </select>
-      ${this.mouseCoords.x}x${this.mouseCoords.y}
+      ${this.renderZoomSelect()} ${this.mouseCoords.x}x${this.mouseCoords.y}
     </div>`;
   }
 
