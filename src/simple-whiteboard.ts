@@ -163,6 +163,13 @@ export class SimpleWhiteboard extends LitElement {
     }
     this.canvasContext = canvasContext;
     this.handleResize();
+
+    // Some workarounds to make sure everything is displayed on slow devices
+    [20, 100, 200, 500, 1000, 2000].forEach((ms) => {
+      setTimeout(() => {
+        this.requestUpdate();
+      }, ms);
+    });
   }
 
   handleResize() {
