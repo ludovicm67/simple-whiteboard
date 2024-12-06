@@ -48,13 +48,14 @@ export class SimpleWhiteboardToolEraser extends SimpleWhiteboardTool {
     if (!simpleWhiteboard) {
       return;
     }
+    const { zoom } = simpleWhiteboard.getCanvasCoords();
     const outlinePoints = getStroke(
       item.path.map((p) => {
         const { x, y } = simpleWhiteboard.coordsToCanvasCoords(p.x, p.y);
         return { x, y };
       }),
       {
-        size: item.options.size || 25,
+        size: (item.options.size || 25) * zoom,
         smoothing: item.options.smoothing || 0.5,
         thinning: item.options.thinning || 0.5,
         streamline: item.options.streamline || 0.5,

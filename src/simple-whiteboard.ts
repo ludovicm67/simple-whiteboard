@@ -23,6 +23,8 @@ export class SimpleWhiteboard extends LitElement {
   @property({ type: Boolean })
   debug = false;
 
+  private mouseCoords: Point = { x: 0, y: 0 };
+
   private canvas?: HTMLCanvasElement;
   private canvasContext?: CanvasRenderingContext2D;
 
@@ -57,7 +59,7 @@ export class SimpleWhiteboard extends LitElement {
     .tools {
       user-select: none;
       gap: 8px;
-      padding: 8px;
+      padding: 3px;
       border-radius: 8px;
       background-color: #fff;
       margin: auto;
@@ -102,6 +104,21 @@ export class SimpleWhiteboard extends LitElement {
       background-color: #fff;
       border-radius: 8px;
       padding: 8px 12px;
+    }
+
+    .footer-tools {
+      position: absolute;
+      z-index: 1;
+      bottom: 0;
+      left: 0;
+      background-color: #f2f3f3;
+      padding: 8px;
+      border-top-right-radius: 8px;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      flex-direction: row;
+      gap: 8px;
     }
 
     @media (max-width: 450px) {
@@ -152,16 +169,20 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   coordsToCanvasCoords(x: number, y: number): Point {
+    const dX = (this.canvas?.width || 0) / 2;
+    const dY = (this.canvas?.height || 0) / 2;
     return {
-      x: x + this.canvasCoords.x,
-      y: y + this.canvasCoords.y,
+      x: x * this.canvasCoords.zoom + this.canvasCoords.x + dX,
+      y: y * this.canvasCoords.zoom + this.canvasCoords.y + dY,
     };
   }
 
   coordsFromCanvasCoords(x: number, y: number): Point {
+    const dX = (this.canvas?.width || 0) / 2;
+    const dY = (this.canvas?.height || 0) / 2;
     return {
-      x: x - this.canvasCoords.x,
-      y: y - this.canvasCoords.y,
+      x: (x - this.canvasCoords.x - dX) / this.canvasCoords.zoom,
+      y: (y - this.canvasCoords.y - dY) / this.canvasCoords.zoom,
     };
   }
 
@@ -204,7 +225,12 @@ export class SimpleWhiteboard extends LitElement {
     context.strokeStyle = "#135aa0";
     context.lineWidth = 2;
     context.beginPath();
-    context.rect(coordX, coordY, width, height);
+    context.rect(
+      coordX,
+      coordY,
+      width * this.canvasCoords.zoom,
+      height * this.canvasCoords.zoom
+    );
     context.stroke();
   }
 
@@ -277,6 +303,9 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   handleMouseMove(e: MouseEvent) {
+    const { x, y } = this.coordsFromCanvasCoords(e.offsetX, e.offsetY);
+    this.mouseCoords = { x, y };
+    this.requestUpdate();
     this.handleDrawingMove(e.offsetX, e.offsetY);
   }
 
@@ -362,7 +391,7 @@ export class SimpleWhiteboard extends LitElement {
 
     const toolName = tool.getToolName();
     this.registeredTools.set(toolName, tool);
-    this.requestUpdate();
+    this.draw();
   }
 
   requestUpdate(
@@ -435,12 +464,60 @@ export class SimpleWhiteboard extends LitElement {
     return html`<div class="tools">${tools}</div>`;
   }
 
+  renderZoomSelect() {
+    const options = [
+      { value: 0.25, label: "25%" },
+      { value: 0.5, label: "50%" },
+      { value: 0.75, label: "75%" },
+      { value: 1, label: "100%" },
+      { value: 1.5, label: "150%" },
+      { value: 2, label: "200%" },
+      { value: 4, label: "400%" },
+    ];
+    const zoom = this.canvasCoords.zoom;
+    const select = html`<select
+      @change=${(e: Event) => {
+        const target = e.target as HTMLSelectElement;
+        this.canvasCoords = {
+          ...this.canvasCoords,
+          zoom: parseFloat(target.value),
+        };
+        this.draw();
+      }}
+    >
+      ${options.map(
+        (option) => html`<option
+          value=${option.value}
+          ?selected=${option.value === zoom}
+        >
+          ${option.label}
+        </option>`
+      )}
+    </select>`;
+    return select;
+  }
+
+  renderDebug() {
+    if (!this.debug) {
+      return null;
+    }
+
+    return html`<pre>${this.mouseCoords.x}x${this.mouseCoords.y}</pre>`;
+  }
+
+  renderFooterTools() {
+    return html`<div class="footer-tools">
+      ${this.renderZoomSelect()} ${this.renderDebug()}
+    </div>`;
+  }
+
   render() {
     return html`
       <div class="root">
         <slot name="tools"></slot>
 
         ${this.renderToolsList()} ${this.renderToolsOptions()}
+        ${this.renderFooterTools()}
 
         <canvas
           @mousedown="${this.handleMouseDown}"

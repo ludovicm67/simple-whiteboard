@@ -45,17 +45,24 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
     if (!simpleWhiteboard) {
       return;
     }
+    const { zoom } = simpleWhiteboard.getCanvasCoords();
     this.ctx = context;
     const { x: textX, y: textY } = simpleWhiteboard.coordsToCanvasCoords(
       item.x,
       item.y
     );
-    context.font = `${item.options.fontSize}px ${item.options.fontFamily}`;
+    context.font = `${item.options.fontSize * zoom}px ${
+      item.options.fontFamily
+    }`;
 
     const prevFillStyle = context.fillStyle;
     context.fillStyle = item.options.color || "#000000";
     item.text.split("\n").forEach((line, i) => {
-      context.fillText(line, textX, textY + (i + 1) * item.options.fontSize);
+      context.fillText(
+        line,
+        textX,
+        textY + (i + 1) * item.options.fontSize * zoom
+      );
     });
     context.fillStyle = prevFillStyle;
   }

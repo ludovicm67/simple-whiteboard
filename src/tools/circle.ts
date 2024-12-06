@@ -41,11 +41,17 @@ export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
     if (!simpleWhiteboard) {
       return;
     }
+    const { zoom } = simpleWhiteboard.getCanvasCoords();
     const { x: circleX, y: circleY } = simpleWhiteboard.coordsToCanvasCoords(
       item.x,
       item.y
     );
-    rc.circle(circleX, circleY, item.diameter, item.options);
+    rc.circle(circleX, circleY, item.diameter * zoom, {
+      ...item.options,
+      strokeWidth: item.options.strokeWidth
+        ? item.options.strokeWidth * zoom
+        : undefined,
+    });
   }
 
   public override getBoundingRect(item: CircleItem): BoundingRect | null {
@@ -105,12 +111,12 @@ export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
     const circleItem = currentDrawing as CircleItem;
     const { x: x1, y: y1 } = circleItem;
 
-    const { x: canvasX, y: canvasY } = simpleWhiteboard.getCanvasCoords();
-
-    const x2 = x - canvasX;
-    const y2 = y - canvasY;
-    const dx = x2 - x1;
-    const dy = y2 - y1;
+    const { x: canvasX, y: canvasY } = simpleWhiteboard.coordsFromCanvasCoords(
+      x,
+      y
+    );
+    const dx = canvasX - x1;
+    const dy = canvasY - y1;
 
     simpleWhiteboard.setCurrentDrawing({
       ...circleItem,

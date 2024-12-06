@@ -16,6 +16,7 @@ import { SimpleWhiteboardToolPen } from "./tools/pen";
 import { SimpleWhiteboardToolPicture } from "./tools/picture";
 import { SimpleWhiteboardToolPointer } from "./tools/pointer";
 import { SimpleWhiteboardToolRect } from "./tools/rect";
+import { SimpleWhiteboardToolEraser } from "./tools/eraser";
 
 declare global {
   interface HTMLElementTagNameMap {
@@ -35,5 +36,6 @@ export {
   SimpleWhiteboardToolPicture,
   SimpleWhiteboardToolPointer,
   SimpleWhiteboardToolRect,
+  SimpleWhiteboardToolEraser,
 };
 export default SimpleWhiteboard;
