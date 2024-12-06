@@ -41,6 +41,7 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
     if (!simpleWhiteboard) {
       return;
     }
+    const { zoom } = simpleWhiteboard.getCanvasCoords();
     const { x: x1, y: y1 } = simpleWhiteboard.coordsToCanvasCoords(
       item.x1,
       item.y1
@@ -49,7 +50,12 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
       item.x2,
       item.y2
     );
-    rc.line(x1, y1, x2, y2, item.options);
+    rc.line(x1, y1, x2, y2, {
+      ...item.options,
+      strokeWidth: item.options.strokeWidth
+        ? item.options.strokeWidth * zoom
+        : undefined,
+    });
   }
 
   public override getBoundingRect(item: LineItem): BoundingRect | null {
@@ -108,12 +114,15 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
 
     const lineItem = currentDrawing as LineItem;
 
-    const { x: canvasX, y: canvasY } = simpleWhiteboard.getCanvasCoords();
+    const { x: canvasX, y: canvasY } = simpleWhiteboard.coordsFromCanvasCoords(
+      x,
+      y
+    );
 
     simpleWhiteboard.setCurrentDrawing({
       ...lineItem,
-      x2: x - canvasX,
-      y2: y - canvasY,
+      x2: canvasX,
+      y2: canvasY,
     } as LineItem);
   }
 

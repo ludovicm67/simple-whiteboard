@@ -38,6 +38,7 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
     if (!simpleWhiteboard) {
       return;
     }
+    const { zoom } = simpleWhiteboard.getCanvasCoords();
     const { x: pictureX, y: pictureY } = simpleWhiteboard.coordsToCanvasCoords(
       item.x,
       item.y
@@ -48,14 +49,20 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
         cachedImage,
         pictureX,
         pictureY,
-        item.width,
-        item.height
+        item.width * zoom,
+        item.height * zoom
       );
     } else {
       const img = new Image();
       img.onload = () => {
         this.pictureCache.set(item.src, img);
-        context.drawImage(img, pictureX, pictureY, item.width, item.height);
+        context.drawImage(
+          img,
+          pictureX,
+          pictureY,
+          item.width * zoom,
+          item.height * zoom
+        );
       };
       img.src = item.src;
     }
@@ -134,6 +141,8 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
                 const updatedItem: PictureItem = {
                   ...item,
                   src: img.src,
+                  x: item.x - img.width / 2,
+                  y: item.y - img.height / 2,
                   width: img.width,
                   height: img.height,
                 };

@@ -31,11 +31,48 @@ export class SimpleWhiteboard extends LitElement {
   @state() private registeredTools: Map<string, SimpleWhiteboardTool> =
     new Map();
 
-  @state() private items: WhiteboardItem[] = [];
+  @state() private items: WhiteboardItem[] = [
+    {
+      kind: "pen",
+      id: "5cd9c367-199b-4fb9-b424-8709c6949a35",
+      // @ts-ignore
+      path: [
+        {
+          x: 0,
+          y: 0,
+        },
+      ],
+      options: {
+        color: "#000000",
+        size: 40,
+        smoothing: 0.5,
+        thinning: 0.5,
+        streamline: 0.5,
+      },
+    },
+    {
+      kind: "pen",
+      id: "5cd9c367-199b-4fb9-b424-8709c6949a36",
+      // @ts-ignore
+      path: [
+        {
+          x: 50,
+          y: 50,
+        },
+      ],
+      options: {
+        color: "#0000ff",
+        size: 40,
+        smoothing: 0.5,
+        thinning: 0.5,
+        streamline: 0.5,
+      },
+    },
+  ];
   @state() private canvasCoords: { x: number; y: number; zoom: number } = {
     x: 0,
     y: 0,
-    zoom: 1,
+    zoom: 0.2,
   };
 
   @state() private currentTool: string = "";
@@ -59,7 +96,7 @@ export class SimpleWhiteboard extends LitElement {
     .tools {
       user-select: none;
       gap: 8px;
-      padding: 8px;
+      padding: 3px;
       border-radius: 8px;
       background-color: #fff;
       margin: auto;
@@ -165,16 +202,20 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   coordsToCanvasCoords(x: number, y: number): Point {
+    const dX = (this.canvas?.width || 0) / 2;
+    const dY = (this.canvas?.height || 0) / 2;
     return {
-      x: x + this.canvasCoords.x,
-      y: y + this.canvasCoords.y,
+      x: x * this.canvasCoords.zoom + this.canvasCoords.x + dX,
+      y: y * this.canvasCoords.zoom + this.canvasCoords.y + dY,
     };
   }
 
   coordsFromCanvasCoords(x: number, y: number): Point {
+    const dX = (this.canvas?.width || 0) / 2;
+    const dY = (this.canvas?.height || 0) / 2;
     return {
-      x: x - this.canvasCoords.x,
-      y: y - this.canvasCoords.y,
+      x: (x - this.canvasCoords.x - dX) / this.canvasCoords.zoom,
+      y: (y - this.canvasCoords.y - dY) / this.canvasCoords.zoom,
     };
   }
 
@@ -217,7 +258,12 @@ export class SimpleWhiteboard extends LitElement {
     context.strokeStyle = "#135aa0";
     context.lineWidth = 2;
     context.beginPath();
-    context.rect(coordX, coordY, width, height);
+    context.rect(
+      coordX,
+      coordY,
+      width * this.canvasCoords.zoom,
+      height * this.canvasCoords.zoom
+    );
     context.stroke();
   }
 
@@ -290,7 +336,8 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   handleMouseMove(e: MouseEvent) {
-    this.mouseCoords = { x: e.offsetX, y: e.offsetY };
+    const { x, y } = this.coordsFromCanvasCoords(e.offsetX, e.offsetY);
+    this.mouseCoords = { x, y };
     this.requestUpdate();
     this.handleDrawingMove(e.offsetX, e.offsetY);
   }
@@ -377,7 +424,7 @@ export class SimpleWhiteboard extends LitElement {
 
     const toolName = tool.getToolName();
     this.registeredTools.set(toolName, tool);
-    this.requestUpdate();
+    this.draw();
   }
 
   requestUpdate(
