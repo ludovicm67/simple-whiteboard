@@ -77,6 +77,7 @@ export class SimpleWhiteboard extends LitElement {
 
     .tools button {
       background-color: transparent;
+      color: #000;
       border: none;
       cursor: pointer;
       padding: 8px;
@@ -112,13 +113,20 @@ export class SimpleWhiteboard extends LitElement {
       bottom: 0;
       left: 0;
       background-color: #f2f3f3;
-      padding: 8px;
+      padding: 2px 8px;
       border-top-right-radius: 8px;
       box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
       display: flex;
       justify-content: space-between;
       flex-direction: row;
+      align-items: center;
       gap: 8px;
+      color: rgba(0, 0, 0, 0.5);
+    }
+
+    .footer-tools select {
+      color: rgba(0, 0, 0, 0.5);
+      padding: 4px;
     }
 
     @media (max-width: 450px) {
@@ -282,6 +290,8 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   handleDrawingMove(x: number, y: number) {
+    const { x: mouseX, y: mouseY } = this.coordsFromCanvasCoords(x, y);
+    this.mouseCoords = { x: mouseX, y: mouseY };
     const tool = this.registeredTools.get(this.currentTool);
     if (!tool) {
       return;
@@ -303,8 +313,6 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   handleMouseMove(e: MouseEvent) {
-    const { x, y } = this.coordsFromCanvasCoords(e.offsetX, e.offsetY);
-    this.mouseCoords = { x, y };
     this.requestUpdate();
     this.handleDrawingMove(e.offsetX, e.offsetY);
   }
@@ -464,6 +472,14 @@ export class SimpleWhiteboard extends LitElement {
     return html`<div class="tools">${tools}</div>`;
   }
 
+  setZoom(zoom: number) {
+    this.canvasCoords = {
+      ...this.canvasCoords,
+      zoom,
+    };
+    this.draw();
+  }
+
   renderZoomSelect() {
     const options = [
       { value: 0.25, label: "25%" },
@@ -478,11 +494,7 @@ export class SimpleWhiteboard extends LitElement {
     const select = html`<select
       @change=${(e: Event) => {
         const target = e.target as HTMLSelectElement;
-        this.canvasCoords = {
-          ...this.canvasCoords,
-          zoom: parseFloat(target.value),
-        };
-        this.draw();
+        this.setZoom(parseFloat(target.value));
       }}
     >
       ${options.map(
