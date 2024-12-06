@@ -1,5 +1,11 @@
 # @ludovicm67/whiteboard
 
+## 0.2.8
+
+### Patch Changes
+
+- f2d10aa: Some minor styles tweaks
+
 ## 0.2.7
 
 ### Patch Changes
