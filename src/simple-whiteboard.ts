@@ -111,10 +111,14 @@ export class SimpleWhiteboard extends LitElement {
       z-index: 1;
       bottom: 0;
       left: 0;
-      background-color: #e6e6e6;
+      background-color: #f2f3f3;
       padding: 8px;
       border-top-right-radius: 8px;
       box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      flex-direction: row;
+      gap: 8px;
     }
 
     @media (max-width: 450px) {
@@ -478,7 +482,6 @@ export class SimpleWhiteboard extends LitElement {
           ...this.canvasCoords,
           zoom: parseFloat(target.value),
         };
-        console.log(this.canvasCoords);
         this.draw();
       }}
     >
@@ -494,9 +497,17 @@ export class SimpleWhiteboard extends LitElement {
     return select;
   }
 
+  renderDebug() {
+    if (!this.debug) {
+      return null;
+    }
+
+    return html`<pre>${this.mouseCoords.x}x${this.mouseCoords.y}</pre>`;
+  }
+
   renderFooterTools() {
     return html`<div class="footer-tools">
-      ${this.renderZoomSelect()} ${this.mouseCoords.x}x${this.mouseCoords.y}
+      ${this.renderZoomSelect()} ${this.renderDebug()}
     </div>`;
   }
 
