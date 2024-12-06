@@ -1,5 +1,12 @@
 # @ludovicm67/whiteboard
 
+## 0.2.7
+
+### Patch Changes
+
+- fc99c50: Add basic eraser tool
+- 2a71cc4: Add basic zoom controls
+
 ## 0.2.6
 
 ### Patch Changes
