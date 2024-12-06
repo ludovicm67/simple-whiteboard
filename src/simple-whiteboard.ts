@@ -31,44 +31,7 @@ export class SimpleWhiteboard extends LitElement {
   @state() private registeredTools: Map<string, SimpleWhiteboardTool> =
     new Map();
 
-  @state() private items: WhiteboardItem[] = [
-    {
-      kind: "pen",
-      id: "5cd9c367-199b-4fb9-b424-8709c6949a35",
-      // @ts-ignore
-      path: [
-        {
-          x: 0,
-          y: 0,
-        },
-      ],
-      options: {
-        color: "#000000",
-        size: 40,
-        smoothing: 0.5,
-        thinning: 0.5,
-        streamline: 0.5,
-      },
-    },
-    {
-      kind: "pen",
-      id: "5cd9c367-199b-4fb9-b424-8709c6949a36",
-      // @ts-ignore
-      path: [
-        {
-          x: 50,
-          y: 50,
-        },
-      ],
-      options: {
-        color: "#0000ff",
-        size: 40,
-        smoothing: 0.5,
-        thinning: 0.5,
-        streamline: 0.5,
-      },
-    },
-  ];
+  @state() private items: WhiteboardItem[] = [];
   @state() private canvasCoords: { x: number; y: number; zoom: number } = {
     x: 0,
     y: 0,
