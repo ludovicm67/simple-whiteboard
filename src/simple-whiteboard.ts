@@ -706,4 +706,48 @@ export class SimpleWhiteboard extends LitElement {
 
     this.requestUpdate();
   }
+
+  public downloadCurrentCanvasAsPng(options?: {
+    fileName?: string;
+    backgroundColor?: string;
+  }) {
+    if (!this.canvas) {
+      return;
+    }
+
+    const opts = options || {};
+    const fileName = opts.fileName || "whiteboard.png";
+    const backgroundColor = opts.backgroundColor || "#ffffff";
+
+    // Create a temporary canvas
+    const tempCanvas = document.createElement("canvas");
+    tempCanvas.width = this.canvas.width;
+    tempCanvas.height = this.canvas.height;
+
+    // Draw the background
+    const tempCanvasContext = tempCanvas.getContext("2d");
+    if (!tempCanvasContext) {
+      return;
+    }
+    tempCanvasContext.fillStyle = backgroundColor;
+    tempCanvasContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+
+    // Draw the whiteboard
+    tempCanvasContext.drawImage(this.canvas, 0, 0);
+
+    // Create a link and download the image
+    const link = document.createElement("a");
+    link.download = fileName;
+    link.href = tempCanvas.toDataURL("image/png");
+    link.click();
+
+    // Revoke the object URL
+    URL.revokeObjectURL(link.href);
+
+    // Remove temporary canvas
+    tempCanvas.remove();
+
+    // Remove the link
+    link.remove();
+  }
 }
