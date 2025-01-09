@@ -13,6 +13,8 @@ import SimpleWhiteboardTool, {
   BoundingRect,
 } from "./lib/SimpleWhiteboardTool";
 
+import { render as renderSaveButton } from "./components/saveButton";
+
 type Point = {
   x: number;
   y: number;
@@ -54,6 +56,27 @@ export class SimpleWhiteboard extends LitElement {
 
     .width-100-percent {
       width: 100%;
+    }
+
+    .menu {
+      position: absolute;
+      z-index: 1;
+      top: 16px;
+      left: 16px;
+      user-select: none;
+    }
+
+    .menu button {
+      background-color: #fff;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      padding: 8px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .menu button:hover {
+      background-color: #dfdfdf;
     }
 
     .tools {
@@ -530,9 +553,17 @@ export class SimpleWhiteboard extends LitElement {
     </div>`;
   }
 
+  renderMenu() {
+    return html`<div class="menu">
+      ${renderSaveButton(() => this.downloadCurrentCanvasAsPng())}
+    </div>`;
+  }
+
   render() {
     return html`
       <div class="root">
+        ${this.renderMenu()}
+
         <slot name="tools"></slot>
 
         ${this.renderToolsList()} ${this.renderToolsOptions()}
