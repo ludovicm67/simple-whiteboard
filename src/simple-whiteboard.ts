@@ -750,4 +750,8 @@ export class SimpleWhiteboard extends LitElement {
     // Remove the link
     link.remove();
   }
+
+  public getCanvasElement(): HTMLCanvasElement | undefined {
+    return this.canvas;
+  }
 }

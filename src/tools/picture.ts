@@ -17,6 +17,8 @@ interface PictureItem extends WhiteboardItem {
   src: string;
 }
 
+const min = (a: number, b: number) => (a < b ? a : b);
+
 @customElement("simple-whiteboard--tool-picture")
 export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
   private pictureCache: Map<string, HTMLImageElement> = new Map();
@@ -107,6 +109,17 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
       return null;
     }
 
+    const canvasElem = simpleWhiteboard.getCanvasElement();
+    if (!canvasElem) {
+      return null;
+    }
+
+    // Get canvas size
+    const canvasRect = canvasElem.getBoundingClientRect();
+    const scaleFactor = 0.8;
+    const canvasWidth = canvasRect.width * scaleFactor;
+    const canvasHeight = canvasRect.height * scaleFactor;
+
     // Case: no item selected = new item
     if (!item) {
       return html`
@@ -138,13 +151,25 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
             reader.onload = (e) => {
               const img = new Image();
               img.onload = () => {
+                // Image should be at most 80% of the canvas size
+                const width = min(img.width, canvasWidth);
+                const height = min(img.height, canvasHeight);
+
+                // Fix aspect ratio
+                const aspectRatio = img.width / img.height;
+                if (width / aspectRatio > height) {
+                  item.width = height * aspectRatio;
+                  item.height = height;
+                } else {
+                  item.width = width;
+                  item.height = width / aspectRatio;
+                }
+
                 const updatedItem: PictureItem = {
                   ...item,
                   src: img.src,
-                  x: item.x - img.width / 2,
-                  y: item.y - img.height / 2,
-                  width: img.width,
-                  height: img.height,
+                  x: item.x - item.width / 2,
+                  y: item.y - item.height / 2,
                 };
                 simpleWhiteboard.addItem(updatedItem, true);
                 simpleWhiteboard.setSelectedItemId(id);
