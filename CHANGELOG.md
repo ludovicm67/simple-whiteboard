@@ -1,5 +1,13 @@
 # @ludovicm67/whiteboard
 
+## 0.2.9
+
+### Patch Changes
+
+- b9d049b: Pictures are by default at max 80% of the canvas size
+- b1662ab: Add basic save button
+- 870a968: It is possible to set a custom size for a picture
+
 ## 0.2.8
 
 ### Patch Changes
