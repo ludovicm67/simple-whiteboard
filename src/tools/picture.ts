@@ -217,6 +217,40 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
           reader.readAsDataURL(file);
         }}
       />
+      <label for="picture-width">Width:</label>
+      <input
+        type="number"
+        id="picture-width"
+        .value=${item.width}
+        @input=${(e: Event) => {
+          const target = e.target as HTMLInputElement;
+          const width = parseInt(target.value, 10);
+          if (!isNaN(width)) {
+            const updatedItem: PictureItem = {
+              ...item,
+              width,
+            };
+            simpleWhiteboard.updateItemById(item.id, updatedItem, true);
+          }
+        }}
+      />
+      <label for="picture-height">Height:</label>
+      <input
+        type="number"
+        id="picture-height"
+        .value=${item.height}
+        @input=${(e: Event) => {
+          const target = e.target as HTMLInputElement;
+          const height = parseInt(target.value, 10);
+          if (!isNaN(height)) {
+            const updatedItem: PictureItem = {
+              ...item,
+              height,
+            };
+            simpleWhiteboard.updateItemById(item.id, updatedItem, true);
+          }
+        }}
+      />
       <button
         @click=${() => {
           simpleWhiteboard.removeItemById(item.id, true);
