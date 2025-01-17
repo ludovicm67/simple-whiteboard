@@ -30,6 +30,9 @@ export class SimpleWhiteboard extends LitElement {
   @property({ type: Boolean })
   debug = false;
 
+  @property({ type: Boolean })
+  hideLocalePicker = false;
+
   @property()
   locale: SupportedLocales = "en";
 
@@ -551,6 +554,9 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   renderLocaleSelect() {
+    if (this.hideLocalePicker) {
+      return null;
+    }
     const options = [
       { value: "en", label: "English" },
       { value: "de", label: "Deutsch" },
