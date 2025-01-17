@@ -1,6 +1,7 @@
 import { html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
+import { localized, msg } from "@lit/localize";
 
 import "../components/colorSelect";
 import SimpleWhiteboardTool, {
@@ -24,6 +25,7 @@ interface TextItem extends WhiteboardItem {
 }
 
 @customElement("simple-whiteboard--tool-text")
+@localized()
 export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
   private ctx: CanvasRenderingContext2D | null = null;
   private color = "#000000";
@@ -170,7 +172,7 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
 
     // Case: item selected => we want to be able to edit the instance
     return html`
-      <p>Edit your text:</p>
+      <p>${msg("Edit your text:", { id: "tool-text-edit" })}</p>
       <textarea
         autofocus
         class="width-100-percent"
@@ -185,7 +187,7 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
         }}
         .value=${item.text}
       ></textarea>
-      <p>Size:</p>
+      <p>${msg("Size:", { id: "tool-options-size" })}</p>
       <input
         class="width-100-percent"
         type="range"
@@ -208,7 +210,7 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
           );
         }}
       />
-      <p>Color:</p>
+      <p>${msg("Color:", { id: "tool-options-color" })}</p>
       ${this.generateColorSelect(
         ["#000000", "#ff1a40", "#29b312", "#135aa0", "#fc8653"],
         this.color,
@@ -232,7 +234,7 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
           simpleWhiteboard.removeItemById(item.id, true);
         }}
       >
-        Delete
+        ${msg("Delete", { id: "tool-options-delete" })}
       </button>
     `;
   }

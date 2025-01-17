@@ -1,6 +1,7 @@
 import { html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
+import { localized, msg } from "@lit/localize";
 
 import SimpleWhiteboardTool, {
   BoundingRect,
@@ -20,6 +21,7 @@ interface PictureItem extends WhiteboardItem {
 const min = (a: number, b: number) => (a < b ? a : b);
 
 @customElement("simple-whiteboard--tool-picture")
+@localized()
 export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
   private pictureCache: Map<string, HTMLImageElement> = new Map();
 
@@ -123,7 +125,11 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
     // Case: no item selected = new item
     if (!item) {
       return html`
-        <label for="picture-src">Image URL:</label>
+        <label for="picture-src"
+          >${msg("Select picture:", {
+            id: "tool-options-select-picture",
+          })}</label
+        >
         <input
           class="width-100-percent"
           type="file"
@@ -184,7 +190,9 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
 
     // Case: item selected => we want to be able to edit the instance
     return html`
-      <label for="picture-src">Edit Image URL:</label>
+      <label for="picture-src"
+        >${msg("Edit picture:", { id: "tool-options-edit-picture" })}</label
+      >
       <input
         class="width-100-percent"
         type="file"
@@ -217,7 +225,9 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
           reader.readAsDataURL(file);
         }}
       />
-      <label for="picture-width">Width:</label>
+      <label for="picture-width"
+        >${msg("Width:", { id: "tool-options-width" })}</label
+      >
       <input
         type="number"
         id="picture-width"
@@ -234,7 +244,9 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
           }
         }}
       />
-      <label for="picture-height">Height:</label>
+      <label for="picture-height"
+        >${msg("Height:", { id: "tool-options-height" })}</label
+      >
       <input
         type="number"
         id="picture-height"
@@ -256,7 +268,7 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
           simpleWhiteboard.removeItemById(item.id, true);
         }}
       >
-        Delete
+        ${msg("Delete", { id: "tool-options-delete" })}
       </button>
     `;
   }

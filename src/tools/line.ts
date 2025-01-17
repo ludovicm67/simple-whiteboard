@@ -1,6 +1,7 @@
 import { html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
+import { localized, msg } from "@lit/localize";
 
 import "../components/colorSelect";
 import SimpleWhiteboardTool, {
@@ -20,6 +21,7 @@ interface LineItem extends WhiteboardItem {
 }
 
 @customElement("simple-whiteboard--tool-line")
+@localized()
 export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
   private stroke = "#000000";
   private strokeWidth = 1;
@@ -199,7 +201,7 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
     // Case: no item selected = new item
     if (!item) {
       return html`
-        <p>Stroke width:</p>
+        <p>${msg("Stroke width:", { id: "tool-options-stroke-width" })}</p>
         <input
           class="width-100-percent"
           type="range"
@@ -212,7 +214,7 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
             this.strokeWidth = parseInt(target.value, 10);
           }}
         />
-        <p>Stroke:</p>
+        <p>${msg("Stroke:", { id: "tool-options-stroke" })}</p>
         ${this.generateColorSelect(
           ["#000000", "#ff1a40", "#29b312", "#135aa0", "#fc8653"],
           this.stroke,
@@ -225,7 +227,7 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
 
     // Case: item selected
     return html`
-      <p>Stroke width:</p>
+      <p>${msg("Stroke width:", { id: "tool-options-stroke-width" })}</p>
       <input
         class="width-100-percent"
         type="range"
@@ -248,7 +250,7 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
           );
         }}
       />
-      <p>Stroke:</p>
+      <p>${msg("Stroke:", { id: "tool-options-stroke" })}</p>
       ${this.generateColorSelect(
         ["#000000", "#ff1a40", "#29b312", "#135aa0", "#fc8653"],
         this.stroke,
@@ -273,7 +275,7 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
           simpleWhiteboard.removeItemById(item.id, true);
         }}
       >
-        Delete
+        ${msg("Delete", { id: "tool-options-delete" })}
       </button>
     `;
   }

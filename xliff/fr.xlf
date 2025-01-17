@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+  <file target-language="fr" source-language="en" original="lit-localize-inputs" datatype="plaintext">
+    <body>
+      <trans-unit id="tool-options-size">
+        <source>Size:</source>
+        <target state="">Taille :</target>
+      </trans-unit>
+      <trans-unit id="tool-options-color">
+        <source>Color:</source>
+        <target state="">Couleur :</target>
+      </trans-unit>
+      <trans-unit id="tool-options-delete">
+        <source>Delete</source>
+        <target state="">Supprimer</target>
+      </trans-unit>
+      <trans-unit id="tool-options-stroke-width">
+        <source>Stroke width:</source>
+        <target state="">Largeur de trait :</target>
+      </trans-unit>
+      <trans-unit id="tool-options-stroke">
+        <source>Stroke:</source>
+        <target state="">Couleur de trait :</target>
+      </trans-unit>
+      <trans-unit id="tool-options-fill">
+        <source>Fill:</source>
+        <target state="">Remplissage :</target>
+      </trans-unit>
+      <trans-unit id="tool-pointer-no-item-selected">
+        <source>Select an item by clicking on it.</source>
+        <target state="">Sélectionnez un élément en cliquant dessus.</target>
+      </trans-unit>
+      <trans-unit id="tool-text-edit">
+        <source>Edit your text:</source>
+        <target state="">Modifiez votre texte :</target>
+      </trans-unit>
+      <trans-unit id="tool-options-select-picture">
+        <source>Select picture:</source>
+        <target state="">Sélectionnez une image :</target>
+      </trans-unit>
+      <trans-unit id="tool-options-edit-picture">
+        <source>Edit picture:</source>
+        <target state="">Modifier l'image :</target>
+      </trans-unit>
+      <trans-unit id="tool-options-width">
+        <source>Width:</source>
+        <target state="">Largeur :</target>
+      </trans-unit>
+      <trans-unit id="tool-options-height">
+        <source>Height:</source>
+        <target state="">Hauteur :</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
