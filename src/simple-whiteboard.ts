@@ -7,43 +7,17 @@ import {
 } from "lit";
 import rough from "roughjs";
 import { customElement, property, state } from "lit/decorators.js";
+import { localized } from "@lit/localize";
 import { RoughCanvas } from "roughjs/bin/canvas";
 import SimpleWhiteboardTool, {
   WhiteboardItem,
   BoundingRect,
 } from "./lib/SimpleWhiteboardTool";
+import { getLocale, setLocale } from "./lib/locales";
+import type { SupportedLocales } from "./lib/locales";
 
 import { render as renderSaveButton } from "./components/saveButton";
-
-import { configureLocalization, LocaleModule, localized } from "@lit/localize";
-import {
-  sourceLocale,
-  targetLocales,
-  allLocales,
-} from "./generated/locale-codes.js";
-
-import * as templates_de from "./generated/locales/de.js";
-import * as templates_fr from "./generated/locales/fr.js";
-export type SupportedLocales = (typeof allLocales)[number];
-
-const localizedTemplates = new Map<SupportedLocales, LocaleModule>([
-  ["de", templates_de],
-  ["fr", templates_fr],
-]);
-
-export const { getLocale, setLocale } = configureLocalization({
-  sourceLocale,
-  targetLocales,
-  loadLocale: (locale: string) =>
-    new Promise((resolve, reject) => {
-      const resolvedLocale = localizedTemplates.get(locale as SupportedLocales);
-      if (!resolvedLocale) {
-        reject(new Error(`Invalid locale: ${locale}`));
-        return;
-      }
-      resolve(resolvedLocale);
-    }),
-});
+import { allLocales } from "./generated/locale-codes";
 
 type Point = {
   x: number;
@@ -55,6 +29,9 @@ type Point = {
 export class SimpleWhiteboard extends LitElement {
   @property({ type: Boolean })
   debug = false;
+
+  @property()
+  locale: SupportedLocales = "en";
 
   private mouseCoords: Point = { x: 0, y: 0 };
 
@@ -471,6 +448,9 @@ export class SimpleWhiteboard extends LitElement {
     if (this.debug) {
       console.log("Request update", name, oldValue, options);
     }
+    if (allLocales.includes(this.locale)) {
+      setLocale(this.locale);
+    }
     super.requestUpdate(name, oldValue, options);
   }
 
@@ -771,7 +751,13 @@ export class SimpleWhiteboard extends LitElement {
     this.requestUpdate();
   }
 
-  public removeItemById(itemId: string, sendEvent = false) {
+  /**
+   * Remove an item by its ID.
+   *
+   * @param itemId The ID of the item to remove.
+   * @param sendEvent Whether to send an event to notify the removal of the item.
+   */
+  public removeItemById(itemId: string, sendEvent = false): void {
     const index = this.items.findIndex(
       (item: WhiteboardItem) => item.id === itemId
     );
@@ -795,10 +781,15 @@ export class SimpleWhiteboard extends LitElement {
     this.requestUpdate();
   }
 
+  /**
+   * Trigger the download of the current canvas as a PNG image.
+   *
+   * @param options Options for the download.
+   */
   public downloadCurrentCanvasAsPng(options?: {
     fileName?: string;
     backgroundColor?: string;
-  }) {
+  }): void {
     if (!this.canvas) {
       return;
     }
@@ -839,6 +830,10 @@ export class SimpleWhiteboard extends LitElement {
     link.remove();
   }
 
+  /**
+   * Get the canvas element.
+   * @returns The canvas element.
+   */
   public getCanvasElement(): HTMLCanvasElement | undefined {
     return this.canvas;
   }
