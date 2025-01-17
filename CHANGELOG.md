@@ -1,5 +1,11 @@
 # @ludovicm67/whiteboard
 
+## 0.2.10
+
+### Patch Changes
+
+- 3eeb721: Add i18n support
+
 ## 0.2.9
 
 ### Patch Changes
