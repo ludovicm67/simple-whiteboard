@@ -1,6 +1,7 @@
 import { html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
+import { localized, msg } from "@lit/localize";
 
 import "../components/colorSelect";
 import SimpleWhiteboardTool, {
@@ -24,6 +25,7 @@ interface PenItem extends WhiteboardItem {
 }
 
 @customElement("simple-whiteboard--tool-pen")
+@localized()
 export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
   private size = 6;
   private smoothing = 0.5;
@@ -210,7 +212,7 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
     if (!item) {
       return html`
         <div>
-          <p>Size:</p>
+          <p>${msg("Size:", { id: "tool-options-size" })}</p>
           <input
             class="width-100-percent"
             type="range"
@@ -223,7 +225,7 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
               this.size = parseInt(target.value, 10);
             }}
           />
-          <p>Color:</p>
+          <p>${msg("Color:", { id: "tool-options-color" })}</p>
           ${this.generateColorSelect(
             ["#000000", "#ff1a40", "#29b312", "#135aa0", "#fc8653"],
             this.color,
@@ -237,7 +239,7 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
 
     // Case: item selected
     return html`
-      <p>Size:</p>
+      <p>${msg("Size:", { id: "tool-options-size" })}</p>
       <input
         class="width-100-percent"
         type="range"
@@ -260,7 +262,7 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
           );
         }}
       />
-      <p>Color:</p>
+      <p>${msg("Color:", { id: "tool-options-color" })}</p>
       ${this.generateColorSelect(
         ["#000000", "#ff1a40", "#29b312", "#135aa0", "#fc8653"],
         this.color,
@@ -285,7 +287,7 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
           simpleWhiteboard.removeItemById(item.id, true);
         }}
       >
-        Delete
+        ${msg("Delete", { id: "tool-options-delete" })}
       </button>
     `;
   }

@@ -1,6 +1,7 @@
 import { TemplateResult, html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
+import { localized, msg } from "@lit/localize";
 
 import SimpleWhiteboardTool, {
   WhiteboardItem,
@@ -25,6 +26,7 @@ interface PointerItem extends WhiteboardItem {
 }
 
 @customElement("simple-whiteboard--tool-pointer")
+@localized()
 export class SimpleWhiteboardToolPointer extends SimpleWhiteboardTool {
   public override getToolIcon() {
     return html`${unsafeHTML(getIconSvg("mouse-pointer"))}`;
@@ -216,7 +218,13 @@ export class SimpleWhiteboardToolPointer extends SimpleWhiteboardTool {
     }
 
     if (!item) {
-      return html` <p>Select an item by clicking on it.</p> `;
+      return html`
+        <p>
+          ${msg("Select an item by clicking on it.", {
+            id: "tool-pointer-no-item-selected",
+          })}
+        </p>
+      `;
     } else {
       const tool = simpleWhiteboard.getToolInstance(item.kind);
       if (!tool) {

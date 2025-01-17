@@ -15,12 +15,43 @@ import SimpleWhiteboardTool, {
 
 import { render as renderSaveButton } from "./components/saveButton";
 
+import { configureLocalization, LocaleModule, localized } from "@lit/localize";
+import {
+  sourceLocale,
+  targetLocales,
+  allLocales,
+} from "./generated/locale-codes.js";
+
+import * as templates_de from "./generated/locales/de.js";
+import * as templates_fr from "./generated/locales/fr.js";
+export type SupportedLocales = (typeof allLocales)[number];
+
+const localizedTemplates = new Map<SupportedLocales, LocaleModule>([
+  ["de", templates_de],
+  ["fr", templates_fr],
+]);
+
+export const { getLocale, setLocale } = configureLocalization({
+  sourceLocale,
+  targetLocales,
+  loadLocale: (locale: string) =>
+    new Promise((resolve, reject) => {
+      const resolvedLocale = localizedTemplates.get(locale as SupportedLocales);
+      if (!resolvedLocale) {
+        reject(new Error(`Invalid locale: ${locale}`));
+        return;
+      }
+      resolve(resolvedLocale);
+    }),
+});
+
 type Point = {
   x: number;
   y: number;
 };
 
 @customElement("simple-whiteboard")
+@localized()
 export class SimpleWhiteboard extends LitElement {
   @property({ type: Boolean })
   debug = false;
@@ -539,6 +570,31 @@ export class SimpleWhiteboard extends LitElement {
     return select;
   }
 
+  renderLocaleSelect() {
+    const options = [
+      { value: "en", label: "English" },
+      { value: "de", label: "Deutsch" },
+      { value: "fr", label: "Français" },
+    ];
+    const currentLocale = getLocale();
+    const select = html`<select
+      @change=${(e: Event) => {
+        const target = e.target as HTMLSelectElement;
+        setLocale(target.value);
+      }}
+    >
+      ${options.map(
+        (option) => html`<option
+          value=${option.value}
+          ?selected=${option.value === currentLocale}
+        >
+          ${option.label}
+        </option>`
+      )}
+    </select>`;
+    return select;
+  }
+
   renderDebug() {
     if (!this.debug) {
       return null;
@@ -549,7 +605,8 @@ export class SimpleWhiteboard extends LitElement {
 
   renderFooterTools() {
     return html`<div class="footer-tools">
-      ${this.renderZoomSelect()} ${this.renderDebug()}
+      ${this.renderZoomSelect()} ${this.renderLocaleSelect()}
+      ${this.renderDebug()}
     </div>`;
   }
 

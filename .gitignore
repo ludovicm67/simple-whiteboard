@@ -24,3 +24,6 @@ dist-ssr
 *.sw?
 
 *.tgz
+
+# Genarated files (locales, …)
+src/generated

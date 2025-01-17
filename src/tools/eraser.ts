@@ -1,6 +1,7 @@
 import { html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
+import { localized, msg } from "@lit/localize";
 
 import "../components/colorSelect";
 import SimpleWhiteboardTool, {
@@ -24,6 +25,7 @@ interface EraserItem extends WhiteboardItem {
 }
 
 @customElement("simple-whiteboard--tool-eraser")
+@localized()
 export class SimpleWhiteboardToolEraser extends SimpleWhiteboardTool {
   private size = 25;
   private smoothing = 0.5;
@@ -198,7 +200,7 @@ export class SimpleWhiteboardToolEraser extends SimpleWhiteboardTool {
     if (!item) {
       return html`
         <div>
-          <p>Size:</p>
+          <p>${msg("Size:", { id: "tool-options-size" })}</p>
           <input
             class="width-100-percent"
             type="range"
@@ -217,7 +219,7 @@ export class SimpleWhiteboardToolEraser extends SimpleWhiteboardTool {
 
     // Case: item selected
     return html`
-      <p>Size:</p>
+      <p>${msg("Size:", { id: "tool-options-size" })}</p>
       <input
         class="width-100-percent"
         type="range"
@@ -246,7 +248,7 @@ export class SimpleWhiteboardToolEraser extends SimpleWhiteboardTool {
           simpleWhiteboard.removeItemById(item.id, true);
         }}
       >
-        Delete
+        ${msg("Delete", { id: "tool-options-delete" })}
       </button>
     `;
   }
