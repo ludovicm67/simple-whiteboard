@@ -50,6 +50,18 @@
         <source>Height:</source>
         <target state="">Hauteur :</target>
       </trans-unit>
+      <trans-unit id="menu-language">
+        <source>Language</source>
+        <target state="">Langue</target>
+      </trans-unit>
+      <trans-unit id="menu-export">
+        <source>Export</source>
+        <target state="">Exporter</target>
+      </trans-unit>
+      <trans-unit id="menu-export-current-view-png">
+        <source>Current view as PNG</source>
+        <target state="">La vue actuelle en PNG</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

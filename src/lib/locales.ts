@@ -10,6 +10,8 @@ import * as templates_fr from "../generated/locales/fr.js";
 
 export type SupportedLocales = (typeof allLocales)[number];
 
+export const supportedLocales = [...allLocales] as SupportedLocales[];
+
 const localizedTemplates = new Map<SupportedLocales, LocaleModule>([
   ["de", templates_de],
   ["fr", templates_fr],
