@@ -1,5 +1,11 @@
 # @ludovicm67/whiteboard
 
+## 0.2.11
+
+### Patch Changes
+
+- 262577e: Add top menu
+
 ## 0.2.10
 
 ### Patch Changes
