@@ -16,7 +16,7 @@ import SimpleWhiteboardTool, {
 import { getLocale, setLocale } from "./lib/locales";
 import type { SupportedLocales } from "./lib/locales";
 
-import { render as renderSaveButton } from "./components/saveButton";
+import "./components/menu";
 import { allLocales } from "./generated/locale-codes";
 
 type Point = {
@@ -71,19 +71,10 @@ export class SimpleWhiteboard extends LitElement {
 
     .menu {
       position: absolute;
-      z-index: 1;
+      z-index: 2;
       top: 16px;
       left: 16px;
       user-select: none;
-    }
-
-    .menu button {
-      background-color: #fff;
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-      padding: 8px;
-      border: none;
-      cursor: pointer;
     }
 
     .menu button:hover {
@@ -105,7 +96,7 @@ export class SimpleWhiteboard extends LitElement {
       box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
       overflow-x: auto;
       white-space: nowrap;
-      max-width: calc(100% - 64px);
+      max-width: calc(100% - 128px);
       scrollbar-width: thin;
     }
 
@@ -566,7 +557,7 @@ export class SimpleWhiteboard extends LitElement {
     const select = html`<select
       @change=${(e: Event) => {
         const target = e.target as HTMLSelectElement;
-        setLocale(target.value);
+        this.locale = target.value as SupportedLocales;
       }}
     >
       ${options.map(
@@ -597,9 +588,10 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   renderMenu() {
-    return html`<div class="menu">
-      ${renderSaveButton(() => this.downloadCurrentCanvasAsPng())}
-    </div>`;
+    return html`<simple-whiteboard-menu
+      class="menu"
+      .instance=${this}
+    ></simple-whiteboard-menu>`;
   }
 
   render() {
