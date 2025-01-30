@@ -24,6 +24,12 @@ type Point = {
   y: number;
 };
 
+const getTouchDistance = (touches: TouchList): number => {
+  const dx = touches[0].clientX - touches[1].clientX;
+  const dy = touches[0].clientY - touches[1].clientY;
+  return Math.sqrt(dx * dx + dy * dy);
+};
+
 @customElement("simple-whiteboard")
 @localized()
 export class SimpleWhiteboard extends LitElement {
@@ -40,6 +46,9 @@ export class SimpleWhiteboard extends LitElement {
 
   private canvas?: HTMLCanvasElement;
   private canvasContext?: CanvasRenderingContext2D;
+
+  private lastDistance = 0;
+  private lastOrigin: Point = { x: 0, y: 0 };
 
   @state() private registeredTools: Map<string, SimpleWhiteboardTool> =
     new Map();
@@ -361,6 +370,20 @@ export class SimpleWhiteboard extends LitElement {
     // Prevent the default action to prevent scrolling
     e.preventDefault();
 
+    // Handle zooming
+    if (e.touches.length === 2) {
+      // Set the zoom origin to the midpoint between the fingers
+      this.lastOrigin = {
+        x:
+          (e.touches[0].clientX + e.touches[1].clientX) / 2 -
+          this.canvas.offsetLeft,
+        y:
+          (e.touches[0].clientY + e.touches[1].clientY) / 2 -
+          this.canvas.offsetTop,
+      };
+      this.lastDistance = getTouchDistance(e.touches);
+    }
+
     // Get the first touch
     const touch = e.touches[0];
 
@@ -380,6 +403,34 @@ export class SimpleWhiteboard extends LitElement {
 
     // Prevent the default action to prevent scrolling
     e.preventDefault();
+
+    // Handle zooming
+    if (e.touches.length === 2) {
+      const origin = {
+        x:
+          (e.touches[0].clientX + e.touches[1].clientX) / 2 -
+          this.canvas.offsetLeft,
+        y:
+          (e.touches[0].clientY + e.touches[1].clientY) / 2 -
+          this.canvas.offsetTop,
+      };
+      const dx = origin.x - this.lastOrigin.x;
+      const dy = origin.y - this.lastOrigin.y;
+      this.lastOrigin = origin;
+      this.canvasCoords = {
+        ...this.canvasCoords,
+        x: this.canvasCoords.x + dx,
+        y: this.canvasCoords.y + dy,
+      };
+
+      const distance = getTouchDistance(e.touches);
+      const zoomFactor = distance / this.lastDistance;
+      this.lastDistance = distance;
+
+      const zoom = this.canvasCoords.zoom * zoomFactor;
+      this.setZoom(zoom);
+      return;
+    }
 
     // Get the first touch
     const touch = e.touches[0];
@@ -510,7 +561,7 @@ export class SimpleWhiteboard extends LitElement {
   setZoom(zoom: number) {
     this.canvasCoords = {
       ...this.canvasCoords,
-      zoom,
+      zoom: Math.max(0.25, Math.min(4, zoom)),
     };
     this.draw();
   }
@@ -526,6 +577,10 @@ export class SimpleWhiteboard extends LitElement {
       { value: 4, label: "400%" },
     ];
     const zoom = this.canvasCoords.zoom;
+    const closestValue = options.reduce((prev, curr) =>
+      Math.abs(curr.value - zoom) < Math.abs(prev.value - zoom) ? curr : prev
+    ).value;
+
     const select = html`<select
       @change=${(e: Event) => {
         const target = e.target as HTMLSelectElement;
@@ -535,7 +590,7 @@ export class SimpleWhiteboard extends LitElement {
       ${options.map(
         (option) => html`<option
           value=${option.value}
-          ?selected=${option.value === zoom}
+          ?selected=${option.value === closestValue}
         >
           ${option.label}
         </option>`
