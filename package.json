@@ -7,7 +7,7 @@
   "scripts": {
     "prepare": "npm run i18n",
     "prebuild": "npm run i18n",
-    "dev": "vite",
+    "dev": "vite --host 0.0.0.0",
     "build": "tsc && vite build",
     "preview": "vite preview",
     "i18n:extract": "lit-localize extract",
