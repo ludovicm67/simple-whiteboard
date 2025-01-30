@@ -1,5 +1,11 @@
 # @ludovicm67/whiteboard
 
+## 0.2.12
+
+### Patch Changes
+
+- faaefbf: Pinch to zoom support
+
 ## 0.2.11
 
 ### Patch Changes
