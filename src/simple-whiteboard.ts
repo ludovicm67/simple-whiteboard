@@ -632,7 +632,11 @@ export class SimpleWhiteboard extends LitElement {
       return null;
     }
 
-    return html`<pre>${this.mouseCoords.x}x${this.mouseCoords.y}</pre>`;
+    return html`<pre>
+${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
+        this.mouseCoords.y * 100
+      ) / 100}</pre
+    >`;
   }
 
   renderFooterTools() {
