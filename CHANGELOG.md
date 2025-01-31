@@ -1,5 +1,11 @@
 # @ludovicm67/whiteboard
 
+## 0.2.13
+
+### Patch Changes
+
+- 27fbf55: Export Text tool
+
 ## 0.2.12
 
 ### Patch Changes
