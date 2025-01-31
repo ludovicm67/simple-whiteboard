@@ -26,7 +26,7 @@ interface TextItem extends WhiteboardItem {
 
 @customElement("simple-whiteboard--tool-text")
 @localized()
-export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
+export class SimpleWhiteboardToolText extends SimpleWhiteboardTool {
   private ctx: CanvasRenderingContext2D | null = null;
   private color = "#000000";
 
