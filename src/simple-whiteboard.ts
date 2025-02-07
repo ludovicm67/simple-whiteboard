@@ -13,7 +13,7 @@ import SimpleWhiteboardTool, {
   WhiteboardItem,
   BoundingRect,
 } from "./lib/SimpleWhiteboardTool";
-import { getLocale, setLocale } from "./lib/locales";
+import { setLocale } from "./lib/locales";
 import type { SupportedLocales } from "./lib/locales";
 
 import "./components/menu";
@@ -599,34 +599,6 @@ export class SimpleWhiteboard extends LitElement {
     return select;
   }
 
-  renderLocaleSelect() {
-    if (this.hideLocalePicker) {
-      return null;
-    }
-    const options = [
-      { value: "en", label: "English" },
-      { value: "de", label: "Deutsch" },
-      { value: "fr", label: "Français" },
-    ];
-    const currentLocale = getLocale();
-    const select = html`<select
-      @change=${(e: Event) => {
-        const target = e.target as HTMLSelectElement;
-        this.locale = target.value as SupportedLocales;
-      }}
-    >
-      ${options.map(
-        (option) => html`<option
-          value=${option.value}
-          ?selected=${option.value === currentLocale}
-        >
-          ${option.label}
-        </option>`
-      )}
-    </select>`;
-    return select;
-  }
-
   renderDebug() {
     if (!this.debug) {
       return null;
@@ -641,8 +613,7 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
 
   renderFooterTools() {
     return html`<div class="footer-tools">
-      ${this.renderZoomSelect()} ${this.renderLocaleSelect()}
-      ${this.renderDebug()}
+      ${this.renderZoomSelect()} ${this.renderDebug()}
     </div>`;
   }
 
