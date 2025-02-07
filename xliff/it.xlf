@@ -1,66 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
-  <file target-language="de" source-language="en" original="lit-localize-inputs" datatype="plaintext">
+  <file target-language="it" source-language="en" original="lit-localize-inputs" datatype="plaintext">
     <body>
       <trans-unit id="menu-export">
         <source>Export</source>
-        <target>Exportieren</target>
+        <target>Esporta</target>
       </trans-unit>
       <trans-unit id="menu-export-current-view-png">
         <source>Current view as PNG</source>
-        <target>Aktuelle Ansicht als PNG</target>
+        <target>Visualizzazione attuale in PNG</target>
       </trans-unit>
       <trans-unit id="menu-language">
         <source>Language</source>
-        <target>Sprache</target>
+        <target>Lingua</target>
       </trans-unit>
       <trans-unit id="tool-options-color">
         <source>Color:</source>
-        <target>Farbe</target>
+        <target>Colore</target>
       </trans-unit>
       <trans-unit id="tool-options-delete">
         <source>Delete</source>
-        <target>Löschen</target>
+        <target>Cancella</target>
       </trans-unit>
       <trans-unit id="tool-options-edit-picture">
         <source>Edit picture:</source>
-        <target>Bild ändern</target>
+        <target>Modifica immagine</target>
       </trans-unit>
       <trans-unit id="tool-options-fill">
         <source>Fill:</source>
-        <target>Füllung</target>
+        <target>Riempimento</target>
       </trans-unit>
       <trans-unit id="tool-options-height">
         <source>Height:</source>
-        <target>Höhe</target>
+        <target>Altezza</target>
       </trans-unit>
       <trans-unit id="tool-options-select-picture">
         <source>Select picture:</source>
-        <target>Bild auswählen</target>
+        <target>Seleziona immagine</target>
       </trans-unit>
       <trans-unit id="tool-options-size">
         <source>Size:</source>
-        <target>Größe</target>
+        <target>Dimensione</target>
       </trans-unit>
       <trans-unit id="tool-options-stroke">
         <source>Stroke:</source>
-        <target>Linienfarbe</target>
+        <target>Tratto</target>
       </trans-unit>
       <trans-unit id="tool-options-stroke-width">
         <source>Stroke width:</source>
-        <target>Linienbreite</target>
+        <target>Larghezza del tratto</target>
       </trans-unit>
       <trans-unit id="tool-options-width">
         <source>Width:</source>
-        <target>Breite</target>
+        <target>Larghezza</target>
       </trans-unit>
       <trans-unit id="tool-pointer-no-item-selected">
         <source>Select an item by clicking on it.</source>
-        <target>Wählen Sie ein Element aus, indem Sie darauf klicken.</target>
+        <target>Seleziona un elemento cliccandoci sopra.</target>
       </trans-unit>
       <trans-unit id="tool-text-edit">
         <source>Edit your text:</source>
-        <target>Text bearbeiten</target>
+        <target>Modifica il testo</target>
       </trans-unit>
     </body>
   </file>
