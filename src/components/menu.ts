@@ -65,6 +65,8 @@ export class SimpleWhiteboardMenu extends LitElement {
       position: absolute;
       left: calc(100% - 10px);
       margin-top: -28px;
+      max-height: 200px;
+      overflow-y: auto;
     }
   `;
 
@@ -80,9 +82,30 @@ export class SimpleWhiteboardMenu extends LitElement {
     }
 
     const locales = [
-      { value: "en", label: "English" },
+      { value: "cs-CZ", label: "Čeština (CZ)" },
+      { value: "cs", label: "Čeština" },
+      { value: "de-DE", label: "Deutsch (DE)" },
       { value: "de", label: "Deutsch" },
+      { value: "en-US", label: "English (US)" },
+      { value: "en", label: "English" },
+      { value: "es-AR", label: "Español (AR)" },
+      { value: "es-CL", label: "Español (CL)" },
+      { value: "es-CO", label: "Español (CO)" },
+      { value: "es-ES", label: "Español (ES)" },
+      { value: "es-MX", label: "Español (MX)" },
+      { value: "es-PE", label: "Español (PE)" },
+      { value: "es", label: "Español" },
+      { value: "fr-FR", label: "Français (FR)" },
       { value: "fr", label: "Français" },
+      { value: "it-IT", label: "Italiano (IT)" },
+      { value: "it", label: "Italiano" },
+      { value: "pl-PL", label: "Polski (PL)" },
+      { value: "pl", label: "Polski" },
+      { value: "pt-BR", label: "Português (BR)" },
+      { value: "pt-PT", label: "Português (PT)" },
+      { value: "pt", label: "Português" },
+      { value: "tr-TR", label: "Türkçe (TR)" },
+      { value: "tr", label: "Türkçe" },
     ];
 
     const menuEntry = html`
