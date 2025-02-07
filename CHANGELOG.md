@@ -1,5 +1,12 @@
 # @ludovicm67/whiteboard
 
+## 0.2.14
+
+### Patch Changes
+
+- f51017a: Remove language picker from the bottom, as it is already available in the menu.
+- ff76981: Add more languages
+
 ## 0.2.13
 
 ### Patch Changes
