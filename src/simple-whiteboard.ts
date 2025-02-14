@@ -65,6 +65,7 @@ export class SimpleWhiteboard extends LitElement {
   @state() private currentDrawing: WhiteboardItem | null = null;
 
   @state() private selectedItemId: string | null = null;
+  @state() private hoveredItemId: string | null = null;
 
   static styles = css`
     .root {
@@ -263,7 +264,11 @@ export class SimpleWhiteboard extends LitElement {
     return tool.getBoundingRect(item);
   }
 
-  drawItemBox(context: CanvasRenderingContext2D, item: WhiteboardItem): void {
+  drawItemBox(
+    context: CanvasRenderingContext2D,
+    item: WhiteboardItem,
+    boxColor = "#135aa0"
+  ): void {
     const boundingRect = this.getBoundingRect(item);
     if (!boundingRect) {
       return;
@@ -271,7 +276,7 @@ export class SimpleWhiteboard extends LitElement {
     const { x, y, width, height } = boundingRect;
     const { x: coordX, y: coordY } = this.coordsToCanvasCoords(x, y);
 
-    context.strokeStyle = "#135aa0";
+    context.strokeStyle = boxColor;
     context.lineWidth = 2;
     context.beginPath();
     context.rect(
@@ -298,6 +303,10 @@ export class SimpleWhiteboard extends LitElement {
     }
 
     const selectedItem = this.getSelectedItem();
+    const hoveredItem = this.getHoveredItem();
+    if (hoveredItem) {
+      this.drawItemBox(context, hoveredItem, "#dbe6f0");
+    }
     if (selectedItem) {
       this.drawItemBox(context, selectedItem);
     }
@@ -356,6 +365,13 @@ export class SimpleWhiteboard extends LitElement {
   handleMouseMove(e: MouseEvent) {
     this.requestUpdate();
     this.handleDrawingMove(e.offsetX, e.offsetY);
+
+    // Forward the event to the tool
+    const tool = this.registeredTools.get(this.currentTool);
+    if (!tool) {
+      return;
+    }
+    tool.handleMouseMove(e);
   }
 
   handleMouseUp() {
@@ -724,6 +740,22 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
   public setCanvasCoords(coords: { x: number; y: number; zoom: number }) {
     this.canvasCoords = coords;
     this.draw();
+  }
+
+  public setHoveredItemId(itemId: string | null) {
+    this.hoveredItemId = itemId;
+  }
+
+  public getHoveredItemId(): string | null {
+    return this.hoveredItemId;
+  }
+
+  public getHoveredItem(): WhiteboardItem | null {
+    if (!this.hoveredItemId) {
+      return null;
+    }
+
+    return this.getItemById(this.hoveredItemId);
   }
 
   public setSelectedItemId(itemId: string | null) {
