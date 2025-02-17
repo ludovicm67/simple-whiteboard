@@ -33,7 +33,7 @@
     "uuid": "^11.0.5"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.27.12",
+    "@changesets/cli": "^2.28.0",
     "@lit/localize-tools": "^0.8.0",
     "@types/feather-icons": "^4.29.4",
     "@types/uuid": "^10.0.0",
