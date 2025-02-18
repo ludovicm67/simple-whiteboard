@@ -1,5 +1,13 @@
 # @ludovicm67/whiteboard
 
+## 0.2.15
+
+### Patch Changes
+
+- 2ecd651: Set the date and time in the generated name file for the export
+- e41627f: Custom style for delete buttons
+- 7c28353: Switch to Lucide Icons
+
 ## 0.2.14
 
 ### Patch Changes
