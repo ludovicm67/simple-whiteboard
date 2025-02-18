@@ -132,7 +132,10 @@ export class SimpleWhiteboardMenu extends LitElement {
 
   exportCurrentCanvasAsPng() {
     if (this.instance) {
-      this.instance.downloadCurrentCanvasAsPng();
+      const dateTime = new Date().toISOString().replace(/:/g, "-");
+      this.instance.downloadCurrentCanvasAsPng({
+        fileName: `whiteboard-${dateTime}.png`,
+      });
     }
   }
 
