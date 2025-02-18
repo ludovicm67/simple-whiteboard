@@ -230,6 +230,7 @@ export class SimpleWhiteboardToolText extends SimpleWhiteboardTool {
         }
       )}
       <button
+        class="button width-100-percent"
         @click=${() => {
           simpleWhiteboard.removeItemById(item.id, true);
         }}

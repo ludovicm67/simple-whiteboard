@@ -74,6 +74,17 @@ export class SimpleWhiteboard extends LitElement {
       position: relative;
     }
 
+    .button {
+      background-color: rgba(0, 0, 0, 0.05);
+      border-radius: 8px;
+      padding: 8px;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+    }
+    .button:hover {
+      background-color: rgba(0, 0, 0, 0.1);
+    }
+
     .width-100-percent {
       width: 100%;
     }

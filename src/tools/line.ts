@@ -270,7 +270,7 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
         }
       )}
       <button
-        class="width-100-percent"
+        class="button width-100-percent"
         @click=${() => {
           simpleWhiteboard.removeItemById(item.id, true);
         }}
