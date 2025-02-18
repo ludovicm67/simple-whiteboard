@@ -29,7 +29,7 @@ interface PointerItem extends WhiteboardItem {
 @localized()
 export class SimpleWhiteboardToolPointer extends SimpleWhiteboardTool {
   public override getToolIcon() {
-    return html`${unsafeHTML(getIconSvg("mouse-pointer"))}`;
+    return html`${unsafeHTML(getIconSvg("MousePointer"))}`;
   }
 
   public override getToolName() {

@@ -1,18 +1,25 @@
-import { FeatherAttributes, FeatherIconNames, icons } from "feather-icons";
+import * as icons from "lucide-static";
 
-export type IconOptions = Partial<FeatherAttributes>;
+export type IconName = keyof typeof icons;
+export type IconNameExtended = IconName | (string & {});
+export const iconNames = Object.keys(icons) as IconName[];
+
+export type IconOptions = Partial<{
+  width: number;
+  height: number;
+}>;
 
 /**
- * Get the FeatherIcon icon.
+ * Get the Lucide icon.
  *
- * @param name Name of the FeatherIcon icon.
- * @returns The FeatherIcon icon.
+ * @param name Name of the Lucide icon.
+ * @returns The Lucide icon.
  */
-export const getIcon = (name: FeatherIconNames) => {
-  if (!icons[name]) {
+export const getIcon = (name: IconNameExtended): string => {
+  if (!(iconNames as string[]).includes(name)) {
     throw new Error(`Icon "${name}" not found.`);
   }
-  return icons[name];
+  return `${icons[name as IconName]}`; // Type assertion
 };
 
 export const defaultSvgIconOptions: IconOptions = {
@@ -20,17 +27,32 @@ export const defaultSvgIconOptions: IconOptions = {
   height: 16,
 };
 
+const createElementFromString = (htmlString: string): Element => {
+  const template = document.createElement("template");
+  template.innerHTML = htmlString.trim();
+  const element = template.content.firstElementChild;
+  if (!element) {
+    throw new Error("Invalid HTML string.");
+  }
+  return element;
+};
+
 /**
- * Get the SVG string of the FeatherIcon icon.
+ * Get the SVG string of the Lucide icon.
  *
- * @param name Name of the FeatherIcon icon.
- * @param options FeatherIcon options.
- * @returns The SVG string of the FeatherIcon icon.
+ * @param name Name of the Lucide icon.
+ * @param options Lucide options.
+ * @returns The SVG string of the Lucide icon.
  */
 export const getIconSvg = (
-  name: FeatherIconNames,
+  name: IconNameExtended,
   options?: IconOptions
 ): string => {
+  const icon = getIcon(name);
+  const svgElement = createElementFromString(icon);
   const iconOptions = { ...defaultSvgIconOptions, ...(options || {}) };
-  return getIcon(name).toSvg(iconOptions);
+  Object.entries(iconOptions).forEach(([key, value]) => {
+    svgElement.setAttribute(key, value.toString());
+  });
+  return svgElement.outerHTML;
 };

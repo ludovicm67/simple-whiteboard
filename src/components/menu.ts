@@ -141,7 +141,7 @@ export class SimpleWhiteboardMenu extends LitElement {
       <menu>
         <div class="btn-container">
           <button @click=${() => (this.isMenuOpen = !this.isMenuOpen)}>
-            ${unsafeHTML(getIconSvg("menu"))}
+            ${unsafeHTML(getIconSvg("Menu"))}
           </button>
         </div>
 

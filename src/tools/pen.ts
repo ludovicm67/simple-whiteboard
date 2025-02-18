@@ -34,7 +34,7 @@ export class SimpleWhiteboardToolPen extends SimpleWhiteboardTool {
   private color = "#000000";
 
   public override getToolIcon() {
-    return html`${unsafeHTML(getIconSvg("edit-2"))}`;
+    return html`${unsafeHTML(getIconSvg("Edit2"))}`;
   }
 
   public override getToolName() {
