@@ -27,7 +27,7 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
   private strokeWidth = 1;
 
   public override getToolIcon() {
-    return html`${unsafeHTML(getIconSvg("minus"))}`;
+    return html`${unsafeHTML(getIconSvg("Minus"))}`;
   }
 
   public override getToolName() {

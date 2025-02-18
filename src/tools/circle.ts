@@ -27,7 +27,7 @@ export class SimpleWhiteboardToolCircle extends SimpleWhiteboardTool {
   private fill = "transparent";
 
   public override getToolIcon() {
-    return html`${unsafeHTML(getIconSvg("circle"))}`;
+    return html`${unsafeHTML(getIconSvg("Circle"))}`;
   }
 
   public override getToolName() {

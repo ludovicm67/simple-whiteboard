@@ -28,7 +28,7 @@ export class SimpleWhiteboardToolRect extends SimpleWhiteboardTool {
   private fill = "transparent";
 
   public override getToolIcon() {
-    return html`${unsafeHTML(getIconSvg("square"))}`;
+    return html`${unsafeHTML(getIconSvg("Square"))}`;
   }
 
   public override getToolName() {

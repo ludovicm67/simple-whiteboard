@@ -8,7 +8,7 @@ import { getIconSvg } from "../lib/icons";
 @customElement("simple-whiteboard--tool-clear")
 export class SimpleWhiteboardToolClear extends SimpleWhiteboardTool {
   public override getToolIcon() {
-    return html`${unsafeHTML(getIconSvg("trash-2"))}`;
+    return html`${unsafeHTML(getIconSvg("Trash2"))}`;
   }
 
   public override getToolName() {

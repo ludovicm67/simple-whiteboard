@@ -15,7 +15,7 @@ interface MoveItem extends WhiteboardItem {
 @customElement("simple-whiteboard--tool-move")
 export class SimpleWhiteboardToolMove extends SimpleWhiteboardTool {
   public override getToolIcon() {
-    return html`${unsafeHTML(getIconSvg("move"))}`;
+    return html`${unsafeHTML(getIconSvg("Move"))}`;
   }
 
   public override getToolName() {

@@ -26,8 +26,8 @@
   },
   "dependencies": {
     "@lit/localize": "^0.12.2",
-    "feather-icons": "^4.29.2",
     "lit": "^3.2.1",
+    "lucide-static": "^0.473.0",
     "perfect-freehand": "^1.2.2",
     "roughjs": "^4.6.6",
     "uuid": "^11.0.5"
@@ -35,7 +35,6 @@
   "devDependencies": {
     "@changesets/cli": "^2.28.0",
     "@lit/localize-tools": "^0.8.0",
-    "@types/feather-icons": "^4.29.4",
     "@types/uuid": "^10.0.0",
     "typescript": "^5.7.3",
     "vite": "^6.1.0",

@@ -34,7 +34,7 @@ export class SimpleWhiteboardToolEraser extends SimpleWhiteboardTool {
   private color = "#fcfcff";
 
   public override getToolIcon() {
-    return html`${unsafeHTML(getIconSvg("tablet"))}`;
+    return html`${unsafeHTML(getIconSvg("Eraser"))}`;
   }
 
   public override getToolName() {

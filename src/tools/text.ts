@@ -31,7 +31,7 @@ export class SimpleWhiteboardToolText extends SimpleWhiteboardTool {
   private color = "#000000";
 
   public override getToolIcon() {
-    return html`${unsafeHTML(getIconSvg("type"))}`;
+    return html`${unsafeHTML(getIconSvg("Type"))}`;
   }
 
   public override getToolName() {

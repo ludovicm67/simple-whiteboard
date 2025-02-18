@@ -26,7 +26,7 @@ export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
   private pictureCache: Map<string, HTMLImageElement> = new Map();
 
   public override getToolIcon() {
-    return html`${unsafeHTML(getIconSvg("image"))}`;
+    return html`${unsafeHTML(getIconSvg("Image"))}`;
   }
 
   public override getToolName() {
