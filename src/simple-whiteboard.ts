@@ -314,13 +314,23 @@ export class SimpleWhiteboard extends LitElement {
     }
   }
 
+  handleKeyDown(e: KeyboardEvent) {
+    // If it is the backspace key, we remove the selected item
+    if (e.key === "Backspace") {
+      if (this.selectedItemId) {
+        this.removeItemById(this.selectedItemId, true);
+      }
+    }
+  }
+
   connectedCallback(): void {
-    super.connectedCallback();
+    window.addEventListener("keydown", this.handleKeyDown.bind(this));
     window.addEventListener("resize", this.handleResize.bind(this));
     document.addEventListener(
       "visibilitychange",
       this.handleVisibilityChange.bind(this)
     );
+    super.connectedCallback();
   }
 
   disconnectedCallback(): void {
@@ -329,6 +339,7 @@ export class SimpleWhiteboard extends LitElement {
       this.handleVisibilityChange.bind(this)
     );
     window.removeEventListener("resize", this.handleResize.bind(this));
+    window.removeEventListener("keydown", this.handleKeyDown.bind(this));
     super.disconnectedCallback();
   }
 
