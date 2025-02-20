@@ -31,6 +31,8 @@ export interface SimpleWhiteboardToolInterface {
   getBoundingRect(item: WhiteboardItem): BoundingRect | null;
   onToolSelected(): void;
 
+  handleMouseMove(e: MouseEvent): void;
+
   handleDrawingStart(x: number, y: number): void;
   handleDrawingMove(x: number, y: number): void;
   handleDrawingEnd(): void;
@@ -159,6 +161,16 @@ abstract class SimpleWhiteboardTool
    * @param _y The y coordinate of the mouse.
    */
   public handleDrawingStart(_x: number, _y: number): void {
+    // Implement this method in the tool class if needed.
+  }
+
+  /**
+   * Called when the mouse moves.
+   * This method should be implemented in the tool class if needed.
+   *
+   * @param _e The mouse event.
+   */
+  public handleMouseMove(_e: MouseEvent): void {
     // Implement this method in the tool class if needed.
   }
 

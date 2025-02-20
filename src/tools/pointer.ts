@@ -8,6 +8,7 @@ import SimpleWhiteboardTool, {
 } from "../lib/SimpleWhiteboardTool";
 import { getIconSvg } from "../lib/icons";
 import { SimpleWhiteboard } from "../simple-whiteboard";
+import { throttle } from "../lib/time";
 
 enum PointerAction {
   SELECT = "select",
@@ -28,6 +29,8 @@ interface PointerItem extends WhiteboardItem {
 @customElement("simple-whiteboard--tool-pointer")
 @localized()
 export class SimpleWhiteboardToolPointer extends SimpleWhiteboardTool {
+  private throttleMouseMove = throttle(this.handleMouseMoveThrottled, 150);
+
   public override getToolIcon() {
     return html`${unsafeHTML(getIconSvg("MousePointer"))}`;
   }
@@ -71,6 +74,28 @@ export class SimpleWhiteboardToolPointer extends SimpleWhiteboardTool {
     }
 
     return null;
+  }
+
+  private handleMouseMoveThrottled(e: MouseEvent): void {
+    const simpleWhiteboard = super.getSimpleWhiteboardInstance();
+    if (!simpleWhiteboard) {
+      return;
+    }
+    const { x: itemX, y: itemY } = simpleWhiteboard.coordsFromCanvasCoords(
+      e.offsetX,
+      e.offsetY
+    );
+
+    const hoveredItem = this.findSelectedItemUnderPointer(
+      simpleWhiteboard,
+      itemX,
+      itemY
+    );
+    simpleWhiteboard.setHoveredItemId(hoveredItem?.id || null);
+    simpleWhiteboard.draw();
+  }
+  public override handleMouseMove(e: MouseEvent): void {
+    this.throttleMouseMove(e);
   }
 
   public override handleDrawingStart(x: number, y: number): void {
