@@ -1,5 +1,12 @@
 # @ludovicm67/whiteboard
 
+## 0.2.16
+
+### Patch Changes
+
+- e0ab727: Delete the selected item by using the backspace key.
+- 6c1b81c: Show the whiteboard item that gets hovered
+
 ## 0.2.15
 
 ### Patch Changes
