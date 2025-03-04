@@ -28,7 +28,7 @@
   "dependencies": {
     "@lit/localize": "^0.12.2",
     "lit": "^3.2.1",
-    "lucide-static": "^0.473.0",
+    "lucide-static": "^0.477.0",
     "perfect-freehand": "^1.2.2",
     "roughjs": "^4.6.6",
     "uuid": "^11.1.0"
