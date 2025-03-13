@@ -13,6 +13,7 @@ import { throttle } from "../lib/time";
 enum PointerAction {
   SELECT = "select",
   DRAG = "drag",
+  RESIZE = "resize",
 }
 
 interface PointerItem extends WhiteboardItem {
@@ -125,6 +126,23 @@ export class SimpleWhiteboardToolPointer extends SimpleWhiteboardTool {
       const tool = simpleWhiteboard.getToolInstance(itemClicked.kind);
       if (tool) {
         clickedItemCoords = tool.getCoordsItem(itemClicked);
+
+        // Check if the user clicked on the bottom right corner of the item
+        const boundingRect = tool.getBoundingRect(itemClicked);
+        if (boundingRect) {
+          const {
+            x: boundingRectX,
+            y: boundingRectY,
+            width,
+            height,
+          } = boundingRect;
+          if (
+            itemX > boundingRectX + width - 10 &&
+            itemY > boundingRectY + height - 10
+          ) {
+            action = PointerAction.RESIZE;
+          }
+        }
       }
     }
 
@@ -159,14 +177,14 @@ export class SimpleWhiteboardToolPointer extends SimpleWhiteboardTool {
       return;
     }
 
-    if (currentDrawing.options.action !== PointerAction.DRAG) {
-      return;
-    }
-
     const pointerItem = currentDrawing as PointerItem;
     const pointerAction = pointerItem.options.action;
     const clickedItemId = pointerItem.options.clickedItemId;
-    if (!clickedItemId || pointerAction !== PointerAction.DRAG) {
+
+    if (
+      !clickedItemId ||
+      ![PointerAction.DRAG, PointerAction.RESIZE].includes(pointerAction)
+    ) {
       return;
     }
 
@@ -194,16 +212,24 @@ export class SimpleWhiteboardToolPointer extends SimpleWhiteboardTool {
     const deltaX = fixedX - startX;
     const deltaY = fixedY - startY;
 
-    const movedInstance = tool.setCoordsItem(
-      clickedItem,
-      clickedItemX + deltaX,
-      clickedItemY + deltaY
-    );
-    if (!movedInstance) {
-      return;
-    }
+    switch (pointerAction) {
+      case PointerAction.DRAG:
+        const movedInstance = tool.setCoordsItem(
+          clickedItem,
+          clickedItemX + deltaX,
+          clickedItemY + deltaY
+        );
+        if (!movedInstance) {
+          return;
+        }
 
-    simpleWhiteboard.updateItemById(clickedItemId, movedInstance, true);
+        simpleWhiteboard.updateItemById(clickedItemId, movedInstance, true);
+        break;
+
+      case PointerAction.RESIZE:
+        console.log("resize");
+        break;
+    }
   }
 
   public override handleDrawingEnd(): void {
@@ -228,6 +254,8 @@ export class SimpleWhiteboardToolPointer extends SimpleWhiteboardTool {
         simpleWhiteboard.setSelectedItemId(options.clickedItemId);
         break;
       case PointerAction.DRAG:
+        break;
+      case PointerAction.RESIZE:
         break;
     }
 

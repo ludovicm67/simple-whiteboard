@@ -18,6 +18,7 @@ import type { SupportedLocales } from "./lib/locales";
 
 import "./components/menu";
 import { allLocales } from "./generated/locale-codes";
+import { RESIZE_HANDLE_SIZE } from "./lib/const";
 
 type Point = {
   x: number;
@@ -275,6 +276,96 @@ export class SimpleWhiteboard extends LitElement {
     return tool.getBoundingRect(item);
   }
 
+  isItemResizable(item: WhiteboardItem): boolean {
+    const tool = this.registeredTools.get(item.kind);
+    if (!tool) {
+      return false;
+    }
+    return tool.isResizable();
+  }
+
+  drawResizeHandles(context: CanvasRenderingContext2D, item: WhiteboardItem) {
+    const boundingRect = this.getBoundingRect(item);
+    if (!boundingRect) {
+      return;
+    }
+    const { x, y, width, height } = boundingRect;
+    const { x: coordX, y: coordY } = this.coordsToCanvasCoords(x, y);
+    const { x: coordWidth, y: coordHeight } = this.coordsToCanvasCoords(
+      x + width,
+      y + height
+    );
+
+    const handleSize = RESIZE_HANDLE_SIZE;
+    const halfHandleSize = handleSize / 2;
+    const handleColor = "#135aa0";
+    const handleBackgroundColor = "#fff";
+
+    // Top left
+    context.fillStyle = handleBackgroundColor;
+    context.fillRect(
+      coordX - halfHandleSize,
+      coordY - halfHandleSize,
+      handleSize,
+      handleSize
+    );
+    context.strokeStyle = handleColor;
+    context.strokeRect(
+      coordX - halfHandleSize,
+      coordY - halfHandleSize,
+      handleSize,
+      handleSize
+    );
+
+    // Top right
+    context.fillStyle = handleBackgroundColor;
+    context.fillRect(
+      coordWidth - halfHandleSize,
+      coordY - halfHandleSize,
+      handleSize,
+      handleSize
+    );
+    context.strokeStyle = handleColor;
+    context.strokeRect(
+      coordWidth - halfHandleSize,
+      coordY - halfHandleSize,
+      handleSize,
+      handleSize
+    );
+
+    // Bottom left
+    context.fillStyle = handleBackgroundColor;
+    context.fillRect(
+      coordX - halfHandleSize,
+      coordHeight - halfHandleSize,
+      handleSize,
+      handleSize
+    );
+    context.strokeStyle = handleColor;
+    context.strokeRect(
+      coordX - halfHandleSize,
+      coordHeight - halfHandleSize,
+      handleSize,
+      handleSize
+    );
+
+    // Bottom right
+    context.fillStyle = handleBackgroundColor;
+    context.fillRect(
+      coordWidth - halfHandleSize,
+      coordHeight - halfHandleSize,
+      handleSize,
+      handleSize
+    );
+    context.strokeStyle = handleColor;
+    context.strokeRect(
+      coordWidth - halfHandleSize,
+      coordHeight - halfHandleSize,
+      handleSize,
+      handleSize
+    );
+  }
+
   drawItemBox(
     context: CanvasRenderingContext2D,
     item: WhiteboardItem,
@@ -320,6 +411,9 @@ export class SimpleWhiteboard extends LitElement {
     }
     if (selectedItem) {
       this.drawItemBox(context, selectedItem);
+      if (this.isItemResizable(selectedItem)) {
+        this.drawResizeHandles(context, selectedItem);
+      }
     }
   }
 

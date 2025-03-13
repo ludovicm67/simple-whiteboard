@@ -34,6 +34,10 @@ export class SimpleWhiteboardToolLine extends SimpleWhiteboardTool {
     return "line";
   }
 
+  public override isResizable(): boolean {
+    return true;
+  }
+
   public override drawItem(
     rc: RoughCanvas,
     _context: CanvasRenderingContext2D,

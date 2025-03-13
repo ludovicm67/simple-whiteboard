@@ -239,6 +239,16 @@ abstract class SimpleWhiteboardTool
     return null;
   }
 
+  /**
+   * Check if the tool is resizable.
+   * By default, a tool is not resizable.
+   *
+   * @returns `true` if the tool is resizable, `false` otherwise.
+   */
+  public isResizable(): boolean {
+    return false;
+  }
+
   protected firstUpdated(): void {
     const simpleWhiteboard = this.lookupSimpleWhiteboardInstance();
     if (simpleWhiteboard) {
