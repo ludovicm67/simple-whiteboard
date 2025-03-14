@@ -16,7 +16,7 @@ import { SimpleWhiteboardToolPen } from "./tools/pen";
 import { SimpleWhiteboardToolText } from "./tools/text";
 import { SimpleWhiteboardToolPicture } from "./tools/picture";
 import { SimpleWhiteboardToolPointer } from "./tools/pointer";
-import { SimpleWhiteboardToolRect } from "./tools/rect";
+import { RectElement } from "./tools/rect/element";
 import { SimpleWhiteboardToolEraser } from "./tools/eraser";
 
 declare global {
@@ -31,7 +31,7 @@ declare global {
     "simple-whiteboard--tool-text": SimpleWhiteboardToolText;
     "simple-whiteboard--tool-picture": SimpleWhiteboardToolPicture;
     "simple-whiteboard--tool-pointer": SimpleWhiteboardToolPointer;
-    "simple-whiteboard--tool-rect": SimpleWhiteboardToolRect;
+    "simple-whiteboard--tool-rect": RectElement;
     "simple-whiteboard--tool-eraser": SimpleWhiteboardToolEraser;
   }
 }
@@ -48,7 +48,7 @@ export {
   SimpleWhiteboardToolText,
   SimpleWhiteboardToolPicture,
   SimpleWhiteboardToolPointer,
-  SimpleWhiteboardToolRect,
+  RectElement,
   SimpleWhiteboardToolEraser,
 };
 export default SimpleWhiteboard;
