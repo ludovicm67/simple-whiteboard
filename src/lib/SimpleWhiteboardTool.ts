@@ -243,7 +243,7 @@ abstract class SimpleWhiteboardTool
     const simpleWhiteboard = this.lookupSimpleWhiteboardInstance();
     if (simpleWhiteboard) {
       this.simpleWhiteboardInstance = simpleWhiteboard;
-      simpleWhiteboard.registerTool(this);
+      // simpleWhiteboard.registerTool(this);
     } else {
       console.error(
         `Failed to register tool: ${this.tagName} (no <simple-whiteboard> parent found)`

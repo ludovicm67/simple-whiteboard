@@ -6,7 +6,7 @@ import "./move";
 import "./pointer";
 import "./rect";
 import "./circle";
-import "./line";
+import "./line/element";
 import "./pen";
 import "./text";
 import "./picture";

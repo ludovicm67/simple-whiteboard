@@ -10,7 +10,7 @@ export type {
 import { SimpleWhiteboardToolCircle } from "./tools/circle";
 import { SimpleWhiteboardToolClear } from "./tools/clear";
 import { SimpleWhiteboardToolDefaults } from "./tools/defaults";
-import { SimpleWhiteboardToolLine } from "./tools/line";
+import { LineElement } from "./tools/line/element";
 import { SimpleWhiteboardToolMove } from "./tools/move";
 import { SimpleWhiteboardToolPen } from "./tools/pen";
 import { SimpleWhiteboardToolText } from "./tools/text";
@@ -25,7 +25,7 @@ declare global {
     "simple-whiteboard--tool-circle": SimpleWhiteboardToolCircle;
     "simple-whiteboard--tool-clear": SimpleWhiteboardToolClear;
     "simple-whiteboard--tool-defaults": SimpleWhiteboardToolDefaults;
-    "simple-whiteboard--tool-line": SimpleWhiteboardToolLine;
+    "simple-whiteboard--tool-line": LineElement;
     "simple-whiteboard--tool-move": SimpleWhiteboardToolMove;
     "simple-whiteboard--tool-pen": SimpleWhiteboardToolPen;
     "simple-whiteboard--tool-text": SimpleWhiteboardToolText;
@@ -42,7 +42,7 @@ export {
   SimpleWhiteboardToolCircle,
   SimpleWhiteboardToolClear,
   SimpleWhiteboardToolDefaults,
-  SimpleWhiteboardToolLine,
+  LineElement,
   SimpleWhiteboardToolMove,
   SimpleWhiteboardToolPen,
   SimpleWhiteboardToolText,

@@ -3,14 +3,14 @@ import { customElement } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { localized, msg } from "@lit/localize";
 
-import "../components/colorSelect";
+import "../../components/colorSelect";
 import SimpleWhiteboardTool, {
   BoundingRect,
   RoughCanvas,
   RoughCanvasOptions,
   WhiteboardItem,
-} from "../lib/SimpleWhiteboardTool";
-import { getIconSvg } from "../lib/icons";
+} from "../../lib/SimpleWhiteboardTool";
+import { getIconSvg } from "../../lib/icons";
 
 interface LineItem extends WhiteboardItem {
   x1: number;
