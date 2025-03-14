@@ -5,7 +5,7 @@ import { customElement } from "lit/decorators.js";
 import "./move";
 import "./pointer";
 import "./rect";
-import "./circle";
+import "./circle/element";
 import "./line/element";
 import "./pen";
 import "./text";
