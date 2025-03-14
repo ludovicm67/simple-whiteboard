@@ -80,6 +80,15 @@ export class CoordsContext {
   }
 
   /**
+   * Get the offset for the canvas coordinates.
+   *
+   * @returns The offset for the canvas coordinates.
+   */
+  public getOffset(): { x: number; y: number } {
+    return { x: this.offsetX, y: this.offsetY };
+  }
+
+  /**
    * Set the zoom level.
    *
    * @param zoom The zoom level.

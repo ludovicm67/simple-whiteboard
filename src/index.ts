@@ -11,7 +11,7 @@ import { CircleElement } from "./tools/circle/element";
 import { SimpleWhiteboardToolClear } from "./tools/clear";
 import { SimpleWhiteboardToolDefaults } from "./tools/defaults";
 import { LineElement } from "./tools/line/element";
-import { SimpleWhiteboardToolMove } from "./tools/move";
+import { MoveElement } from "./tools/move/element";
 import { PenElement } from "./tools/pen/element";
 import { SimpleWhiteboardToolText } from "./tools/text";
 import { SimpleWhiteboardToolPicture } from "./tools/picture";
@@ -26,7 +26,7 @@ declare global {
     "simple-whiteboard--tool-clear": SimpleWhiteboardToolClear;
     "simple-whiteboard--tool-defaults": SimpleWhiteboardToolDefaults;
     "simple-whiteboard--tool-line": LineElement;
-    "simple-whiteboard--tool-move": SimpleWhiteboardToolMove;
+    "simple-whiteboard--tool-move": MoveElement;
     "simple-whiteboard--tool-pen": PenElement;
     "simple-whiteboard--tool-text": SimpleWhiteboardToolText;
     "simple-whiteboard--tool-picture": SimpleWhiteboardToolPicture;
@@ -43,7 +43,7 @@ export {
   SimpleWhiteboardToolClear,
   SimpleWhiteboardToolDefaults,
   LineElement,
-  SimpleWhiteboardToolMove,
+  MoveElement,
   PenElement,
   SimpleWhiteboardToolText,
   SimpleWhiteboardToolPicture,

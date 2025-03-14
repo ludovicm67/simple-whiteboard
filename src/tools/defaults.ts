@@ -2,7 +2,7 @@ import { LitElement, html } from "lit";
 import { customElement } from "lit/decorators.js";
 
 // Import all the tools
-import "./move";
+import "./move/element";
 import "./pointer";
 import "./rect/element";
 import "./circle/element";
