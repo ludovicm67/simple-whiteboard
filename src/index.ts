@@ -12,7 +12,7 @@ import { SimpleWhiteboardToolClear } from "./tools/clear";
 import { SimpleWhiteboardToolDefaults } from "./tools/defaults";
 import { LineElement } from "./tools/line/element";
 import { SimpleWhiteboardToolMove } from "./tools/move";
-import { SimpleWhiteboardToolPen } from "./tools/pen";
+import { PenElement } from "./tools/pen/element";
 import { SimpleWhiteboardToolText } from "./tools/text";
 import { SimpleWhiteboardToolPicture } from "./tools/picture";
 import { SimpleWhiteboardToolPointer } from "./tools/pointer";
@@ -27,7 +27,7 @@ declare global {
     "simple-whiteboard--tool-defaults": SimpleWhiteboardToolDefaults;
     "simple-whiteboard--tool-line": LineElement;
     "simple-whiteboard--tool-move": SimpleWhiteboardToolMove;
-    "simple-whiteboard--tool-pen": SimpleWhiteboardToolPen;
+    "simple-whiteboard--tool-pen": PenElement;
     "simple-whiteboard--tool-text": SimpleWhiteboardToolText;
     "simple-whiteboard--tool-picture": SimpleWhiteboardToolPicture;
     "simple-whiteboard--tool-pointer": SimpleWhiteboardToolPointer;
@@ -44,7 +44,7 @@ export {
   SimpleWhiteboardToolDefaults,
   LineElement,
   SimpleWhiteboardToolMove,
-  SimpleWhiteboardToolPen,
+  PenElement,
   SimpleWhiteboardToolText,
   SimpleWhiteboardToolPicture,
   SimpleWhiteboardToolPointer,

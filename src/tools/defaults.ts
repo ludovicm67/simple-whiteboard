@@ -7,7 +7,7 @@ import "./pointer";
 import "./rect/element";
 import "./circle/element";
 import "./line/element";
-import "./pen";
+import "./pen/element";
 import "./text";
 import "./picture";
 import "./eraser";
