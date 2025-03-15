@@ -28,18 +28,18 @@
   "dependencies": {
     "@lit/localize": "^0.12.2",
     "lit": "^3.2.1",
-    "lucide-static": "^0.479.0",
+    "lucide-static": "^0.482.0",
     "perfect-freehand": "^1.2.2",
     "roughjs": "^4.6.6",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.28.0",
+    "@changesets/cli": "^2.28.1",
     "@lit/localize-tools": "^0.8.0",
     "@types/uuid": "^10.0.0",
-    "typescript": "^5.7.3",
-    "vite": "^6.1.1",
-    "vite-plugin-dts": "^4.5.0",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.2",
+    "vite-plugin-dts": "^4.5.3",
     "vite-plugin-html": "^3.2.2"
   },
   "files": [

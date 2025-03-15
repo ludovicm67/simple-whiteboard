@@ -7,48 +7,48 @@ export type {
   SimpleWhiteboardToolInterface,
   WhiteboardItem,
 } from "./lib/SimpleWhiteboardTool";
-import { SimpleWhiteboardToolCircle } from "./tools/circle";
-import { SimpleWhiteboardToolClear } from "./tools/clear";
-import { SimpleWhiteboardToolDefaults } from "./tools/defaults";
-import { SimpleWhiteboardToolLine } from "./tools/line";
-import { SimpleWhiteboardToolMove } from "./tools/move";
-import { SimpleWhiteboardToolPen } from "./tools/pen";
+import { CircleElement } from "./tools/circle/element";
+import { ClearElement } from "./tools/clear/element";
+import { DefaultTools } from "./tools/defaults";
+import { LineElement } from "./tools/line/element";
+import { MoveElement } from "./tools/move/element";
+import { PenElement } from "./tools/pen/element";
 import { SimpleWhiteboardToolText } from "./tools/text";
 import { SimpleWhiteboardToolPicture } from "./tools/picture";
 import { SimpleWhiteboardToolPointer } from "./tools/pointer";
-import { SimpleWhiteboardToolRect } from "./tools/rect";
+import { RectElement } from "./tools/rect/element";
 import { SimpleWhiteboardToolEraser } from "./tools/eraser";
 
 declare global {
   interface HTMLElementTagNameMap {
     "simple-whiteboard": SimpleWhiteboard;
-    "simple-whiteboard--tool-circle": SimpleWhiteboardToolCircle;
-    "simple-whiteboard--tool-clear": SimpleWhiteboardToolClear;
-    "simple-whiteboard--tool-defaults": SimpleWhiteboardToolDefaults;
-    "simple-whiteboard--tool-line": SimpleWhiteboardToolLine;
-    "simple-whiteboard--tool-move": SimpleWhiteboardToolMove;
-    "simple-whiteboard--tool-pen": SimpleWhiteboardToolPen;
+    "simple-whiteboard--defaults-tools": DefaultTools;
+    "simple-whiteboard--tool-circle": CircleElement;
+    "simple-whiteboard--tool-clear": ClearElement;
+    "simple-whiteboard--tool-line": LineElement;
+    "simple-whiteboard--tool-move": MoveElement;
+    "simple-whiteboard--tool-pen": PenElement;
     "simple-whiteboard--tool-text": SimpleWhiteboardToolText;
     "simple-whiteboard--tool-picture": SimpleWhiteboardToolPicture;
     "simple-whiteboard--tool-pointer": SimpleWhiteboardToolPointer;
-    "simple-whiteboard--tool-rect": SimpleWhiteboardToolRect;
+    "simple-whiteboard--tool-rect": RectElement;
     "simple-whiteboard--tool-eraser": SimpleWhiteboardToolEraser;
   }
 }
 
 export {
   SimpleWhiteboard,
+  DefaultTools,
   SimpleWhiteboardTool,
-  SimpleWhiteboardToolCircle,
-  SimpleWhiteboardToolClear,
-  SimpleWhiteboardToolDefaults,
-  SimpleWhiteboardToolLine,
-  SimpleWhiteboardToolMove,
-  SimpleWhiteboardToolPen,
+  CircleElement,
+  ClearElement,
+  LineElement,
+  MoveElement,
+  PenElement,
   SimpleWhiteboardToolText,
   SimpleWhiteboardToolPicture,
   SimpleWhiteboardToolPointer,
-  SimpleWhiteboardToolRect,
+  RectElement,
   SimpleWhiteboardToolEraser,
 };
 export default SimpleWhiteboard;
