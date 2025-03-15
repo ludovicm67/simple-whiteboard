@@ -27,6 +27,12 @@ export interface WhiteboardItemInterface<T extends WhiteboardItemType> {
   partialUpdate(item: T): void;
   update(item: T): void;
   draw(context: DrawingContext): void;
+  getBoundingBox(): {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null;
 }
 
 /**
@@ -108,5 +114,18 @@ export abstract class WhiteboardItem<T extends WhiteboardItemType>
    */
   public draw(_context: DrawingContext): void {
     // To be implemented by the subclass
+  }
+
+  /**
+   * Get the bounding box of the item.
+   */
+  public getBoundingBox(): {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null {
+    // To be implemented by the subclass
+    return null;
   }
 }

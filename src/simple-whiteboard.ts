@@ -1,15 +1,8 @@
-import {
-  LitElement,
-  PropertyDeclaration,
-  TemplateResult,
-  css,
-  html,
-} from "lit";
+import { LitElement, PropertyDeclaration, TemplateResult, html } from "lit";
 import rough from "roughjs";
 import { customElement, property, state } from "lit/decorators.js";
 import { localized } from "@lit/localize";
-import { RoughCanvas } from "roughjs/bin/canvas";
-import SimpleWhiteboardTool, { BoundingRect } from "./lib/SimpleWhiteboardTool";
+import { BoundingRect } from "./lib/SimpleWhiteboardTool";
 import { setLocale } from "./lib/locales";
 import type { SupportedLocales } from "./lib/locales";
 
@@ -64,15 +57,9 @@ export class SimpleWhiteboard extends LitElement {
   > = new Map();
 
   @state() private items: WhiteboardItem<WhiteboardItemType>[] = [];
-  @state() private canvasCoords: { x: number; y: number; zoom: number } = {
-    x: 0,
-    y: 0,
-    zoom: 1,
-  };
 
   @state() private currentTool: string = "";
   @state() private previousTool: string = "";
-  @state() private currentDrawing: WhiteboardItem<any> | null = null;
 
   @state() private selectedItemId: string | null = null;
   @state() private hoveredItemId: string | null = null;
@@ -91,13 +78,6 @@ export class SimpleWhiteboard extends LitElement {
     }
     this.canvasContext = canvasContext;
     this.handleResize();
-
-    // Some workarounds to make sure everything is displayed on slow devices
-    [20, 100, 200, 500, 1000, 2000].forEach((ms) => {
-      setTimeout(() => {
-        this.requestUpdate();
-      }, ms);
-    });
   }
 
   handleResize() {
@@ -113,24 +93,6 @@ export class SimpleWhiteboard extends LitElement {
     this.draw();
   }
 
-  coordsToCanvasCoords(x: number, y: number): Point {
-    const dX = (this.canvas?.width || 0) / 2;
-    const dY = (this.canvas?.height || 0) / 2;
-    return {
-      x: x * this.canvasCoords.zoom + this.canvasCoords.x + dX,
-      y: y * this.canvasCoords.zoom + this.canvasCoords.y + dY,
-    };
-  }
-
-  coordsFromCanvasCoords(x: number, y: number): Point {
-    const dX = (this.canvas?.width || 0) / 2;
-    const dY = (this.canvas?.height || 0) / 2;
-    return {
-      x: (x - this.canvasCoords.x - dX) / this.canvasCoords.zoom,
-      y: (y - this.canvasCoords.y - dY) / this.canvasCoords.zoom,
-    };
-  }
-
   handleVisibilityChange() {
     if (!this.canvas) {
       return;
@@ -139,47 +101,30 @@ export class SimpleWhiteboard extends LitElement {
     this.draw();
   }
 
-  drawItem(
-    rc: RoughCanvas,
-    context: CanvasRenderingContext2D,
+  getBoundingRect(
     item: WhiteboardItem<WhiteboardItemType>
-  ) {
-    const tool = this.registeredTools.get(item.kind);
-    if (tool) {
-      tool.drawItem(rc, context, item);
-      return;
-    }
-  }
-
-  getBoundingRect(item: WhiteboardItem): BoundingRect | null {
-    const tool = this.registeredTools.get(item.kind);
-    if (!tool) {
-      return null;
-    }
-    return tool.getBoundingRect(item);
+  ): BoundingRect | null {
+    return item.getBoundingBox();
   }
 
   drawItemBox(
     context: CanvasRenderingContext2D,
-    item: WhiteboardItem,
+    item: WhiteboardItem<WhiteboardItemType>,
     boxColor = "#135aa0"
   ): void {
     const boundingRect = this.getBoundingRect(item);
     if (!boundingRect) {
       return;
     }
+
     const { x, y, width, height } = boundingRect;
-    const { x: coordX, y: coordY } = this.coordsToCanvasCoords(x, y);
+    const { x: coordX, y: coordY } = this.coordsContext.convertToCanvas(x, y);
+    const zoom = this.coordsContext.getZoom();
 
     context.strokeStyle = boxColor;
     context.lineWidth = 2;
     context.beginPath();
-    context.rect(
-      coordX,
-      coordY,
-      width * this.canvasCoords.zoom,
-      height * this.canvasCoords.zoom
-    );
+    context.rect(coordX, coordY, width * zoom, height * zoom);
     context.stroke();
   }
 
@@ -206,9 +151,6 @@ export class SimpleWhiteboard extends LitElement {
 
     const drawingContext = this.generateDrawingContext();
     this.items.forEach((item) => item.draw(drawingContext));
-    if (this.currentDrawing) {
-      this.drawItem(drawingContext.roughCanvas, context, this.currentDrawing);
-    }
 
     const selectedItem = this.getSelectedItem();
     const hoveredItem = this.getHoveredItem();
@@ -259,7 +201,7 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   handleDrawingMove(x: number, y: number) {
-    const { x: mouseX, y: mouseY } = this.coordsFromCanvasCoords(x, y);
+    const { x: mouseX, y: mouseY } = this.coordsContext.convertFromCanvas(x, y);
     this.mouseCoords = { x: mouseX, y: mouseY };
     const tool = this.registeredTools.get(this.currentTool);
     if (!tool) {
@@ -353,17 +295,15 @@ export class SimpleWhiteboard extends LitElement {
       const dx = origin.x - this.lastOrigin.x;
       const dy = origin.y - this.lastOrigin.y;
       this.lastOrigin = origin;
-      this.canvasCoords = {
-        ...this.canvasCoords,
-        x: this.canvasCoords.x + dx,
-        y: this.canvasCoords.y + dy,
-      };
+
+      const { x, y } = this.coordsContext.getCoords();
+      this.coordsContext.setCoords(x + dx, y + dy);
 
       const distance = getTouchDistance(e.touches);
       const zoomFactor = distance / this.lastDistance;
       this.lastDistance = distance;
 
-      const zoom = this.canvasCoords.zoom * zoomFactor;
+      const zoom = this.coordsContext.getZoom() * zoomFactor;
       this.setZoom(zoom);
       return;
     }
@@ -385,12 +325,6 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   handleTouchCancel() {
-    if (!this.currentDrawing) {
-      return;
-    }
-
-    this.currentDrawing = null;
-
     this.draw();
   }
 
@@ -443,7 +377,7 @@ export class SimpleWhiteboard extends LitElement {
 
   public clearWhiteboard() {
     this.resetWhiteboard();
-    this.canvasCoords = { x: 0, y: 0, zoom: 1 };
+    this.coordsContext.reset();
     this.draw();
 
     const itemsUpdatedEvent = new CustomEvent("items-updated", {
@@ -614,7 +548,7 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
     this.draw();
   }
 
-  public setItems(items: WhiteboardItem[]) {
+  public setItems(items: WhiteboardItem<WhiteboardItemType>[]) {
     this.items = items;
     this.draw();
   }
@@ -655,11 +589,9 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
     return this.items[index];
   }
 
-  public updateItem(itemId: string, item: WhiteboardItem) {
-    const index = this.items.findIndex(
-      (item: WhiteboardItem) => item.id === itemId
-    );
-    if (index === -1) {
+  public updateItem(itemId: string, item: WhiteboardItem<WhiteboardItemType>) {
+    const index = this.getItemIndexById(itemId);
+    if (!index) {
       return;
     }
 
@@ -692,24 +624,6 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
     }
   }
 
-  public setCurrentDrawing(item: WhiteboardItem | null) {
-    this.currentDrawing = item;
-    this.draw();
-  }
-
-  public getCurrentDrawing(): WhiteboardItem | null {
-    return this.currentDrawing;
-  }
-
-  public getCanvasCoords() {
-    return this.canvasCoords;
-  }
-
-  public setCanvasCoords(coords: { x: number; y: number; zoom: number }) {
-    this.canvasCoords = coords;
-    this.draw();
-  }
-
   public setHoveredItemId(itemId: string | null) {
     this.hoveredItemId = itemId;
   }
@@ -718,7 +632,7 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
     return this.hoveredItemId;
   }
 
-  public getHoveredItem(): WhiteboardItem | null {
+  public getHoveredItem(): WhiteboardItem<WhiteboardItemType> | null {
     if (!this.hoveredItemId) {
       return null;
     }
@@ -734,11 +648,13 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
     return this.selectedItemId;
   }
 
-  public getToolInstance(toolName: string): SimpleWhiteboardTool | undefined {
+  public getToolInstance(
+    toolName: string
+  ): WhiteboardTool<WhiteboardItem<WhiteboardItemType>> | undefined {
     return this.registeredTools.get(toolName);
   }
 
-  public getSelectedItem(): WhiteboardItem | null {
+  public getSelectedItem(): WhiteboardItem<WhiteboardItemType> | null {
     if (!this.selectedItemId) {
       return null;
     }
@@ -748,13 +664,11 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
 
   public updateItemById(
     itemId: string,
-    item: WhiteboardItem,
+    item: WhiteboardItem<WhiteboardItemType>,
     sendEvent = false
   ) {
-    const index = this.items.findIndex(
-      (item: WhiteboardItem) => item.id === itemId
-    );
-    if (index === -1) {
+    const index = this.getItemIndexById(itemId);
+    if (!index) {
       return;
     }
 
@@ -782,10 +696,8 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
    * @param sendEvent Whether to send an event to notify the removal of the item.
    */
   public removeItemById(itemId: string, sendEvent = false): void {
-    const index = this.items.findIndex(
-      (item: WhiteboardItem) => item.id === itemId
-    );
-    if (index === -1) {
+    const index = this.getItemIndexById(itemId);
+    if (!index) {
       return;
     }
 

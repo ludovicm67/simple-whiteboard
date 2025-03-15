@@ -1,5 +1,3 @@
-import { Point } from "./point";
-
 /**
  * Context for the coordinates of the whiteboard.
  */
@@ -16,28 +14,6 @@ export class CoordsContext {
     this.x = x;
     this.y = y;
     this.zoom = zoom;
-  }
-
-  /**
-   * Convert the point from the canvas coordinates to the coordinates of the whiteboard.
-   *
-   * @param point Point in the canvas coordinates.
-   * @returns Point in the coordinates of the whiteboard.
-   */
-  public convertPointFromCanvas(point: Point): Point {
-    const { x, y } = this.convertFromCanvas(point.getX(), point.getY());
-    return new Point(x, y);
-  }
-
-  /**
-   * Convert the point from the coordinates of the whiteboard to the canvas coordinates.
-   *
-   * @param point Point in the coordinates of the whiteboard.
-   * @returns Point in the canvas coordinates.
-   */
-  public convertPointToCanvas(point: Point): Point {
-    const { x, y } = this.convertToCanvas(point.getX(), point.getY());
-    return new Point(x, y);
   }
 
   /**
@@ -111,5 +87,25 @@ export class CoordsContext {
    */
   public getCoords(): { x: number; y: number } {
     return { x: this.x, y: this.y };
+  }
+
+  /**
+   * Set the coordinates of the whiteboard.
+   *
+   * @param x The x-coordinate.
+   * @param y The y-coordinate.
+   */
+  public setCoords(x: number, y: number): void {
+    this.x = x;
+    this.y = y;
+  }
+
+  /**
+   * Reset the coordinates and zoom level.
+   */
+  public reset(): void {
+    this.x = 0;
+    this.y = 0;
+    this.zoom = 1;
   }
 }
