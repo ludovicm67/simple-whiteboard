@@ -11,7 +11,7 @@ import "./pen/element";
 import "./text";
 import "./picture";
 import "./eraser";
-import "./clear";
+import "./clear/element";
 
 @customElement("simple-whiteboard--tool-defaults")
 export class SimpleWhiteboardToolDefaults extends LitElement {

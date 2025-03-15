@@ -8,7 +8,7 @@ export type {
   WhiteboardItem,
 } from "./lib/SimpleWhiteboardTool";
 import { CircleElement } from "./tools/circle/element";
-import { SimpleWhiteboardToolClear } from "./tools/clear";
+import { ClearElement } from "./tools/clear/element";
 import { SimpleWhiteboardToolDefaults } from "./tools/defaults";
 import { LineElement } from "./tools/line/element";
 import { MoveElement } from "./tools/move/element";
@@ -23,7 +23,7 @@ declare global {
   interface HTMLElementTagNameMap {
     "simple-whiteboard": SimpleWhiteboard;
     "simple-whiteboard--tool-circle": CircleElement;
-    "simple-whiteboard--tool-clear": SimpleWhiteboardToolClear;
+    "simple-whiteboard--tool-clear": ClearElement;
     "simple-whiteboard--tool-defaults": SimpleWhiteboardToolDefaults;
     "simple-whiteboard--tool-line": LineElement;
     "simple-whiteboard--tool-move": MoveElement;
@@ -40,7 +40,7 @@ export {
   SimpleWhiteboard,
   SimpleWhiteboardTool,
   CircleElement,
-  SimpleWhiteboardToolClear,
+  ClearElement,
   SimpleWhiteboardToolDefaults,
   LineElement,
   MoveElement,
