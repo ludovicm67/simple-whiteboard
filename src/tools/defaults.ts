@@ -10,7 +10,7 @@ import "./line/element";
 import "./pen/element";
 import "./text";
 import "./picture";
-import "./eraser";
+import "./eraser/element";
 import "./clear/element";
 
 @customElement("simple-whiteboard--tool-defaults")
