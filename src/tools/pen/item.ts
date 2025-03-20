@@ -121,4 +121,30 @@ export class PenItem extends WhiteboardItem<PenItemType> {
     context.canvas.fill(path2D);
     context.canvas.fillStyle = prevFillStyle;
   }
+
+  /**
+   * Get the item's options.
+   */
+  public getOptions(): PenItemOptions {
+    return this.options;
+  }
+
+  /**
+   * Set the item's options.
+   *
+   * @param options The new options.
+   */
+  public setOptions(options: PenItemOptions): void {
+    this.options = options;
+  }
+
+  /**
+   * Update the item's options.
+   */
+  public updateOptions(options: Partial<PenItemOptions>): void {
+    this.options = {
+      ...this.options,
+      ...options,
+    };
+  }
 }
