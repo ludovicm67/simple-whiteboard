@@ -9,7 +9,7 @@ import "./circle/element";
 import "./line/element";
 import "./pen/element";
 // import "./text";
-// import "./picture";
+import "./picture/element";
 import "./eraser/element";
 import "./clear/element";
 

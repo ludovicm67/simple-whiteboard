@@ -530,6 +530,10 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
     `;
   }
 
+  public getDefaultToolName(): string {
+    return "pointer";
+  }
+
   public getItems(): WhiteboardItem<WhiteboardItemType>[] {
     return this.items;
   }
