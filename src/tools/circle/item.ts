@@ -114,4 +114,30 @@ export class CircleItem extends WhiteboardItem<CircleItemType> {
       ...optionsOverride,
     });
   }
+
+  /**
+   * Get the item's options.
+   */
+  public getOptions(): RoughCanvasOptions {
+    return this.options;
+  }
+
+  /**
+   * Set the item's options.
+   *
+   * @param options The new options.
+   */
+  public setOptions(options: RoughCanvasOptions): void {
+    this.options = options;
+  }
+
+  /**
+   * Update the item's options.
+   */
+  public updateOptions(options: Partial<RoughCanvasOptions>): void {
+    this.options = {
+      ...this.options,
+      ...options,
+    };
+  }
 }

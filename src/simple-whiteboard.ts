@@ -1,13 +1,10 @@
 import { LitElement, PropertyDeclaration, TemplateResult, html } from "lit";
 import rough from "roughjs";
 import { customElement, property, state } from "lit/decorators.js";
-import { localized } from "@lit/localize";
 import { BoundingRect } from "./lib/SimpleWhiteboardTool";
-import { setLocale } from "./lib/locales";
-import type { SupportedLocales } from "./lib/locales";
+import { I18nContext } from "./lib/locales";
 
 import "./components/menu";
-import { allLocales } from "./generated/locale-codes";
 import { WhiteboardTool } from "./lib/tool";
 import {
   ExportedWhiteboardItem,
@@ -30,7 +27,6 @@ const getTouchDistance = (touches: TouchList): number => {
 };
 
 @customElement("simple-whiteboard")
-@localized()
 export class SimpleWhiteboard extends LitElement {
   @property({ type: Boolean })
   debug = false;
@@ -39,8 +35,12 @@ export class SimpleWhiteboard extends LitElement {
   hideLocalePicker = false;
 
   @property()
-  locale: SupportedLocales = "en";
+  locale: string = "en";
 
+  @state()
+  isReady: boolean = false;
+
+  private i18nContext: I18nContext = new I18nContext();
   private coordsContext: CoordsContext = new CoordsContext();
 
   private mouseCoords: Point = { x: 0, y: 0 };
@@ -172,6 +172,13 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   connectedCallback(): void {
+    this.isReady = true;
+    const i18n = this.i18nContext.getInstance();
+    i18n.on("languageChanged", (lang: string) => {
+      this.locale = lang;
+      console.log("Language changed event", lang);
+      this.requestUpdate();
+    });
     window.addEventListener("keydown", this.handleKeyDown.bind(this));
     window.addEventListener("resize", this.handleResize.bind(this));
     document.addEventListener(
@@ -182,6 +189,9 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   disconnectedCallback(): void {
+    this.isReady = false;
+    const i18n = this.i18nContext.getInstance();
+    i18n.off("languageChanged");
     document.removeEventListener(
       "visibilitychange",
       this.handleVisibilityChange.bind(this)
@@ -354,6 +364,7 @@ export class SimpleWhiteboard extends LitElement {
     const toolName = tool.getName();
     this.registeredTools.set(toolName, tool);
     this.draw();
+    this.requestUpdate();
   }
 
   requestUpdate(
@@ -364,9 +375,12 @@ export class SimpleWhiteboard extends LitElement {
     if (this.debug) {
       console.log("Request update", name, oldValue, options);
     }
-    if (allLocales.includes(this.locale)) {
-      setLocale(this.locale);
+
+    // Make sure to update the locale in the i18n context if the 'locale' property changes
+    if (name === "locale" && this.i18nContext && this.locale !== oldValue) {
+      this.i18nContext.setLocale(this.locale);
     }
+
     super.requestUpdate(name, oldValue, options);
   }
 
@@ -399,7 +413,6 @@ export class SimpleWhiteboard extends LitElement {
     if (!options) {
       return null;
     }
-
     return html`<div class="tools-options">${options}</div>`;
   }
 
@@ -493,6 +506,10 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
   }
 
   render() {
+    if (!this.isReady) {
+      return null;
+    }
+
     return html`
       <div class="root">
         ${this.renderMenu()}
@@ -521,6 +538,10 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
 
   public getCoordsContext(): CoordsContext {
     return this.coordsContext;
+  }
+
+  public getI18nContext(): I18nContext {
+    return this.i18nContext;
   }
 
   public exportItems(): ExportedWhiteboardItem<WhiteboardItemType>[] {

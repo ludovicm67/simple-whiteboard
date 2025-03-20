@@ -1,7 +1,6 @@
 import { html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
-import { localized, msg } from "@lit/localize";
 
 import "../components/colorSelect";
 import SimpleWhiteboardTool, {
@@ -25,7 +24,6 @@ interface EraserItem extends WhiteboardItem {
 }
 
 @customElement("simple-whiteboard--tool-eraser")
-@localized()
 export class SimpleWhiteboardToolEraser extends SimpleWhiteboardTool {
   private size = 25;
   private smoothing = 0.5;

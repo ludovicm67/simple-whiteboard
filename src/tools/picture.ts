@@ -1,7 +1,6 @@
 import { html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
-import { localized, msg } from "@lit/localize";
 
 import SimpleWhiteboardTool, {
   BoundingRect,
@@ -21,7 +20,6 @@ interface PictureItem extends WhiteboardItem {
 const min = (a: number, b: number) => (a < b ? a : b);
 
 @customElement("simple-whiteboard--tool-picture")
-@localized()
 export class SimpleWhiteboardToolPicture extends SimpleWhiteboardTool {
   private pictureCache: Map<string, HTMLImageElement> = new Map();
 

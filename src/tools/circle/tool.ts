@@ -90,4 +90,53 @@ export class CircleTool extends WhiteboardTool<CircleItem> {
   public getCurrentOptions(): RoughCanvasOptions {
     return this.currentOptions;
   }
+
+  public updateCurrentOptions(options: RoughCanvasOptions): void {
+    this.currentOptions = {
+      ...this.currentOptions,
+      ...options,
+    };
+  }
+
+  public override renderToolOptions(item: CircleItem | null) {
+    const whiteboard = this.getSimpleWhiteboardInstance();
+    const i18n = whiteboard.getI18nContext();
+
+    // Case: no item selected = new item
+    if (!item) {
+      const currentOptions = this.getCurrentOptions();
+      return html`
+        <p>${i18n.t("tool-options-stroke-width")}</p>
+        <input
+          class="width-100-percent"
+          type="range"
+          min="1"
+          max="50"
+          step="7"
+          .value=${currentOptions.strokeWidth}
+          @input=${(e: Event) => {
+            const target = e.target as HTMLInputElement;
+            this.updateCurrentOptions({
+              strokeWidth: parseInt(target.value, 10),
+            });
+          }}
+        />
+        <p>${i18n.t("tool-options-stroke")}</p>
+      `;
+    }
+
+    // Case: item selected
+    const currentOptions = item.getOptions();
+    return html`
+      <p>${i18n.t("tool-options-stroke-width")}</p>
+      <button
+        class="button width-100-percent"
+        @click=${() => {
+          whiteboard.removeItemById(item.getId(), true);
+        }}
+      >
+        ${i18n.t("tool-options-delete")}
+      </button>
+    `;
+  }
 }

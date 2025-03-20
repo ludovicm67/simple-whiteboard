@@ -13,7 +13,7 @@ import "./picture";
 import "./eraser";
 import "./clear/element";
 
-@customElement("simple-whiteboard--defaults-tools")
+@customElement("simple-whiteboard--tool-defaults")
 export class DefaultTools extends LitElement {
   // This is a workaround to prevent LitElement from creating a shadow root.
   createRenderRoot() {

@@ -1,7 +1,6 @@
 import { TemplateResult, html } from "lit";
 import { customElement } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
-import { localized, msg } from "@lit/localize";
 
 import SimpleWhiteboardTool, {
   WhiteboardItem,
@@ -27,7 +26,6 @@ interface PointerItem extends WhiteboardItem {
 }
 
 @customElement("simple-whiteboard--tool-pointer")
-@localized()
 export class SimpleWhiteboardToolPointer extends SimpleWhiteboardTool {
   private throttleMouseMove = throttle(this.handleMouseMoveThrottled, 150);
 

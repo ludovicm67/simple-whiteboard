@@ -22,7 +22,7 @@ import { SimpleWhiteboardToolEraser } from "./tools/eraser";
 declare global {
   interface HTMLElementTagNameMap {
     "simple-whiteboard": SimpleWhiteboard;
-    "simple-whiteboard--defaults-tools": DefaultTools;
+    "simple-whiteboard--tool-defaults": DefaultTools;
     "simple-whiteboard--tool-circle": CircleElement;
     "simple-whiteboard--tool-clear": ClearElement;
     "simple-whiteboard--tool-line": LineElement;
