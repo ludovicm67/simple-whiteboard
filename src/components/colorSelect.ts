@@ -12,7 +12,7 @@ export class ColorSelect extends LitElement {
       border-radius: 5px;
       padding: 12px;
       cursor: pointer;
-      border: 1px solid var(--border-color, #fff);
+      border: 2px solid var(--border-color, #fff);
       box-sizing: border-box;
       background-image: var(--bg-image, none);
       margin: 2px;
@@ -28,7 +28,7 @@ export class ColorSelect extends LitElement {
     }
 
     div:hover {
-      border: 1px solid #000;
+      border: 2px solid #000;
     }
   `;
 
@@ -37,6 +37,15 @@ export class ColorSelect extends LitElement {
 
   @property({ type: Boolean })
   selected = false;
+
+  fireUpdateEvent() {
+    this.dispatchEvent(
+      new CustomEvent("request-simple-whiteboard-update", {
+        bubbles: true,
+        composed: true,
+      })
+    );
+  }
 
   updated(changedProperties: Map<string | number | symbol, unknown>) {
     if (changedProperties.has("color")) {
@@ -48,10 +57,12 @@ export class ColorSelect extends LitElement {
         this.style.setProperty("--bg-image", "none");
         this.shadowRoot?.querySelector("div")?.classList.remove("transparent");
       }
+      this.fireUpdateEvent();
     }
 
     if (changedProperties.has("selected")) {
       this.style.setProperty("--border-color", this.selected ? "#000" : "#fff");
+      this.fireUpdateEvent();
     }
   }
 

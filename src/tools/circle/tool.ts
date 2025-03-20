@@ -5,6 +5,8 @@ import { getIconSvg } from "../../lib/icons";
 import { CircleItem } from "./item";
 import { RoughCanvasOptions } from "../../lib/SimpleWhiteboardTool";
 
+import "../../components/colorSelect";
+
 export const CIRCLE_TOOL_NAME = "circle";
 
 export class CircleTool extends WhiteboardTool<CircleItem> {
@@ -98,6 +100,23 @@ export class CircleTool extends WhiteboardTool<CircleItem> {
     };
   }
 
+  generateColorSelect(
+    colors: string[],
+    currentColor: string,
+    clickCallback: (color: string) => void
+  ) {
+    return colors.map((color) => {
+      return html`<color-select
+        color=${color}
+        .selected=${currentColor === color}
+        @color-click=${(e: CustomEvent) => {
+          clickCallback(e.detail.color);
+          this.getSimpleWhiteboardInstance().requestUpdate();
+        }}
+      ></color-select>`;
+    });
+  }
+
   public override renderToolOptions(item: CircleItem | null) {
     const whiteboard = this.getSimpleWhiteboardInstance();
     const i18n = whiteboard.getI18nContext();
@@ -122,6 +141,25 @@ export class CircleTool extends WhiteboardTool<CircleItem> {
           }}
         />
         <p>${i18n.t("tool-options-stroke")}</p>
+        ${this.generateColorSelect(
+          ["#000000", "#ff1a40", "#29b312", "#135aa0", "#fc8653"],
+          currentOptions.stroke || "#000000",
+          (color) => {
+            this.updateCurrentOptions({
+              stroke: color,
+            });
+          }
+        )}
+        <p>${i18n.t("tool-options-fill")}</p>
+        ${this.generateColorSelect(
+          ["transparent", "#ff8dad", "#9bff8c", "#8fddff", "#ffc7a9"],
+          currentOptions.fill || "transparent",
+          (color) => {
+            this.updateCurrentOptions({
+              fill: color,
+            });
+          }
+        )}
       `;
     }
 
@@ -129,6 +167,54 @@ export class CircleTool extends WhiteboardTool<CircleItem> {
     const currentOptions = item.getOptions();
     return html`
       <p>${i18n.t("tool-options-stroke-width")}</p>
+      <input
+        class="width-100-percent"
+        type="range"
+        min="1"
+        max="50"
+        step="7"
+        .value=${currentOptions.strokeWidth}
+        @input=${(e: Event) => {
+          const target = e.target as HTMLInputElement;
+          const value = parseInt(target.value, 10);
+
+          this.updateCurrentOptions({
+            strokeWidth: value,
+          });
+
+          item.partialUpdate({
+            options: { ...currentOptions, strokeWidth: value },
+          });
+        }}
+      />
+      <p>${i18n.t("tool-options-stroke")}</p>
+      ${this.generateColorSelect(
+        ["#000000", "#ff1a40", "#29b312", "#135aa0", "#fc8653"],
+        currentOptions.stroke || "#000000",
+        (color) => {
+          this.updateCurrentOptions({
+            stroke: color,
+          });
+
+          item.partialUpdate({
+            options: { ...currentOptions, stroke: color },
+          });
+        }
+      )}
+      <p>${i18n.t("tool-options-fill")}</p>
+      ${this.generateColorSelect(
+        ["transparent", "#ff8dad", "#9bff8c", "#8fddff", "#ffc7a9"],
+        currentOptions.fill || "transparent",
+        (color) => {
+          this.updateCurrentOptions({
+            fill: color,
+          });
+
+          item.partialUpdate({
+            options: { ...currentOptions, fill: color },
+          });
+        }
+      )}
       <button
         class="button width-100-percent"
         @click=${() => {
