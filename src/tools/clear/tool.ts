@@ -35,9 +35,6 @@ export class ClearTool extends WhiteboardTool<ClearItem> {
    */
   public override onToolSelected(): void {
     const simpleWhiteboard = this.getSimpleWhiteboardInstance();
-    if (!simpleWhiteboard) {
-      return;
-    }
     simpleWhiteboard.clearWhiteboard();
 
     // Select the previous tool

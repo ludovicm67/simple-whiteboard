@@ -146,4 +146,24 @@ export class RectItem extends WhiteboardItem<RectItemType> {
       ...options,
     };
   }
+
+  /**
+   * Get the bounding box of the item.
+   */
+  public override getBoundingBox(): {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null {
+    const strokeWidth = this.options.strokeWidth ?? 1;
+    const halfStrokeWidth = strokeWidth / 2;
+
+    return {
+      x: this.x - halfStrokeWidth,
+      y: this.y - halfStrokeWidth,
+      width: this.width + strokeWidth,
+      height: this.height + strokeWidth,
+    };
+  }
 }

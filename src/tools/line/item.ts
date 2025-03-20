@@ -147,4 +147,24 @@ export class LineItem extends WhiteboardItem<LineItemType> {
       ...options,
     };
   }
+
+  /**
+   * Get the bounding box of the item.
+   */
+  public override getBoundingBox(): {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null {
+    const strokeWidth = this.options.strokeWidth ?? 1;
+    const halfStrokeWidth = strokeWidth / 2;
+
+    return {
+      x: Math.min(this.x1, this.x2) - halfStrokeWidth,
+      y: Math.min(this.y1, this.y2) - halfStrokeWidth,
+      width: Math.abs(this.x2 - this.x1) + strokeWidth,
+      height: Math.abs(this.y2 - this.y1) + strokeWidth,
+    };
+  }
 }

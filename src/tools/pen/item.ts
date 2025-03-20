@@ -147,4 +147,32 @@ export class PenItem extends WhiteboardItem<PenItemType> {
       ...options,
     };
   }
+
+  /**
+   * Get the bounding box of the item.
+   */
+  public override getBoundingBox(): {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null {
+    const strokeWidth = this.options.size ?? 1;
+    const halfStrokeWidth = strokeWidth / 2;
+
+    const xValues = this.path.map(({ x }) => x);
+    const yValues = this.path.map(({ y }) => y);
+
+    const minX = Math.min(...xValues) - halfStrokeWidth;
+    const minY = Math.min(...yValues) - halfStrokeWidth;
+    const maxX = Math.max(...xValues) + halfStrokeWidth;
+    const maxY = Math.max(...yValues) + halfStrokeWidth;
+
+    return {
+      x: minX,
+      y: minY,
+      width: maxX - minX,
+      height: maxY - minY,
+    };
+  }
 }

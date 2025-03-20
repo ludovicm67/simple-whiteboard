@@ -646,7 +646,10 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
   }
 
   public setHoveredItemId(itemId: string | null) {
-    this.hoveredItemId = itemId;
+    if (itemId !== this.hoveredItemId) {
+      this.hoveredItemId = itemId;
+      this.draw();
+    }
   }
 
   public getHoveredItemId(): string | null {

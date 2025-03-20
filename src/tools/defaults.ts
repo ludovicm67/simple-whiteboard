@@ -3,7 +3,7 @@ import { customElement } from "lit/decorators.js";
 
 // Import all the tools
 import "./move/element";
-import "./pointer";
+import "./pointer/element";
 import "./rect/element";
 import "./circle/element";
 import "./line/element";

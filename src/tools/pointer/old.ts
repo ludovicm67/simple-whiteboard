@@ -4,10 +4,10 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 import SimpleWhiteboardTool, {
   WhiteboardItem,
-} from "../lib/SimpleWhiteboardTool";
-import { getIconSvg } from "../lib/icons";
-import { SimpleWhiteboard } from "../simple-whiteboard";
-import { throttle } from "../lib/time";
+} from "../../lib/SimpleWhiteboardTool";
+import { getIconSvg } from "../../lib/icons";
+import { SimpleWhiteboard } from "../../simple-whiteboard";
+import { throttle } from "../../lib/time";
 
 enum PointerAction {
   SELECT = "select",

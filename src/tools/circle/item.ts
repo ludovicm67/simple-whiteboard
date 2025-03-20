@@ -140,4 +140,26 @@ export class CircleItem extends WhiteboardItem<CircleItemType> {
       ...options,
     };
   }
+
+  /**
+   * Get the bounding box of the item.
+   */
+  public override getBoundingBox(): {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null {
+    const strokeWidth = this.options.strokeWidth ?? 1;
+    const halfStrokeWidth = strokeWidth / 2;
+    const diameter = this.diameter;
+    const radius = diameter / 2;
+
+    return {
+      x: this.x - radius - halfStrokeWidth,
+      y: this.y - radius - halfStrokeWidth,
+      width: diameter + strokeWidth,
+      height: diameter + strokeWidth,
+    };
+  }
 }
