@@ -1,7 +1,7 @@
 import i18next, { i18n, TFunction } from "i18next";
 
 const getLocaleContent = async (locale: string): Promise<any> => {
-  const content = (await import(`../../locales/${locale}`)).default;
+  const content = (await import(`../../locales/${locale}.json`)).default;
   return content;
 };
 
