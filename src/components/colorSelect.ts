@@ -38,15 +38,6 @@ export class ColorSelect extends LitElement {
   @property({ type: Boolean })
   selected = false;
 
-  fireUpdateEvent() {
-    this.dispatchEvent(
-      new CustomEvent("request-simple-whiteboard-update", {
-        bubbles: true,
-        composed: true,
-      })
-    );
-  }
-
   updated(changedProperties: Map<string | number | symbol, unknown>) {
     if (changedProperties.has("color")) {
       this.style.setProperty("--bg-color", this.color);
@@ -57,12 +48,10 @@ export class ColorSelect extends LitElement {
         this.style.setProperty("--bg-image", "none");
         this.shadowRoot?.querySelector("div")?.classList.remove("transparent");
       }
-      this.fireUpdateEvent();
     }
 
     if (changedProperties.has("selected")) {
       this.style.setProperty("--border-color", this.selected ? "#000" : "#fff");
-      this.fireUpdateEvent();
     }
   }
 
