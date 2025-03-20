@@ -629,6 +629,17 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
     }
     this.items[index].partialUpdate(updates);
     this.draw();
+
+    if (sendEvent) {
+      const itemsUpdatedEvent = new CustomEvent("items-updated", {
+        detail: {
+          type: "partial-update",
+          itemId,
+          updates,
+        },
+      });
+      this.dispatchEvent(itemsUpdatedEvent);
+    }
   }
 
   public clear() {
