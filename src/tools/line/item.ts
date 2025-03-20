@@ -167,4 +167,25 @@ export class LineItem extends WhiteboardItem<LineItemType> {
       height: Math.abs(this.y2 - this.y1) + strokeWidth,
     };
   }
+
+  /**
+   * Return the relative move operation of the item.
+   * The operation is the partial update that needs to be done to move the item.
+   *
+   * @param dx The amount to move in the x direction.
+   * @param dy The amount to move in the y direction.
+   *
+   * @returns the partial update to perform if the item can be moved, `null` otherwise.
+   */
+  public override relativeMoveOperation(
+    dx: number,
+    dy: number
+  ): Partial<LineItemType> | null {
+    return {
+      x1: this.x1 + dx,
+      y1: this.y1 + dy,
+      x2: this.x2 + dx,
+      y2: this.y2 + dy,
+    };
+  }
 }

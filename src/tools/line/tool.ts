@@ -72,7 +72,7 @@ export class LineTool extends WhiteboardTool<LineItem> {
       return;
     }
 
-    item.partialUpdate({
+    whiteboard.partialItemUpdateById(this.currentItemId, {
       x2: whiteboardX,
       y2: whiteboardY,
     });
@@ -148,6 +148,7 @@ export class LineTool extends WhiteboardTool<LineItem> {
 
     // Case: item selected
     const currentOptions = item.getOptions();
+    const itemId = item.getId();
     return html`
       <p>${i18n.t("tool-options-stroke-width")}</p>
       <input
@@ -165,7 +166,7 @@ export class LineTool extends WhiteboardTool<LineItem> {
             strokeWidth: value,
           });
 
-          item.partialUpdate({
+          whiteboard.partialItemUpdateById(itemId, {
             options: { ...currentOptions, strokeWidth: value },
           });
         }}
@@ -179,7 +180,7 @@ export class LineTool extends WhiteboardTool<LineItem> {
             stroke: color,
           });
 
-          item.partialUpdate({
+          whiteboard.partialItemUpdateById(itemId, {
             options: { ...currentOptions, stroke: color },
           });
         }

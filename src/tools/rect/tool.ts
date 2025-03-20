@@ -78,7 +78,7 @@ export class RectTool extends WhiteboardTool<RectItem> {
     const width = whiteboardX - itemData.x;
     const height = whiteboardY - itemData.y;
 
-    item.partialUpdate({
+    whiteboard.partialItemUpdateById(this.currentItemId, {
       width,
       height,
     });
@@ -164,6 +164,7 @@ export class RectTool extends WhiteboardTool<RectItem> {
 
     // Case: item selected
     const currentOptions = item.getOptions();
+    const itemId = item.getId();
     return html`
       <p>${i18n.t("tool-options-stroke-width")}</p>
       <input
@@ -181,7 +182,7 @@ export class RectTool extends WhiteboardTool<RectItem> {
             strokeWidth: value,
           });
 
-          item.partialUpdate({
+          whiteboard.partialItemUpdateById(itemId, {
             options: { ...currentOptions, strokeWidth: value },
           });
         }}
@@ -195,7 +196,7 @@ export class RectTool extends WhiteboardTool<RectItem> {
             stroke: color,
           });
 
-          item.partialUpdate({
+          whiteboard.partialItemUpdateById(itemId, {
             options: { ...currentOptions, stroke: color },
           });
         }
@@ -209,7 +210,7 @@ export class RectTool extends WhiteboardTool<RectItem> {
             fill: color,
           });
 
-          item.partialUpdate({
+          whiteboard.partialItemUpdateById(itemId, {
             options: { ...currentOptions, fill: color },
           });
         }

@@ -72,7 +72,7 @@ export class PenTool extends WhiteboardTool<PenItem> {
     }
 
     const itemData = item.export().data;
-    item.partialUpdate({
+    whiteboard.partialItemUpdateById(this.currentItemId, {
       path: [...itemData.path, { x: whiteboardX, y: whiteboardY }],
     });
   }
@@ -147,6 +147,7 @@ export class PenTool extends WhiteboardTool<PenItem> {
 
     // Case: item selected
     const currentOptions = item.getOptions();
+    const itemId = item.getId();
     return html`
       <p>${i18n.t("tool-options-size")}</p>
       <input
@@ -164,7 +165,7 @@ export class PenTool extends WhiteboardTool<PenItem> {
             size: value,
           });
 
-          item.partialUpdate({
+          whiteboard.partialItemUpdateById(itemId, {
             options: { ...currentOptions, size: value },
           });
         }}
@@ -178,7 +179,7 @@ export class PenTool extends WhiteboardTool<PenItem> {
             color: color,
           });
 
-          item.partialUpdate({
+          whiteboard.partialItemUpdateById(itemId, {
             options: { ...currentOptions, color: color },
           });
         }

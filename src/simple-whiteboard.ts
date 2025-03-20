@@ -14,6 +14,7 @@ import {
 import { DrawingContext } from "./lib/types";
 import { CoordsContext } from "./lib/coords";
 import { styles } from "./styles";
+import { item } from "./tools/line";
 
 type Point = {
   x: number;
@@ -404,8 +405,11 @@ export class SimpleWhiteboard extends LitElement {
 
   renderToolsOptions(): TemplateResult | null {
     const selectedItem = this.getSelectedItem();
-
-    const tool = this.registeredTools.get(this.currentTool);
+    const currentTool = this.registeredTools.get(this.currentTool);
+    const selectedItemTool = selectedItem
+      ? this.registeredTools.get(selectedItem.getType())
+      : null;
+    const tool = selectedItemTool || currentTool;
     if (!tool) {
       return null;
     }
@@ -612,11 +616,24 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
 
   public updateItem(itemId: string, item: WhiteboardItem<WhiteboardItemType>) {
     const index = this.getItemIndexById(itemId);
-    if (!index) {
+    if (index === null) {
       return;
     }
 
     this.items[index] = item;
+    this.draw();
+  }
+
+  public partialItemUpdateById(
+    itemId: string,
+    updates: Partial<WhiteboardItemType>,
+    sendEvent = false
+  ) {
+    const index = this.getItemIndexById(itemId);
+    if (index === null) {
+      return;
+    }
+    this.items[index].partialUpdate(updates);
     this.draw();
   }
 
@@ -634,6 +651,10 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
   }
 
   public setCurrentTool(tool: string, updatePreviousTool = true) {
+    const previousToolInstance = this.registeredTools.get(this.currentTool);
+    if (previousToolInstance) {
+      previousToolInstance.onToolUnselected();
+    }
     if (updatePreviousTool) {
       this.previousTool = this.currentTool;
     }
@@ -692,7 +713,7 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
     sendEvent = false
   ) {
     const index = this.getItemIndexById(itemId);
-    if (!index) {
+    if (index === null) {
       return;
     }
 
@@ -721,7 +742,7 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
    */
   public removeItemById(itemId: string, sendEvent = false): void {
     const index = this.getItemIndexById(itemId);
-    if (!index) {
+    if (index === null) {
       return;
     }
 

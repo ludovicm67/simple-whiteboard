@@ -80,7 +80,7 @@ export class CircleTool extends WhiteboardTool<CircleItem> {
           Math.pow(whiteboardY - itemData.y, 2)
       ) * 2;
 
-    item.partialUpdate({
+    whiteboard.partialItemUpdateById(this.currentItemId, {
       diameter,
     });
   }
@@ -165,6 +165,7 @@ export class CircleTool extends WhiteboardTool<CircleItem> {
 
     // Case: item selected
     const currentOptions = item.getOptions();
+    const itemId = item.getId();
     return html`
       <p>${i18n.t("tool-options-stroke-width")}</p>
       <input
@@ -182,7 +183,7 @@ export class CircleTool extends WhiteboardTool<CircleItem> {
             strokeWidth: value,
           });
 
-          item.partialUpdate({
+          whiteboard.partialItemUpdateById(itemId, {
             options: { ...currentOptions, strokeWidth: value },
           });
         }}
@@ -196,7 +197,7 @@ export class CircleTool extends WhiteboardTool<CircleItem> {
             stroke: color,
           });
 
-          item.partialUpdate({
+          whiteboard.partialItemUpdateById(itemId, {
             options: { ...currentOptions, stroke: color },
           });
         }
@@ -210,7 +211,7 @@ export class CircleTool extends WhiteboardTool<CircleItem> {
             fill: color,
           });
 
-          item.partialUpdate({
+          whiteboard.partialItemUpdateById(itemId, {
             options: { ...currentOptions, fill: color },
           });
         }

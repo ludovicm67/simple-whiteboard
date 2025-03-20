@@ -145,4 +145,13 @@ export abstract class WhiteboardTool<
   public onToolSelected(): void {
     // Implement this method in the tool class if needed.
   }
+
+  /**
+   * Called when the tool is unselected.
+   * This method should be implemented in the tool class if needed.
+   */
+  public onToolUnselected(): void {
+    const simpleWhiteboard = this.getSimpleWhiteboardInstance();
+    simpleWhiteboard.setSelectedItemId(null);
+  }
 }

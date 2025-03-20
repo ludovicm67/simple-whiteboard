@@ -175,4 +175,25 @@ export class PenItem extends WhiteboardItem<PenItemType> {
       height: maxY - minY,
     };
   }
+
+  /**
+   * Return the relative move operation of the item.
+   * The operation is the partial update that needs to be done to move the item.
+   *
+   * @param dx The amount to move in the x direction.
+   * @param dy The amount to move in the y direction.
+   *
+   * @returns the partial update to perform if the item can be moved, `null` otherwise.
+   */
+  public override relativeMoveOperation(
+    dx: number,
+    dy: number
+  ): Partial<PenItemType> | null {
+    return {
+      path: this.path.map(({ x, y }) => ({
+        x: x + dx,
+        y: y + dy,
+      })),
+    };
+  }
 }

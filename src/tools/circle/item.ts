@@ -162,4 +162,23 @@ export class CircleItem extends WhiteboardItem<CircleItemType> {
       height: diameter + strokeWidth,
     };
   }
+
+  /**
+   * Return the relative move operation of the item.
+   * The operation is the partial update that needs to be done to move the item.
+   *
+   * @param dx The amount to move in the x direction.
+   * @param dy The amount to move in the y direction.
+   *
+   * @returns the partial update to perform if the item can be moved, `null` otherwise.
+   */
+  public override relativeMoveOperation(
+    dx: number,
+    dy: number
+  ): Partial<CircleItemType> | null {
+    return {
+      x: this.x + dx,
+      y: this.y + dy,
+    };
+  }
 }

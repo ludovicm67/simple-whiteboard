@@ -33,6 +33,7 @@ export interface WhiteboardItemInterface<T extends WhiteboardItemType> {
     width: number;
     height: number;
   } | null;
+  relativeMoveOperation(_dx: number, _dy: number): Partial<T> | null;
 }
 
 /**
@@ -125,6 +126,20 @@ export abstract class WhiteboardItem<T extends WhiteboardItemType>
     width: number;
     height: number;
   } | null {
+    // To be implemented by the subclass
+    return null;
+  }
+
+  /**
+   * Return the relative move operation of the item.
+   * The operation is the partial update that needs to be done to move the item.
+   *
+   * @param _dx The amount to move in the x direction.
+   * @param _dy The amount to move in the y direction.
+   *
+   * @returns the partial update to perform if the item can be moved, `null` otherwise.
+   */
+  public relativeMoveOperation(_dx: number, _dy: number): Partial<T> | null {
     // To be implemented by the subclass
     return null;
   }
