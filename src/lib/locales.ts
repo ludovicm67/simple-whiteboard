@@ -1,5 +1,10 @@
 import i18next, { i18n, TFunction } from "i18next";
 
+const getLocaleContent = async (locale: string): Promise<any> => {
+  const content = (await import(`../../locales/${locale}`)).default;
+  return content;
+};
+
 export class I18nContext {
   private instance: i18n;
   private _t = (key: string) => key;
@@ -9,30 +14,8 @@ export class I18nContext {
       {
         lng: "en",
         fallbackLng: "en",
-        debug: true,
-        resources: {
-          en: {
-            translation: {
-              key: "hello world",
-              "menu-export": "Export",
-              "tool-options-stroke-width": "Stroke Width",
-            },
-          },
-          de: {
-            translation: {
-              key: "hallo welt",
-              "menu-export": "Exportieren",
-              "tool-options-stroke-width": "Strichstärke",
-            },
-          },
-          fr: {
-            translation: {
-              key: "bonjour le monde",
-              "menu-export": "Exporter",
-              "tool-options-stroke-width": "Épaisseur du trait",
-            },
-          },
-        },
+        debug: false,
+        resources: {},
       },
       (err, _t) => {
         if (err) {
@@ -41,6 +24,44 @@ export class I18nContext {
           this._t = _t;
         }
       }
+    );
+    this.init();
+  }
+
+  public async init(): Promise<void> {
+    await Promise.all(
+      [
+        "cs-CZ",
+        "cs",
+        "de-DE",
+        "de",
+        "en-US",
+        "en",
+        "es-AR",
+        "es-CL",
+        "es-CO",
+        "es-ES",
+        "es-MX",
+        "es-PE",
+        "es",
+        "fr-FR",
+        "fr",
+        "it-IT",
+        "it",
+        "pl-PL",
+        "pl",
+        "pt-BR",
+        "pt-PT",
+        "pt",
+        "tr-TR",
+        "tr",
+      ].map(async (locale) => {
+        this.instance.addResourceBundle(
+          locale,
+          "translation",
+          await getLocaleContent(locale)
+        );
+      })
     );
   }
 

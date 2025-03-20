@@ -1,0 +1,17 @@
+{
+  "menu-export": "Exportieren",
+  "menu-export-current-view-png": "Aktuelle Ansicht als PNG",
+  "menu-language": "Sprache",
+  "tool-options-color": "Farbe",
+  "tool-options-delete": "Löschen",
+  "tool-options-edit-picture": "Bild ändern",
+  "tool-options-fill": "Füllung",
+  "tool-options-height": "Höhe",
+  "tool-options-select-picture": "Bild auswählen",
+  "tool-options-size": "Größe",
+  "tool-options-stroke": "Linienfarbe",
+  "tool-options-stroke-width": "Linienbreite",
+  "tool-options-width": "Breite",
+  "tool-pointer-no-item-selected": "Wählen Sie ein Element aus, indem Sie darauf klicken.",
+  "tool-text-edit": "Text bearbeiten"
+}

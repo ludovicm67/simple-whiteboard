@@ -1,0 +1,17 @@
+{
+  "menu-export": "Dışarı aktar",
+  "menu-export-current-view-png": "Mevcut görünümü PNG olarak",
+  "menu-language": "Dil",
+  "tool-options-color": "Renk",
+  "tool-options-delete": "Kaldır",
+  "tool-options-edit-picture": "Fotoğrafı düzenle",
+  "tool-options-fill": "Dolgu",
+  "tool-options-height": "Yükseklik",
+  "tool-options-select-picture": "Fotoğraf seç",
+  "tool-options-size": "Boyut",
+  "tool-options-stroke": "Kontur  ",
+  "tool-options-stroke-width": "Kontur genişliği",
+  "tool-options-width": "Genişlik",
+  "tool-pointer-no-item-selected": "Üzerine tıklayarak bir öğeyi seçin",
+  "tool-text-edit": "Metni düzenle"
+}
