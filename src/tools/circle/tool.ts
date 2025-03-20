@@ -3,7 +3,7 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { WhiteboardTool } from "../../lib/tool";
 import { getIconSvg } from "../../lib/icons";
 import { CircleItem } from "./item";
-import { RoughCanvasOptions } from "../../lib/SimpleWhiteboardTool";
+import { RoughCanvasOptions } from "../../lib/types";
 
 import "../../components/colorSelect";
 

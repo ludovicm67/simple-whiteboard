@@ -1,4 +1,5 @@
-import { RoughCanvas } from "roughjs/bin/canvas";
+import { RoughCanvas as LocalRoughCanvas } from "roughjs/bin/canvas";
+import { Options as LocalRoughCanvasOptions } from "roughjs/bin/core";
 import { CoordsContext } from "./coords";
 
 /**
@@ -19,3 +20,11 @@ export interface BoundingRect {
   width: number;
   height: number;
 }
+
+export type Point = {
+  x: number;
+  y: number;
+};
+
+export type RoughCanvas = LocalRoughCanvas;
+export type RoughCanvasOptions = LocalRoughCanvasOptions;

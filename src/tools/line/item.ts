@@ -3,8 +3,7 @@ import {
   WhiteboardItem,
   WhiteboardItemType,
 } from "../../lib/item";
-import { RoughCanvasOptions } from "../../lib/SimpleWhiteboardTool";
-import { DrawingContext } from "../../lib/types";
+import { DrawingContext, RoughCanvasOptions } from "../../lib/types";
 
 export const LINE_ITEM_TYPE = "line";
 

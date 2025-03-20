@@ -1,25 +1,19 @@
 import { LitElement, PropertyDeclaration, TemplateResult, html } from "lit";
 import rough from "roughjs";
 import { customElement, property, state } from "lit/decorators.js";
-import { BoundingRect } from "./lib/SimpleWhiteboardTool";
 import { I18nContext } from "./lib/locales";
-
-import "./components/menu";
 import { WhiteboardTool } from "./lib/tool";
 import {
   ExportedWhiteboardItem,
   WhiteboardItem,
   WhiteboardItemType,
 } from "./lib/item";
-import { DrawingContext } from "./lib/types";
+import { DrawingContext, Point } from "./lib/types";
 import { CoordsContext } from "./lib/coords";
 import { styles } from "./styles";
 import { item } from "./tools/line";
 
-type Point = {
-  x: number;
-  y: number;
-};
+import "./components/menu";
 
 const getTouchDistance = (touches: TouchList): number => {
   const dx = touches[0].clientX - touches[1].clientX;
@@ -104,7 +98,7 @@ export class SimpleWhiteboard extends LitElement {
 
   getBoundingRect(
     item: WhiteboardItem<WhiteboardItemType>
-  ): BoundingRect | null {
+  ): { x: number; y: number; width: number; height: number } | null {
     return item.getBoundingBox();
   }
 
