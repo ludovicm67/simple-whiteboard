@@ -35,6 +35,7 @@ export interface WhiteboardItemInterface<T extends WhiteboardItemType> {
   } | null;
   relativeMoveOperation(_dx: number, _dy: number): Partial<T> | null;
   isRemovableWithBackspace(): boolean;
+  isResizable(): boolean;
 }
 
 /**
@@ -152,5 +153,13 @@ export abstract class WhiteboardItem<T extends WhiteboardItemType>
    */
   public isRemovableWithBackspace(): boolean {
     return true;
+  }
+
+  /**
+   * Could the item be resized?
+   * This is used to determine if the item should be resizable.
+   */
+  public isResizable(): boolean {
+    return false;
   }
 }
