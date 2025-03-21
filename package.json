@@ -28,7 +28,7 @@
   "dependencies": {
     "i18next": "^24.2.3",
     "lit": "^3.2.1",
-    "lucide-static": "^0.482.0",
+    "lucide-static": "^0.483.0",
     "perfect-freehand": "^1.2.2",
     "roughjs": "^4.6.6",
     "uuid": "^11.1.0"
