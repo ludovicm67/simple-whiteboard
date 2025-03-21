@@ -553,25 +553,34 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
     return this.items.map((item) => item.export());
   }
 
+  public importItem(
+    item: ExportedWhiteboardItem<WhiteboardItemType>,
+    shouldThrow = false
+  ): WhiteboardItem<WhiteboardItemType> | null {
+    const tool = this.registeredTools.get(item.type);
+    if (!tool) {
+      if (shouldThrow) {
+        throw new Error(`Tool not found: ${item.type}`);
+      } else {
+        console.error(`Tool not found: ${item.type} ; skipping item`);
+        return null;
+      }
+    }
+    const newItem = tool.import(item);
+    if (newItem) {
+      this.items.push(newItem);
+      this.draw();
+    }
+    return newItem;
+  }
+
   public importItems(
     items: ExportedWhiteboardItem<WhiteboardItemType>[],
     shouldThrow = false
   ): void {
     this.items = items
-      .map((item) => {
-        const tool = this.registeredTools.get(item.type);
-        if (!tool) {
-          if (shouldThrow) {
-            throw new Error(`Tool not found: ${item.type}`);
-          } else {
-            console.error(`Tool not found: ${item.type} ; skipping item`);
-            return null;
-          }
-        }
-        return tool.import(item);
-      })
+      .map((item) => this.importItem(item, shouldThrow))
       .filter((item) => item !== null);
-    this.draw();
   }
 
   public setItems(items: WhiteboardItem<WhiteboardItemType>[]) {
@@ -581,7 +590,7 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
 
   public addItem(
     item: WhiteboardItem<WhiteboardItemType>,
-    sendEvent: boolean = false
+    sendEvent: boolean = true
   ) {
     this.items.push(item);
     this.draw();
@@ -590,7 +599,7 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
       const itemsUpdatedEvent = new CustomEvent("items-updated", {
         detail: {
           type: "add",
-          item,
+          item: item.export(),
         },
       });
       this.dispatchEvent(itemsUpdatedEvent);
@@ -628,7 +637,7 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
   public partialItemUpdateById(
     itemId: string,
     updates: Partial<WhiteboardItemType>,
-    sendEvent = false
+    sendEvent = true
   ) {
     const index = this.getItemIndexById(itemId);
     if (index === null) {
