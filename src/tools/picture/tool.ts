@@ -7,8 +7,6 @@ import { PictureItem } from "./item";
 export const PICTURE_TOOL_NAME = "picture";
 
 export class PictureTool extends WhiteboardTool<PictureItem> {
-  private currentItemId: string | null = null;
-
   /**
    * Get the icon of the tool.
    * Return `null` if the tool does not have an icon.
@@ -82,7 +80,6 @@ export class PictureTool extends WhiteboardTool<PictureItem> {
               src: null,
             });
             const newItemId = newItem.getId();
-            this.currentItemId = newItemId;
             this.getSimpleWhiteboardInstance().addItem(newItem);
 
             const target = e.target as HTMLInputElement;

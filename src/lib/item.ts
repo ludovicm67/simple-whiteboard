@@ -34,6 +34,7 @@ export interface WhiteboardItemInterface<T extends WhiteboardItemType> {
     height: number;
   } | null;
   relativeMoveOperation(_dx: number, _dy: number): Partial<T> | null;
+  isRemovableWithBackspace(): boolean;
 }
 
 /**
@@ -142,5 +143,14 @@ export abstract class WhiteboardItem<T extends WhiteboardItemType>
   public relativeMoveOperation(_dx: number, _dy: number): Partial<T> | null {
     // To be implemented by the subclass
     return null;
+  }
+
+  /**
+   * Could the item be removed using the backspace key?
+   * This is used to determine if the item should be removed when the backspace key is pressed.
+   * If it is not safe to remove the item with the backspace key, the item should return false.
+   */
+  public isRemovableWithBackspace(): boolean {
+    return true;
   }
 }

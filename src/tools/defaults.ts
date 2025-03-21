@@ -8,7 +8,7 @@ import "./rect/element";
 import "./circle/element";
 import "./line/element";
 import "./pen/element";
-// import "./text";
+import "./text/element";
 import "./picture/element";
 import "./eraser/element";
 import "./clear/element";

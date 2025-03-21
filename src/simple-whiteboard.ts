@@ -160,8 +160,9 @@ export class SimpleWhiteboard extends LitElement {
   handleKeyDown(e: KeyboardEvent) {
     // If it is the backspace key, we remove the selected item
     if (e.key === "Backspace") {
-      if (this.selectedItemId) {
-        this.removeItemById(this.selectedItemId, true);
+      const selectedItem = this.getSelectedItem();
+      if (selectedItem && selectedItem.isRemovableWithBackspace()) {
+        this.removeItemById(selectedItem.getId(), true);
       }
     }
   }
@@ -171,7 +172,9 @@ export class SimpleWhiteboard extends LitElement {
     const i18n = this.i18nContext.getInstance();
     i18n.on("languageChanged", (lang: string) => {
       this.locale = lang;
-      console.log("Language changed event", lang);
+      if (this.debug) {
+        console.log("Language changed event", lang);
+      }
       this.requestUpdate();
     });
     window.addEventListener("keydown", this.handleKeyDown.bind(this));
@@ -633,6 +636,7 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
     }
     this.items[index].partialUpdate(updates);
     this.draw();
+    this.requestUpdate();
 
     if (sendEvent) {
       const itemsUpdatedEvent = new CustomEvent("items-updated", {

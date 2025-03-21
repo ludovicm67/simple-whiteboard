@@ -3,7 +3,7 @@ import {
   WhiteboardItem,
   WhiteboardItemType,
 } from "../../lib/item";
-import { DrawingContext, RoughCanvasOptions } from "../../lib/types";
+import { DrawingContext } from "../../lib/types";
 
 export const PICTURE_ITEM_TYPE = "picture";
 
