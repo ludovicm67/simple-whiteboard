@@ -1,5 +1,11 @@
 # @ludovicm67/whiteboard
 
+## 0.3.0
+
+### Minor Changes
+
+- 0cd2603: Rewrite some of the logic to have a separation between elements, tools and items.
+
 ## 0.2.16
 
 ### Patch Changes
