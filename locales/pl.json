@@ -1,0 +1,17 @@
+{
+  "menu-export": "Eksportuj",
+  "menu-export-current-view-png": "Aktualny widok jako PNG",
+  "menu-language": "Język",
+  "tool-options-color": "Barva",
+  "tool-options-delete": "Kasuj",
+  "tool-options-edit-picture": "Edytuj obraz",
+  "tool-options-fill": "Wypełnienie",
+  "tool-options-height": "Wysokość",
+  "tool-options-select-picture": "Wybierz obraz",
+  "tool-options-size": "Rozmiar",
+  "tool-options-stroke": "Obrys",
+  "tool-options-stroke-width": "Szerokość obrysu",
+  "tool-options-width": "Szerokość obrysu",
+  "tool-pointer-no-item-selected": "Wybierz element, klikając na niego.",
+  "tool-text-edit": "Edytuj swój tekst"
+}

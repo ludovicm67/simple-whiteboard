@@ -2,19 +2,19 @@ import { LitElement, html } from "lit";
 import { customElement } from "lit/decorators.js";
 
 // Import all the tools
-import "./move";
-import "./pointer";
-import "./rect";
-import "./circle";
-import "./line";
-import "./pen";
-import "./text";
-import "./picture";
-import "./eraser";
-import "./clear";
+import "./move/element";
+import "./pointer/element";
+import "./rect/element";
+import "./circle/element";
+import "./line/element";
+import "./pen/element";
+import "./text/element";
+import "./picture/element";
+import "./eraser/element";
+import "./clear/element";
 
 @customElement("simple-whiteboard--tool-defaults")
-export class SimpleWhiteboardToolDefaults extends LitElement {
+export class DefaultTools extends LitElement {
   // This is a workaround to prevent LitElement from creating a shadow root.
   createRenderRoot() {
     return this;

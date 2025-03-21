@@ -1,0 +1,17 @@
+{
+  "menu-export": "Exportovat",
+  "menu-export-current-view-png": "Aktuální zobrazení v PNG",
+  "menu-language": "Jazyk",
+  "tool-options-color": "Barva",
+  "tool-options-delete": "Odstranit",
+  "tool-options-edit-picture": "Upravit obrázek",
+  "tool-options-fill": "Vyplnit",
+  "tool-options-height": "Výška",
+  "tool-options-select-picture": "Vyberte obrázek",
+  "tool-options-size": "Velikost",
+  "tool-options-stroke": "Obrys",
+  "tool-options-stroke-width": "Šírka obrysu",
+  "tool-options-width": "Šířka",
+  "tool-pointer-no-item-selected": "Kliknutím vyberte položku.",
+  "tool-text-edit": "Upravit text"
+}

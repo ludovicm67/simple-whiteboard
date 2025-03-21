@@ -1,54 +1,52 @@
 import { SimpleWhiteboard } from "./simple-whiteboard";
-import SimpleWhiteboardTool from "./lib/SimpleWhiteboardTool";
-export type {
-  BoundingRect,
-  RoughCanvas,
-  RoughCanvasOptions,
-  SimpleWhiteboardToolInterface,
-  WhiteboardItem,
-} from "./lib/SimpleWhiteboardTool";
-import { SimpleWhiteboardToolCircle } from "./tools/circle";
-import { SimpleWhiteboardToolClear } from "./tools/clear";
-import { SimpleWhiteboardToolDefaults } from "./tools/defaults";
-import { SimpleWhiteboardToolLine } from "./tools/line";
-import { SimpleWhiteboardToolMove } from "./tools/move";
-import { SimpleWhiteboardToolPen } from "./tools/pen";
-import { SimpleWhiteboardToolText } from "./tools/text";
-import { SimpleWhiteboardToolPicture } from "./tools/picture";
-import { SimpleWhiteboardToolPointer } from "./tools/pointer";
-import { SimpleWhiteboardToolRect } from "./tools/rect";
-import { SimpleWhiteboardToolEraser } from "./tools/eraser";
+import { CircleElement } from "./tools/circle/element";
+import { ClearElement } from "./tools/clear/element";
+import { DefaultTools } from "./tools/defaults";
+import { LineElement } from "./tools/line/element";
+import { MoveElement } from "./tools/move/element";
+import { PenElement } from "./tools/pen/element";
+import { TextElement } from "./tools/text/element";
+import { PictureElement } from "./tools/picture/element";
+import { PointerElement } from "./tools/pointer/element";
+import { RectElement } from "./tools/rect/element";
+import { EraserElement } from "./tools/eraser/element";
+
+import * as ToolLib from "./lib/tool";
+import * as ElementLib from "./lib/element";
+import * as ItemLib from "./lib/item";
 
 declare global {
   interface HTMLElementTagNameMap {
     "simple-whiteboard": SimpleWhiteboard;
-    "simple-whiteboard--tool-circle": SimpleWhiteboardToolCircle;
-    "simple-whiteboard--tool-clear": SimpleWhiteboardToolClear;
-    "simple-whiteboard--tool-defaults": SimpleWhiteboardToolDefaults;
-    "simple-whiteboard--tool-line": SimpleWhiteboardToolLine;
-    "simple-whiteboard--tool-move": SimpleWhiteboardToolMove;
-    "simple-whiteboard--tool-pen": SimpleWhiteboardToolPen;
-    "simple-whiteboard--tool-text": SimpleWhiteboardToolText;
-    "simple-whiteboard--tool-picture": SimpleWhiteboardToolPicture;
-    "simple-whiteboard--tool-pointer": SimpleWhiteboardToolPointer;
-    "simple-whiteboard--tool-rect": SimpleWhiteboardToolRect;
-    "simple-whiteboard--tool-eraser": SimpleWhiteboardToolEraser;
+    "simple-whiteboard--tool-defaults": DefaultTools;
+    "simple-whiteboard--tool-circle": CircleElement;
+    "simple-whiteboard--tool-clear": ClearElement;
+    "simple-whiteboard--tool-line": LineElement;
+    "simple-whiteboard--tool-move": MoveElement;
+    "simple-whiteboard--tool-pen": PenElement;
+    "simple-whiteboard--tool-text": TextElement;
+    "simple-whiteboard--tool-picture": PictureElement;
+    "simple-whiteboard--tool-pointer": PointerElement;
+    "simple-whiteboard--tool-rect": RectElement;
+    "simple-whiteboard--tool-eraser": EraserElement;
   }
 }
 
 export {
   SimpleWhiteboard,
-  SimpleWhiteboardTool,
-  SimpleWhiteboardToolCircle,
-  SimpleWhiteboardToolClear,
-  SimpleWhiteboardToolDefaults,
-  SimpleWhiteboardToolLine,
-  SimpleWhiteboardToolMove,
-  SimpleWhiteboardToolPen,
-  SimpleWhiteboardToolText,
-  SimpleWhiteboardToolPicture,
-  SimpleWhiteboardToolPointer,
-  SimpleWhiteboardToolRect,
-  SimpleWhiteboardToolEraser,
+  DefaultTools,
+  CircleElement,
+  ClearElement,
+  LineElement,
+  MoveElement,
+  PenElement,
+  TextElement,
+  PictureElement,
+  PointerElement,
+  RectElement,
+  EraserElement,
+  ToolLib,
+  ElementLib,
+  ItemLib,
 };
 export default SimpleWhiteboard;

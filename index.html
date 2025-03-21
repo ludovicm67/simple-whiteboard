@@ -31,6 +31,7 @@
       const id = Math.random().toString(36).substr(2, 9);
       const app = document.getElementById("app");
       (async () => {
+        // Just make sure that the simple-whiteboard element is defined
         await new Promise((resolve) => {
           window.customElements.whenDefined("simple-whiteboard").then(() => {
             resolve();
@@ -59,6 +60,13 @@
                 item: e.detail.item,
               });
               break;
+            case "partial-update":
+              bc.postMessage({
+                type: "item-partial-update",
+                itemId: e.detail.itemId,
+                updates: e.detail.updates,
+              });
+              break;
             case "clear":
               bc.postMessage({
                 type: "clear",
@@ -74,12 +82,6 @@
         });
 
         const bc = new BroadcastChannel("whiteboard-channel");
-        bc.postMessage({
-          type: "join",
-          id,
-        });
-        console.log("Client ID:", id);
-
         bc.onmessage = (e) => {
           if (!e.data.type) {
             return;
@@ -87,10 +89,13 @@
 
           switch (e.data.type) {
             case "item-add":
-              app.addItem(e.data.item);
+              app.importItem(e.data.item);
               break;
             case "item-update":
               app.updateItem(e.data.itemId, e.data.item);
+              break;
+            case "item-partial-update":
+              app.partialItemUpdateById(e.data.itemId, e.data.updates, false);
               break;
             case "item-remove":
               app.removeItemById(e.data.itemId);
@@ -98,17 +103,23 @@
             case "join":
               bc.postMessage({
                 type: "sync",
-                items: app.getItems(),
+                items: app.exportItems(),
               });
               break;
             case "sync":
-              app.setItems(e.data.items);
+              app.importItems(e.data.items);
               break;
             case "clear":
               app.clear();
               break;
           }
         };
+
+        bc.postMessage({
+          type: "join",
+          id,
+        });
+        console.log("Client ID:", id);
       })();
     </script>
   </body>

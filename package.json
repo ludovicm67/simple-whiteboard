@@ -13,7 +13,7 @@
     "preview": "vite preview",
     "i18n:extract": "lit-localize extract",
     "i18n:build": "lit-localize build",
-    "i18n": "npm run i18n:extract && npm run i18n:build",
+    "i18n": "true",
     "prepack": "npm run build",
     "release": "changeset publish"
   },
@@ -26,20 +26,19 @@
     "url": "https://ludovic-muller.fr/"
   },
   "dependencies": {
-    "@lit/localize": "^0.12.2",
+    "i18next": "^24.2.3",
     "lit": "^3.2.1",
-    "lucide-static": "^0.479.0",
+    "lucide-static": "^0.482.0",
     "perfect-freehand": "^1.2.2",
     "roughjs": "^4.6.6",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.28.0",
-    "@lit/localize-tools": "^0.8.0",
+    "@changesets/cli": "^2.28.1",
     "@types/uuid": "^10.0.0",
-    "typescript": "^5.7.3",
-    "vite": "^6.1.1",
-    "vite-plugin-dts": "^4.5.0",
+    "typescript": "^5.8.2",
+    "vite": "^6.2.2",
+    "vite-plugin-dts": "^4.5.3",
     "vite-plugin-html": "^3.2.2"
   },
   "files": [

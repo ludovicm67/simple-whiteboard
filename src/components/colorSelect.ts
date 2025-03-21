@@ -12,7 +12,7 @@ export class ColorSelect extends LitElement {
       border-radius: 5px;
       padding: 12px;
       cursor: pointer;
-      border: 1px solid var(--border-color, #fff);
+      border: 2px solid var(--border-color, #fff);
       box-sizing: border-box;
       background-image: var(--bg-image, none);
       margin: 2px;
@@ -28,7 +28,7 @@ export class ColorSelect extends LitElement {
     }
 
     div:hover {
-      border: 1px solid #000;
+      border: 2px solid #000;
     }
   `;
 

@@ -3,11 +3,8 @@ import { customElement, property, state } from "lit/decorators.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { getIconSvg } from "../lib/icons";
 import { SimpleWhiteboard } from "../simple-whiteboard";
-import { SupportedLocales } from "../lib/locales";
-import { localized, msg } from "@lit/localize";
 
 @customElement("simple-whiteboard-menu")
-@localized()
 export class SimpleWhiteboardMenu extends LitElement {
   static styles = css`
     menu {
@@ -76,10 +73,35 @@ export class SimpleWhiteboardMenu extends LitElement {
   @state()
   isMenuOpen = false;
 
+  connectedCallback(): void {
+    if (!this.instance) {
+      throw new Error("SimpleWhiteboard instance is required");
+    }
+
+    const i18nContext = this.instance.getI18nContext();
+    const i18n = i18nContext.getInstance();
+    i18n.on("languageChanged", (_lang: string) => {
+      this.requestUpdate();
+    });
+
+    super.connectedCallback();
+  }
+
+  disconnectedCallback(): void {
+    if (this.instance) {
+      const i18nContext = this.instance.getI18nContext();
+      const i18n = i18nContext.getInstance();
+      i18n.off("languageChanged");
+    }
+    super.disconnectedCallback();
+  }
+
   renderLocaleSelect() {
     if (!this.instance || this.instance.hideLocalePicker) {
       return null;
     }
+
+    const i18nContext = this.instance.getI18nContext();
 
     const locales = [
       { value: "cs-CZ", label: "Čeština (CZ)" },
@@ -110,14 +132,12 @@ export class SimpleWhiteboardMenu extends LitElement {
 
     const menuEntry = html`
       <li>
-        ${msg("Language", { id: "menu-language" })}
+        ${i18nContext.t("menu-language")}
         <ul>
           ${locales.map((locale) => {
             return html`<li
               @click=${() => {
-                if (this.instance) {
-                  this.instance.locale = locale.value as SupportedLocales;
-                }
+                i18nContext.setLocale(locale.value);
               }}
             >
               ${locale.label}
@@ -140,6 +160,12 @@ export class SimpleWhiteboardMenu extends LitElement {
   }
 
   render() {
+    if (!this.instance) {
+      return null;
+    }
+
+    const i18nContext = this.instance.getI18nContext();
+
     return html`
       <menu>
         <div class="btn-container">
@@ -150,12 +176,10 @@ export class SimpleWhiteboardMenu extends LitElement {
 
         <ul style="display: ${this.isMenuOpen ? "block" : "none"}">
           <li>
-            ${msg("Export", { id: "menu-export" })}
+            ${i18nContext.t("menu-export")}
             <ul>
               <li @click=${() => this.exportCurrentCanvasAsPng()}>
-                ${msg("Current view as PNG", {
-                  id: "menu-export-current-view-png",
-                })}
+                ${i18nContext.t("menu-export-current-view-png")}
               </li>
             </ul>
           </li>

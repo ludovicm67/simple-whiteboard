@@ -1,28 +1,19 @@
-import {
-  LitElement,
-  PropertyDeclaration,
-  TemplateResult,
-  css,
-  html,
-} from "lit";
+import { LitElement, PropertyDeclaration, TemplateResult, html } from "lit";
 import rough from "roughjs";
 import { customElement, property, state } from "lit/decorators.js";
-import { localized } from "@lit/localize";
-import { RoughCanvas } from "roughjs/bin/canvas";
-import SimpleWhiteboardTool, {
+import { I18nContext } from "./lib/locales";
+import { WhiteboardTool } from "./lib/tool";
+import {
+  ExportedWhiteboardItem,
   WhiteboardItem,
-  BoundingRect,
-} from "./lib/SimpleWhiteboardTool";
-import { setLocale } from "./lib/locales";
-import type { SupportedLocales } from "./lib/locales";
+  WhiteboardItemType,
+} from "./lib/item";
+import { DrawingContext, Point } from "./lib/types";
+import { CoordsContext } from "./lib/coords";
+import { styles } from "./styles";
+import { item } from "./tools/line";
 
 import "./components/menu";
-import { allLocales } from "./generated/locale-codes";
-
-type Point = {
-  x: number;
-  y: number;
-};
 
 const getTouchDistance = (touches: TouchList): number => {
   const dx = touches[0].clientX - touches[1].clientX;
@@ -31,7 +22,6 @@ const getTouchDistance = (touches: TouchList): number => {
 };
 
 @customElement("simple-whiteboard")
-@localized()
 export class SimpleWhiteboard extends LitElement {
   @property({ type: Boolean })
   debug = false;
@@ -40,7 +30,13 @@ export class SimpleWhiteboard extends LitElement {
   hideLocalePicker = false;
 
   @property()
-  locale: SupportedLocales = "en";
+  locale: string = "en";
+
+  @state()
+  isReady: boolean = false;
+
+  private i18nContext: I18nContext = new I18nContext();
+  private coordsContext: CoordsContext = new CoordsContext();
 
   private mouseCoords: Point = { x: 0, y: 0 };
 
@@ -50,152 +46,20 @@ export class SimpleWhiteboard extends LitElement {
   private lastDistance = 0;
   private lastOrigin: Point = { x: 0, y: 0 };
 
-  @state() private registeredTools: Map<string, SimpleWhiteboardTool> =
-    new Map();
+  @state() private registeredTools: Map<
+    string,
+    WhiteboardTool<WhiteboardItem<WhiteboardItemType>>
+  > = new Map();
 
-  @state() private items: WhiteboardItem[] = [];
-  @state() private canvasCoords: { x: number; y: number; zoom: number } = {
-    x: 0,
-    y: 0,
-    zoom: 1,
-  };
+  @state() private items: WhiteboardItem<WhiteboardItemType>[] = [];
 
   @state() private currentTool: string = "";
   @state() private previousTool: string = "";
-  @state() private currentDrawing: WhiteboardItem | null = null;
 
   @state() private selectedItemId: string | null = null;
   @state() private hoveredItemId: string | null = null;
 
-  static styles = css`
-    .root {
-      height: 100%;
-      width: 100%;
-      background-color: #fcfcff;
-      position: relative;
-    }
-
-    .button {
-      background-color: rgba(0, 0, 0, 0.05);
-      border-radius: 8px;
-      padding: 8px;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-      cursor: pointer;
-    }
-    .button:hover {
-      background-color: rgba(0, 0, 0, 0.1);
-    }
-
-    .width-100-percent {
-      width: 100%;
-    }
-
-    .menu {
-      position: absolute;
-      z-index: 2;
-      top: 16px;
-      left: 16px;
-      user-select: none;
-    }
-
-    .menu button:hover {
-      background-color: #dfdfdf;
-    }
-
-    .tools {
-      user-select: none;
-      gap: 8px;
-      padding: 3px;
-      border-radius: 8px;
-      background-color: #fff;
-      margin: auto;
-      position: absolute;
-      z-index: 1;
-      top: 16px;
-      left: 50%;
-      transform: translateX(-50%);
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-      overflow-x: auto;
-      white-space: nowrap;
-      max-width: calc(100% - 128px);
-      scrollbar-width: thin;
-    }
-
-    .tools button {
-      background-color: transparent;
-      color: #000;
-      border: none;
-      cursor: pointer;
-      padding: 8px;
-      border-radius: 4px;
-      transition: background-color 0.2s;
-    }
-
-    .tools button:hover {
-      background-color: rgba(0, 0, 0, 0.05);
-    }
-
-    .tools button:active,
-    .tools .tools--active {
-      background-color: rgba(0, 0, 0, 0.1);
-    }
-
-    .tools-options {
-      user-select: none;
-      position: absolute;
-      z-index: 1;
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-      top: 84px;
-      width: 200px;
-      left: 16px;
-      background-color: #fff;
-      border-radius: 8px;
-      padding: 8px 12px;
-    }
-
-    .footer-tools {
-      position: absolute;
-      z-index: 1;
-      bottom: 0;
-      left: 0;
-      background-color: #f2f3f3;
-      padding: 2px 8px;
-      border-top-right-radius: 8px;
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-      display: flex;
-      justify-content: space-between;
-      flex-direction: row;
-      align-items: center;
-      gap: 8px;
-      color: rgba(0, 0, 0, 0.5);
-    }
-
-    .footer-tools select {
-      color: rgba(0, 0, 0, 0.5);
-      padding: 4px;
-    }
-
-    @media (max-width: 450px) {
-      .tools-options {
-        width: calc(100% - 64px);
-      }
-    }
-
-    .tools-options p {
-      font-size: 14px;
-      margin: 0;
-    }
-
-    canvas {
-      top: 0;
-      left: 0;
-      position: absolute;
-      right: 0;
-      bottom: 0;
-      width: 100%;
-      height: 100%;
-    }
-  `;
+  static styles = styles;
 
   protected firstUpdated(): void {
     this.canvas = this.shadowRoot?.querySelector("canvas") || undefined;
@@ -209,13 +73,6 @@ export class SimpleWhiteboard extends LitElement {
     }
     this.canvasContext = canvasContext;
     this.handleResize();
-
-    // Some workarounds to make sure everything is displayed on slow devices
-    [20, 100, 200, 500, 1000, 2000].forEach((ms) => {
-      setTimeout(() => {
-        this.requestUpdate();
-      }, ms);
-    });
   }
 
   handleResize() {
@@ -226,25 +83,9 @@ export class SimpleWhiteboard extends LitElement {
     this.canvas.width = this.canvas.clientWidth;
     this.canvas.height = this.canvas.clientHeight;
 
+    this.coordsContext.setOffset(this.canvas.width / 2, this.canvas.height / 2);
+
     this.draw();
-  }
-
-  coordsToCanvasCoords(x: number, y: number): Point {
-    const dX = (this.canvas?.width || 0) / 2;
-    const dY = (this.canvas?.height || 0) / 2;
-    return {
-      x: x * this.canvasCoords.zoom + this.canvasCoords.x + dX,
-      y: y * this.canvasCoords.zoom + this.canvasCoords.y + dY,
-    };
-  }
-
-  coordsFromCanvasCoords(x: number, y: number): Point {
-    const dX = (this.canvas?.width || 0) / 2;
-    const dY = (this.canvas?.height || 0) / 2;
-    return {
-      x: (x - this.canvasCoords.x - dX) / this.canvasCoords.zoom,
-      y: (y - this.canvasCoords.y - dY) / this.canvasCoords.zoom,
-    };
   }
 
   handleVisibilityChange() {
@@ -255,48 +96,44 @@ export class SimpleWhiteboard extends LitElement {
     this.draw();
   }
 
-  drawItem(
-    rc: RoughCanvas,
-    context: CanvasRenderingContext2D,
-    item: WhiteboardItem
-  ) {
-    const tool = this.registeredTools.get(item.kind);
-    if (tool) {
-      tool.drawItem(rc, context, item);
-      return;
-    }
-  }
-
-  getBoundingRect(item: WhiteboardItem): BoundingRect | null {
-    const tool = this.registeredTools.get(item.kind);
-    if (!tool) {
-      return null;
-    }
-    return tool.getBoundingRect(item);
+  getBoundingRect(
+    item: WhiteboardItem<WhiteboardItemType>
+  ): { x: number; y: number; width: number; height: number } | null {
+    return item.getBoundingBox();
   }
 
   drawItemBox(
     context: CanvasRenderingContext2D,
-    item: WhiteboardItem,
+    item: WhiteboardItem<WhiteboardItemType>,
     boxColor = "#135aa0"
   ): void {
     const boundingRect = this.getBoundingRect(item);
     if (!boundingRect) {
       return;
     }
+
     const { x, y, width, height } = boundingRect;
-    const { x: coordX, y: coordY } = this.coordsToCanvasCoords(x, y);
+    const { x: coordX, y: coordY } = this.coordsContext.convertToCanvas(x, y);
+    const zoom = this.coordsContext.getZoom();
 
     context.strokeStyle = boxColor;
     context.lineWidth = 2;
     context.beginPath();
-    context.rect(
-      coordX,
-      coordY,
-      width * this.canvasCoords.zoom,
-      height * this.canvasCoords.zoom
-    );
+    context.rect(coordX, coordY, width * zoom, height * zoom);
     context.stroke();
+  }
+
+  generateDrawingContext(): DrawingContext {
+    if (!this.canvas || !this.canvasContext) {
+      throw new Error("Canvas not found");
+    }
+
+    const rc = rough.canvas(this.canvas, { options: { seed: 42 } });
+    return {
+      canvas: this.canvasContext,
+      roughCanvas: rc,
+      coords: this.coordsContext,
+    };
   }
 
   draw() {
@@ -307,11 +144,8 @@ export class SimpleWhiteboard extends LitElement {
     const context = this.canvasContext;
     context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    const rc = rough.canvas(this.canvas, { options: { seed: 42 } });
-    this.items.forEach((item) => this.drawItem(rc, context, item));
-    if (this.currentDrawing) {
-      this.drawItem(rc, context, this.currentDrawing);
-    }
+    const drawingContext = this.generateDrawingContext();
+    this.items.forEach((item) => item.draw(drawingContext));
 
     const selectedItem = this.getSelectedItem();
     const hoveredItem = this.getHoveredItem();
@@ -326,13 +160,23 @@ export class SimpleWhiteboard extends LitElement {
   handleKeyDown(e: KeyboardEvent) {
     // If it is the backspace key, we remove the selected item
     if (e.key === "Backspace") {
-      if (this.selectedItemId) {
-        this.removeItemById(this.selectedItemId, true);
+      const selectedItem = this.getSelectedItem();
+      if (selectedItem && selectedItem.isRemovableWithBackspace()) {
+        this.removeItemById(selectedItem.getId(), true);
       }
     }
   }
 
   connectedCallback(): void {
+    this.isReady = true;
+    const i18n = this.i18nContext.getInstance();
+    i18n.on("languageChanged", (lang: string) => {
+      this.locale = lang;
+      if (this.debug) {
+        console.log("Language changed event", lang);
+      }
+      this.requestUpdate();
+    });
     window.addEventListener("keydown", this.handleKeyDown.bind(this));
     window.addEventListener("resize", this.handleResize.bind(this));
     document.addEventListener(
@@ -343,6 +187,9 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   disconnectedCallback(): void {
+    this.isReady = false;
+    const i18n = this.i18nContext.getInstance();
+    i18n.off("languageChanged");
     document.removeEventListener(
       "visibilitychange",
       this.handleVisibilityChange.bind(this)
@@ -357,19 +204,19 @@ export class SimpleWhiteboard extends LitElement {
     if (!tool) {
       return;
     }
-
     tool.handleDrawingStart(x, y);
+    this.draw();
   }
 
   handleDrawingMove(x: number, y: number) {
-    const { x: mouseX, y: mouseY } = this.coordsFromCanvasCoords(x, y);
+    const { x: mouseX, y: mouseY } = this.coordsContext.convertFromCanvas(x, y);
     this.mouseCoords = { x: mouseX, y: mouseY };
     const tool = this.registeredTools.get(this.currentTool);
     if (!tool) {
       return;
     }
-
     tool.handleDrawingMove(x, y);
+    this.draw();
   }
 
   handleDrawingEnd() {
@@ -378,6 +225,7 @@ export class SimpleWhiteboard extends LitElement {
       return;
     }
     tool.handleDrawingEnd();
+    this.draw();
   }
 
   handleMouseDown(e: MouseEvent) {
@@ -455,17 +303,15 @@ export class SimpleWhiteboard extends LitElement {
       const dx = origin.x - this.lastOrigin.x;
       const dy = origin.y - this.lastOrigin.y;
       this.lastOrigin = origin;
-      this.canvasCoords = {
-        ...this.canvasCoords,
-        x: this.canvasCoords.x + dx,
-        y: this.canvasCoords.y + dy,
-      };
+
+      const { x, y } = this.coordsContext.getCoords();
+      this.coordsContext.setCoords(x + dx, y + dy);
 
       const distance = getTouchDistance(e.touches);
       const zoomFactor = distance / this.lastDistance;
       this.lastDistance = distance;
 
-      const zoom = this.canvasCoords.zoom * zoomFactor;
+      const zoom = this.coordsContext.getZoom() * zoomFactor;
       this.setZoom(zoom);
       return;
     }
@@ -487,12 +333,6 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   handleTouchCancel() {
-    if (!this.currentDrawing) {
-      return;
-    }
-
-    this.currentDrawing = null;
-
     this.draw();
   }
 
@@ -512,15 +352,17 @@ export class SimpleWhiteboard extends LitElement {
    *
    * @param tool The tool to register.
    */
-  public registerTool(tool: SimpleWhiteboardTool): void {
-    if (!tool || !tool.tagName || !tool.getToolName) {
-      console.error("Invalid tool");
-      return;
+  public registerTool(
+    tool: WhiteboardTool<WhiteboardItem<WhiteboardItemType>>
+  ): void {
+    if (!tool || !tool.getName) {
+      throw new Error("Invalid tool");
     }
 
-    const toolName = tool.getToolName();
+    const toolName = tool.getName();
     this.registeredTools.set(toolName, tool);
     this.draw();
+    this.requestUpdate();
   }
 
   requestUpdate(
@@ -531,9 +373,12 @@ export class SimpleWhiteboard extends LitElement {
     if (this.debug) {
       console.log("Request update", name, oldValue, options);
     }
-    if (allLocales.includes(this.locale)) {
-      setLocale(this.locale);
+
+    // Make sure to update the locale in the i18n context if the 'locale' property changes
+    if (name === "locale" && this.i18nContext && this.locale !== oldValue) {
+      this.i18nContext.setLocale(this.locale);
     }
+
     super.requestUpdate(name, oldValue, options);
   }
 
@@ -544,7 +389,7 @@ export class SimpleWhiteboard extends LitElement {
 
   public clearWhiteboard() {
     this.resetWhiteboard();
-    this.canvasCoords = { x: 0, y: 0, zoom: 1 };
+    this.coordsContext.reset();
     this.draw();
 
     const itemsUpdatedEvent = new CustomEvent("items-updated", {
@@ -557,8 +402,11 @@ export class SimpleWhiteboard extends LitElement {
 
   renderToolsOptions(): TemplateResult | null {
     const selectedItem = this.getSelectedItem();
-
-    const tool = this.registeredTools.get(this.currentTool);
+    const currentTool = this.registeredTools.get(this.currentTool);
+    const selectedItemTool = selectedItem
+      ? this.registeredTools.get(selectedItem.getType())
+      : null;
+    const tool = selectedItemTool || currentTool;
     if (!tool) {
       return null;
     }
@@ -566,7 +414,6 @@ export class SimpleWhiteboard extends LitElement {
     if (!options) {
       return null;
     }
-
     return html`<div class="tools-options">${options}</div>`;
   }
 
@@ -574,7 +421,7 @@ export class SimpleWhiteboard extends LitElement {
     const tools = [];
 
     for (const [toolName, tool] of this.registeredTools) {
-      const icon = tool.getToolIcon();
+      const icon = tool.getIcon();
       if (!icon) {
         continue;
       }
@@ -597,10 +444,7 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   setZoom(zoom: number) {
-    this.canvasCoords = {
-      ...this.canvasCoords,
-      zoom: Math.max(0.25, Math.min(4, zoom)),
-    };
+    this.coordsContext.setZoom(Math.max(0.25, Math.min(4, zoom)));
     this.draw();
   }
 
@@ -614,7 +458,7 @@ export class SimpleWhiteboard extends LitElement {
       { value: 2, label: "200%" },
       { value: 4, label: "400%" },
     ];
-    const zoom = this.canvasCoords.zoom;
+    const zoom = this.coordsContext.getZoom();
     const closestValue = options.reduce((prev, curr) =>
       Math.abs(curr.value - zoom) < Math.abs(prev.value - zoom) ? curr : prev
     ).value;
@@ -663,6 +507,10 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
   }
 
   render() {
+    if (!this.isReady) {
+      return null;
+    }
+
     return html`
       <div class="root">
         ${this.renderMenu()}
@@ -685,16 +533,65 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
     `;
   }
 
-  public getItems(): WhiteboardItem[] {
+  public getDefaultToolName(): string {
+    return "pointer";
+  }
+
+  public getItems(): WhiteboardItem<WhiteboardItemType>[] {
     return this.items;
   }
 
-  public setItems(items: WhiteboardItem[]) {
+  public getCoordsContext(): CoordsContext {
+    return this.coordsContext;
+  }
+
+  public getI18nContext(): I18nContext {
+    return this.i18nContext;
+  }
+
+  public exportItems(): ExportedWhiteboardItem<WhiteboardItemType>[] {
+    return this.items.map((item) => item.export());
+  }
+
+  public importItem(
+    item: ExportedWhiteboardItem<WhiteboardItemType>,
+    shouldThrow = false
+  ): WhiteboardItem<WhiteboardItemType> | null {
+    const tool = this.registeredTools.get(item.type);
+    if (!tool) {
+      if (shouldThrow) {
+        throw new Error(`Tool not found: ${item.type}`);
+      } else {
+        console.error(`Tool not found: ${item.type} ; skipping item`);
+        return null;
+      }
+    }
+    const newItem = tool.import(item);
+    if (newItem) {
+      this.items.push(newItem);
+      this.draw();
+    }
+    return newItem;
+  }
+
+  public importItems(
+    items: ExportedWhiteboardItem<WhiteboardItemType>[],
+    shouldThrow = false
+  ): void {
+    this.items = items
+      .map((item) => this.importItem(item, shouldThrow))
+      .filter((item) => item !== null);
+  }
+
+  public setItems(items: WhiteboardItem<WhiteboardItemType>[]) {
     this.items = items;
     this.draw();
   }
 
-  public addItem(item: WhiteboardItem, sendEvent: boolean = false) {
+  public addItem(
+    item: WhiteboardItem<WhiteboardItemType>,
+    sendEvent: boolean = true
+  ) {
     this.items.push(item);
     this.draw();
 
@@ -702,23 +599,64 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
       const itemsUpdatedEvent = new CustomEvent("items-updated", {
         detail: {
           type: "add",
-          item,
+          item: item.export(),
         },
       });
       this.dispatchEvent(itemsUpdatedEvent);
     }
   }
 
-  public updateItem(itemId: string, item: WhiteboardItem) {
-    const index = this.items.findIndex(
-      (item: WhiteboardItem) => item.id === itemId
-    );
+  private getItemIndexById(itemId: string): number | null {
+    const index = this.items.findIndex((item) => item.getId() === itemId);
     if (index === -1) {
+      return null;
+    }
+    return index;
+  }
+
+  public getItemById(
+    itemId: string
+  ): WhiteboardItem<WhiteboardItemType> | null {
+    const index = this.getItemIndexById(itemId);
+    if (index === null) {
+      return null;
+    }
+    return this.items[index];
+  }
+
+  public updateItem(itemId: string, item: WhiteboardItem<WhiteboardItemType>) {
+    const index = this.getItemIndexById(itemId);
+    if (index === null) {
       return;
     }
 
     this.items[index] = item;
     this.draw();
+  }
+
+  public partialItemUpdateById(
+    itemId: string,
+    updates: Partial<WhiteboardItemType>,
+    sendEvent = true
+  ) {
+    const index = this.getItemIndexById(itemId);
+    if (index === null) {
+      return;
+    }
+    this.items[index].partialUpdate(updates);
+    this.draw();
+    this.requestUpdate();
+
+    if (sendEvent) {
+      const itemsUpdatedEvent = new CustomEvent("items-updated", {
+        detail: {
+          type: "partial-update",
+          itemId,
+          updates,
+        },
+      });
+      this.dispatchEvent(itemsUpdatedEvent);
+    }
   }
 
   public clear() {
@@ -735,6 +673,10 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
   }
 
   public setCurrentTool(tool: string, updatePreviousTool = true) {
+    const previousToolInstance = this.registeredTools.get(this.currentTool);
+    if (previousToolInstance) {
+      previousToolInstance.onToolUnselected();
+    }
     if (updatePreviousTool) {
       this.previousTool = this.currentTool;
     }
@@ -746,33 +688,18 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
     }
   }
 
-  public setCurrentDrawing(item: WhiteboardItem | null) {
-    this.currentDrawing = item;
-    this.draw();
-  }
-
-  public getCurrentDrawing(): WhiteboardItem | null {
-    return this.currentDrawing;
-  }
-
-  public getCanvasCoords() {
-    return this.canvasCoords;
-  }
-
-  public setCanvasCoords(coords: { x: number; y: number; zoom: number }) {
-    this.canvasCoords = coords;
-    this.draw();
-  }
-
   public setHoveredItemId(itemId: string | null) {
-    this.hoveredItemId = itemId;
+    if (itemId !== this.hoveredItemId) {
+      this.hoveredItemId = itemId;
+      this.draw();
+    }
   }
 
   public getHoveredItemId(): string | null {
     return this.hoveredItemId;
   }
 
-  public getHoveredItem(): WhiteboardItem | null {
+  public getHoveredItem(): WhiteboardItem<WhiteboardItemType> | null {
     if (!this.hoveredItemId) {
       return null;
     }
@@ -788,15 +715,13 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
     return this.selectedItemId;
   }
 
-  public getToolInstance(toolName: string): SimpleWhiteboardTool | undefined {
+  public getToolInstance(
+    toolName: string
+  ): WhiteboardTool<WhiteboardItem<WhiteboardItemType>> | undefined {
     return this.registeredTools.get(toolName);
   }
 
-  public getItemById(itemId: string): WhiteboardItem | null {
-    return this.items.find((item) => item.id === itemId) || null;
-  }
-
-  public getSelectedItem(): WhiteboardItem | null {
+  public getSelectedItem(): WhiteboardItem<WhiteboardItemType> | null {
     if (!this.selectedItemId) {
       return null;
     }
@@ -806,13 +731,11 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
 
   public updateItemById(
     itemId: string,
-    item: WhiteboardItem,
+    item: WhiteboardItem<WhiteboardItemType>,
     sendEvent = false
   ) {
-    const index = this.items.findIndex(
-      (item: WhiteboardItem) => item.id === itemId
-    );
-    if (index === -1) {
+    const index = this.getItemIndexById(itemId);
+    if (index === null) {
       return;
     }
 
@@ -840,10 +763,8 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
    * @param sendEvent Whether to send an event to notify the removal of the item.
    */
   public removeItemById(itemId: string, sendEvent = false): void {
-    const index = this.items.findIndex(
-      (item: WhiteboardItem) => item.id === itemId
-    );
-    if (index === -1) {
+    const index = this.getItemIndexById(itemId);
+    if (index === null) {
       return;
     }
 
