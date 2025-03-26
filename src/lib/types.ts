@@ -28,3 +28,5 @@ export type Point = {
 
 export type RoughCanvas = LocalRoughCanvas;
 export type RoughCanvasOptions = LocalRoughCanvasOptions;
+
+export type ResizeHandle = { name: string; x: number; y: number };

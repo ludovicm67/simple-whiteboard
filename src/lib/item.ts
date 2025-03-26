@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { DrawingContext } from "./types";
+import { DrawingContext, ResizeHandle } from "./types";
 
 /**
  * Interface for the type of a whiteboard item.
@@ -35,6 +35,13 @@ export interface WhiteboardItemInterface<T extends WhiteboardItemType> {
   } | null;
   relativeMoveOperation(_dx: number, _dy: number): Partial<T> | null;
   isRemovableWithBackspace(): boolean;
+  isResizable(): boolean;
+  relativeResizeOperation(
+    _dx: number,
+    _dy: number,
+    _name: string
+  ): Partial<T> | null;
+  getResizeHandles(): ResizeHandle[];
 }
 
 /**
@@ -152,5 +159,35 @@ export abstract class WhiteboardItem<T extends WhiteboardItemType>
    */
   public isRemovableWithBackspace(): boolean {
     return true;
+  }
+
+  /**
+   * Could the item be resized?
+   * This is used to determine if the item should be resizable.
+   */
+  public isResizable(): boolean {
+    return false;
+  }
+
+  /**
+   * Return the relative resize operation of the item.
+   * The operation is the partial update that needs to be done to resize the item.
+   *
+   * @param _dx The amount to move in the x direction.
+   * @param _dy The amount to move in the y direction.
+   * @param _name The resize handle name.
+   *
+   * @returns the partial update to perform if the item can be moved, `null` otherwise.
+   */
+  public relativeResizeOperation(
+    _dx: number,
+    _dy: number,
+    _name: string
+  ): Partial<T> | null {
+    return null;
+  }
+
+  public getResizeHandles(): ResizeHandle[] {
+    return [];
   }
 }

@@ -3,7 +3,11 @@ import {
   WhiteboardItem,
   WhiteboardItemType,
 } from "../../lib/item";
-import { DrawingContext, RoughCanvasOptions } from "../../lib/types";
+import {
+  DrawingContext,
+  ResizeHandle,
+  RoughCanvasOptions,
+} from "../../lib/types";
 
 export const CIRCLE_ITEM_TYPE = "circle";
 
@@ -179,5 +183,49 @@ export class CircleItem extends WhiteboardItem<CircleItemType> {
       x: this.x + dx,
       y: this.y + dy,
     };
+  }
+
+  /**
+   * Could the item be resized?
+   * This is used to determine if the item should be resizable.
+   */
+  public isResizable(): boolean {
+    return true;
+  }
+
+  /**
+   * Return the relative resize operation of the item.
+   * The operation is the partial update that needs to be done to resize the item.
+   *
+   * @param dx The amount to move in the x direction.
+   * @param _dy The amount to move in the y direction.
+   * @param name The resize handle name.
+   *
+   * @returns the partial update to perform if the item can be moved, `null` otherwise.
+   */
+  public override relativeResizeOperation(
+    dx: number,
+    _dy: number,
+    name: string
+  ): Partial<CircleItemType> | null {
+    switch (name) {
+      case "diameter":
+        const diameter = this.diameter + dx * 2;
+        if (diameter < 0) {
+          return {
+            diameter: Math.abs(diameter),
+            x: this.x + dx,
+          };
+        }
+        return {
+          diameter: diameter,
+        };
+      default:
+        return null;
+    }
+  }
+
+  public override getResizeHandles(): ResizeHandle[] {
+    return [{ x: this.x + this.diameter / 2, y: this.y, name: "diameter" }];
   }
 }

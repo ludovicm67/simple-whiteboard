@@ -5,18 +5,21 @@ import { getIconSvg } from "../../lib/icons";
 import { PointerItem } from "./item";
 import { throttle } from "../../lib/time";
 import { WhiteboardItem, WhiteboardItemType } from "../../lib/item";
+import { ResizeHandle } from "../../lib/types";
 
 export const POINTER_TOOL_NAME = "pointer";
 
 enum PointerAction {
   SELECT = "select",
   DRAG = "drag",
+  RESIZE = "resize",
 }
 
 export class PointerTool extends WhiteboardTool<PointerItem> {
   private clickedItemId: string | null = null;
   private action: PointerAction = PointerAction.SELECT;
   private coords: { x: number; y: number } | null = null;
+  private resizeHandleName: string | null = null;
 
   private throttleMouseMove = throttle(this.handleMouseMoveThrottled, 150);
 
@@ -123,6 +126,53 @@ export class PointerTool extends WhiteboardTool<PointerItem> {
       }
       whiteboard.partialItemUpdateById(this.clickedItemId, partialUpdate);
     }
+
+    if (
+      this.action === PointerAction.RESIZE &&
+      this.coords &&
+      this.clickedItemId &&
+      this.resizeHandleName
+    ) {
+      const deltaX = whiteboardX - this.coords.x;
+      const deltaY = whiteboardY - this.coords.y;
+      this.coords = { x: whiteboardX, y: whiteboardY };
+
+      const item = whiteboard.getItemById(this.clickedItemId);
+      if (!item) {
+        return;
+      }
+      const partialUpdate = item.relativeResizeOperation(
+        deltaX,
+        deltaY,
+        this.resizeHandleName
+      );
+      if (partialUpdate === null) {
+        return;
+      }
+      whiteboard.partialItemUpdateById(this.clickedItemId, partialUpdate);
+    }
+  }
+
+  private resizeHandleMatch(
+    resizeHandles: ResizeHandle[],
+    x: number,
+    y: number
+  ): ResizeHandle | null {
+    console.log(resizeHandles, x, y);
+    for (const handle of resizeHandles) {
+      const { x: handleX, y: handleY } = handle;
+      const handleSize = 10;
+      const halfHandleSize = handleSize / 2;
+      if (
+        x >= handleX - halfHandleSize &&
+        x <= handleX + halfHandleSize &&
+        y >= handleY - halfHandleSize &&
+        y <= handleY + halfHandleSize
+      ) {
+        return handle;
+      }
+    }
+    return null;
   }
 
   public override handleDrawingStart(x: number, y: number): void {
@@ -133,7 +183,27 @@ export class PointerTool extends WhiteboardTool<PointerItem> {
       y
     );
 
-    const currentSelectedItemId = whiteboard.getSelectedItemId();
+    this.action = PointerAction.SELECT;
+
+    const currentSelectedItem = whiteboard.getSelectedItem();
+
+    if (currentSelectedItem && currentSelectedItem.isResizable()) {
+      const resizeHandles = currentSelectedItem.getResizeHandles();
+      const resizeHandle = this.resizeHandleMatch(
+        resizeHandles,
+        whiteboardX,
+        whiteboardY
+      );
+      if (resizeHandle) {
+        this.action = PointerAction.RESIZE;
+        this.clickedItemId = currentSelectedItem.getId();
+        this.coords = { x: whiteboardX, y: whiteboardY };
+        this.resizeHandleName = resizeHandle.name;
+        return;
+      }
+    }
+
+    const currentSelectedItemId = currentSelectedItem?.getId() || null;
     const hoveredItemId = whiteboard.getHoveredItemId();
     const potentialItem = this.findSelectedItemUnderPointer(
       whiteboardX,
@@ -157,6 +227,7 @@ export class PointerTool extends WhiteboardTool<PointerItem> {
     this.clickedItemId = null;
     this.action = PointerAction.SELECT;
     this.coords = null;
+    this.resizeHandleName = null;
   }
 
   public override renderToolOptions(
