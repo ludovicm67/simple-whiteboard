@@ -14,6 +14,7 @@ import { styles } from "./styles";
 import { item } from "./tools/line";
 
 import "./components/menu";
+import { LineItem } from "./tools/line/item";
 
 const getTouchDistance = (touches: TouchList): number => {
   const dx = touches[0].clientX - touches[1].clientX;
@@ -73,6 +74,61 @@ export class SimpleWhiteboard extends LitElement {
     }
     this.canvasContext = canvasContext;
     this.handleResize();
+
+    // From bottom left to top right
+    this.addItem(
+      new LineItem({
+        x1: 0 - 200,
+        y1: 0 - 200,
+        x2: 100 - 200,
+        y2: 100 - 200,
+        options: {
+          stroke: "#000000",
+          strokeWidth: 6,
+        },
+      })
+    );
+    // From top right to bottom left
+    this.addItem(
+      new LineItem({
+        x1: 100 - 100,
+        y1: 100 - 100,
+        x2: 0 - 100,
+        y2: 0 - 100,
+        options: {
+          stroke: "#000000",
+          strokeWidth: 6,
+        },
+      })
+    );
+
+    // From top left to bottom right
+    this.addItem(
+      new LineItem({
+        x1: 0 + 100,
+        y1: 100 + 100,
+        x2: 100 + 100,
+        y2: 0 + 100,
+        options: {
+          stroke: "#000000",
+          strokeWidth: 6,
+        },
+      })
+    );
+
+    // From bottom right to top left
+    this.addItem(
+      new LineItem({
+        x1: 100 + 200,
+        y1: 0 + 200,
+        x2: 0 + 200,
+        y2: 100 + 200,
+        options: {
+          stroke: "#000000",
+          strokeWidth: 6,
+        },
+      })
+    );
   }
 
   handleResize() {
@@ -105,7 +161,8 @@ export class SimpleWhiteboard extends LitElement {
   drawItemBox(
     context: CanvasRenderingContext2D,
     item: WhiteboardItem<WhiteboardItemType>,
-    boxColor = "#135aa0"
+    boxColor = "#135aa0",
+    isResizable = false
   ): void {
     const boundingRect = this.getBoundingRect(item);
     if (!boundingRect) {
@@ -121,6 +178,37 @@ export class SimpleWhiteboard extends LitElement {
     context.beginPath();
     context.rect(coordX, coordY, width * zoom, height * zoom);
     context.stroke();
+
+    if (!isResizable) {
+      return;
+    }
+
+    const handleSize = 8;
+    const halfHandleSize = handleSize / 2;
+    const handleColor = "#135aa0";
+    const handleBackgroundColor = "#fff";
+
+    // Draw all resize handles for the item
+    item.getResizeHandles().forEach((handle) => {
+      const { x: handleX, y: handleY } = this.coordsContext.convertToCanvas(
+        handle.x,
+        handle.y
+      );
+      context.fillStyle = handleBackgroundColor;
+      context.fillRect(
+        handleX - halfHandleSize,
+        handleY - halfHandleSize,
+        handleSize,
+        handleSize
+      );
+      context.strokeStyle = handleColor;
+      context.strokeRect(
+        handleX - halfHandleSize,
+        handleY - halfHandleSize,
+        handleSize,
+        handleSize
+      );
+    });
   }
 
   generateDrawingContext(): DrawingContext {
@@ -153,7 +241,8 @@ export class SimpleWhiteboard extends LitElement {
       this.drawItemBox(context, hoveredItem, "#dbe6f0");
     }
     if (selectedItem) {
-      this.drawItemBox(context, selectedItem);
+      const isResizable = selectedItem.isResizable();
+      this.drawItemBox(context, selectedItem, "#135aa0", isResizable);
     }
   }
 

@@ -3,7 +3,11 @@ import {
   WhiteboardItem,
   WhiteboardItemType,
 } from "../../lib/item";
-import { DrawingContext, RoughCanvasOptions } from "../../lib/types";
+import {
+  DrawingContext,
+  ResizeHandle,
+  RoughCanvasOptions,
+} from "../../lib/types";
 
 export const LINE_ITEM_TYPE = "line";
 
@@ -186,5 +190,51 @@ export class LineItem extends WhiteboardItem<LineItemType> {
       x2: this.x2 + dx,
       y2: this.y2 + dy,
     };
+  }
+
+  /**
+   * Could the item be resized?
+   * This is used to determine if the item should be resizable.
+   */
+  public isResizable(): boolean {
+    return true;
+  }
+
+  /**
+   * Return the relative resize operation of the item.
+   * The operation is the partial update that needs to be done to resize the item.
+   *
+   * @param dx The amount to move in the x direction.
+   * @param dy The amount to move in the y direction.
+   * @param name The resize handle name.
+   *
+   * @returns the partial update to perform if the item can be moved, `null` otherwise.
+   */
+  public override relativeResizeOperation(
+    dx: number,
+    dy: number,
+    name: string
+  ): Partial<LineItemType> | null {
+    switch (name) {
+      case "point-1":
+        return {
+          x1: this.x1 + dx,
+          y1: this.y1 + dy,
+        };
+      case "point-2":
+        return {
+          x2: this.x2 + dx,
+          y2: this.y2 + dy,
+        };
+      default:
+        return null;
+    }
+  }
+
+  public override getResizeHandles(): ResizeHandle[] {
+    return [
+      { x: this.x1, y: this.y1, name: "point-1" },
+      { x: this.x2, y: this.y2, name: "point-2" },
+    ];
   }
 }

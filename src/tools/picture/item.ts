@@ -3,7 +3,7 @@ import {
   WhiteboardItem,
   WhiteboardItemType,
 } from "../../lib/item";
-import { DrawingContext } from "../../lib/types";
+import { DrawingContext, ResizeHandle } from "../../lib/types";
 
 export const PICTURE_ITEM_TYPE = "picture";
 
@@ -182,5 +182,72 @@ export class PictureItem extends WhiteboardItem<PictureItemType> {
       x: this.x + dx,
       y: this.y + dy,
     };
+  }
+
+  /**
+   * Could the item be resized?
+   * This is used to determine if the item should be resizable.
+   */
+  public isResizable(): boolean {
+    return true;
+  }
+
+  /**
+   * Return the relative resize operation of the item.
+   * The operation is the partial update that needs to be done to resize the item.
+   *
+   * @param dx The amount to move in the x direction.
+   * @param dy The amount to move in the y direction.
+   * @param name The resize handle name.
+   *
+   * @returns the partial update to perform if the item can be moved, `null` otherwise.
+   */
+  public override relativeResizeOperation(
+    dx: number,
+    dy: number,
+    name: string
+  ): Partial<PictureItemType> | null {
+    switch (name) {
+      case "top-left":
+        return {
+          x: this.x + dx,
+          y: this.y + dy,
+          width: this.width - dx,
+          height: this.height - dy,
+        };
+      case "top-right":
+        return {
+          y: this.y + dy,
+          width: this.width + dx,
+          height: this.height - dy,
+        };
+      case "bottom-left":
+        return {
+          x: this.x + dx,
+          width: this.width - dx,
+          height: this.height + dy,
+        };
+      case "bottom-right":
+        return {
+          width: this.width + dx,
+          height: this.height + dy,
+        };
+      default:
+        return null;
+    }
+  }
+
+  public override getResizeHandles(): ResizeHandle[] {
+    const boundingBox = this.getBoundingBox();
+    if (!boundingBox) {
+      return [];
+    }
+    const { x, y, width, height } = boundingBox;
+    return [
+      { x, y, name: "top-left" },
+      { x: x + width, y, name: "top-right" },
+      { x, y: y + height, name: "bottom-left" },
+      { x: x + width, y: y + height, name: "bottom-right" },
+    ];
   }
 }
