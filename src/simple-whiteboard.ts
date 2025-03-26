@@ -14,7 +14,6 @@ import { styles } from "./styles";
 import { item } from "./tools/line";
 
 import "./components/menu";
-import { LineItem } from "./tools/line/item";
 
 const getTouchDistance = (touches: TouchList): number => {
   const dx = touches[0].clientX - touches[1].clientX;
