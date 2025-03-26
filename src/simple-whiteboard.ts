@@ -74,61 +74,6 @@ export class SimpleWhiteboard extends LitElement {
     }
     this.canvasContext = canvasContext;
     this.handleResize();
-
-    // From bottom left to top right
-    this.addItem(
-      new LineItem({
-        x1: 0 - 200,
-        y1: 0 - 200,
-        x2: 100 - 200,
-        y2: 100 - 200,
-        options: {
-          stroke: "#000000",
-          strokeWidth: 6,
-        },
-      })
-    );
-    // From top right to bottom left
-    this.addItem(
-      new LineItem({
-        x1: 100 - 100,
-        y1: 100 - 100,
-        x2: 0 - 100,
-        y2: 0 - 100,
-        options: {
-          stroke: "#000000",
-          strokeWidth: 6,
-        },
-      })
-    );
-
-    // From top left to bottom right
-    this.addItem(
-      new LineItem({
-        x1: 0 + 100,
-        y1: 100 + 100,
-        x2: 100 + 100,
-        y2: 0 + 100,
-        options: {
-          stroke: "#000000",
-          strokeWidth: 6,
-        },
-      })
-    );
-
-    // From bottom right to top left
-    this.addItem(
-      new LineItem({
-        x1: 100 + 200,
-        y1: 0 + 200,
-        x2: 0 + 200,
-        y2: 100 + 200,
-        options: {
-          stroke: "#000000",
-          strokeWidth: 6,
-        },
-      })
-    );
   }
 
   handleResize() {
