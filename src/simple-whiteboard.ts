@@ -73,6 +73,14 @@ export class SimpleWhiteboard extends LitElement {
     }
     this.canvasContext = canvasContext;
     this.handleResize();
+
+    // Just send a ready event ; the whiteboard element is available
+    const readyEvent = new CustomEvent("ready", {
+      detail: {
+        status: "ready",
+      },
+    });
+    this.dispatchEvent(readyEvent);
   }
 
   handleResize() {
@@ -396,6 +404,14 @@ export class SimpleWhiteboard extends LitElement {
     this.registeredTools.set(toolName, tool);
     this.draw();
     this.requestUpdate();
+
+    // Just send an event saying that a tool was registered
+    const toolRegistered = new CustomEvent("tool-registered", {
+      detail: {
+        name: toolName,
+      },
+    });
+    this.dispatchEvent(toolRegistered);
   }
 
   requestUpdate(
