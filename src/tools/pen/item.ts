@@ -4,7 +4,7 @@ import {
   WhiteboardItem,
   WhiteboardItemType,
 } from "../../lib/item";
-import { DrawingContext } from "../../lib/types";
+import { DrawingContext, ResizeHandle } from "../../lib/types";
 import { getSvgPathFromStroke } from "../../lib/svg";
 
 export const PEN_ITEM_TYPE = "pen";
@@ -195,5 +195,62 @@ export class PenItem extends WhiteboardItem<PenItemType> {
         y: y + dy,
       })),
     };
+  }
+
+  /**
+   * Could the item be resized?
+   * This is used to determine if the item should be resizable.
+   */
+  public isResizable(): boolean {
+    return true;
+  }
+
+  /**
+   * Return the relative resize operation of the item.
+   * The operation is the partial update that needs to be done to resize the item.
+   *
+   * @param dx The amount to move in the x direction.
+   * @param dy The amount to move in the y direction.
+   * @param name The resize handle name.
+   *
+   * @returns the partial update to perform if the item can be moved, `null` otherwise.
+   */
+  public override relativeResizeOperation(
+    dx: number,
+    dy: number,
+    name: string
+  ): Partial<PenItemType> | null {
+    const boundingBox = this.getBoundingBox();
+    if (!boundingBox) {
+      return null;
+    }
+    const { x, y, width, height } = boundingBox;
+    const newWidth = width + dx;
+    const newHeight = height + dy;
+    const ratioX = newWidth / width;
+    const ratioY = newHeight / height;
+
+    const newPath = this.path.map(({ x: pointX, y: pointY }) => ({
+      x: x + (pointX - x) * ratioX,
+      y: y + (pointY - y) * ratioY,
+    }));
+
+    switch (name) {
+      case "bottom-right":
+        return {
+          path: newPath,
+        };
+      default:
+        return null;
+    }
+  }
+
+  public override getResizeHandles(): ResizeHandle[] {
+    const boundingBox = this.getBoundingBox();
+    if (!boundingBox) {
+      return [];
+    }
+    const { x, y, width, height } = boundingBox;
+    return [{ x: x + width, y: y + height, name: "bottom-right" }];
   }
 }
