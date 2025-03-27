@@ -404,6 +404,14 @@ export class SimpleWhiteboard extends LitElement {
     this.registeredTools.set(toolName, tool);
     this.draw();
     this.requestUpdate();
+
+    // Just send an event saying that a tool was registered
+    const toolRegistered = new CustomEvent("tool-registered", {
+      detail: {
+        name: toolName,
+      },
+    });
+    this.dispatchEvent(toolRegistered);
   }
 
   requestUpdate(

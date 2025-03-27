@@ -31,11 +31,22 @@
       const id = Math.random().toString(36).substr(2, 9);
       const app = document.getElementById("app");
       (async () => {
+        // Listen for ready event
+        app.addEventListener("ready", (e) => {
+          console.info("Whiteboard is ready!", e.detail);
+        });
+
         // Just make sure that the simple-whiteboard element is defined
         await new Promise((resolve) => {
           window.customElements.whenDefined("simple-whiteboard").then(() => {
             resolve();
           });
+        });
+
+        // Listen for tool-registered event
+        app.addEventListener("tool-registered", (e) => {
+          const toolName = e.detail?.name || "Unknown";
+          console.log("Tool registered event:", toolName, e.detail);
         });
 
         // Listen for items-updated event
