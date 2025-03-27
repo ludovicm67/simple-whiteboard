@@ -1,5 +1,13 @@
 # @ludovicm67/whiteboard
 
+## 0.3.1
+
+### Patch Changes
+
+- 08b4cd5: Add "tool-registered" event
+- bc6b3b2: Most of the items can be resized
+- ce7589a: Add "ready" event
+
 ## 0.3.0
 
 ### Minor Changes
