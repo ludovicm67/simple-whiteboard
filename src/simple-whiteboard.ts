@@ -369,6 +369,28 @@ export class SimpleWhiteboard extends LitElement {
     this.handleDrawingMove(x, y);
   }
 
+  handleWheel(e: WheelEvent) {
+    e.preventDefault();
+
+    const isTrackpad = Math.abs(e.deltaY) < 50; // Detect trackpad VS mouse wheel
+    const scaleFactor = isTrackpad ? 0.02 : 0.1; // Lower for trackpads to slow down zoom
+
+    // Handle zooming
+    if (e.ctrlKey || e.metaKey) {
+      // Zoom in or out
+      const zoomFactor = e.deltaY > 0 ? 1 - scaleFactor : 1 + scaleFactor;
+      const zoom = this.coordsContext.getZoom() * zoomFactor;
+      this.setZoom(zoom);
+      return;
+    }
+
+    // Move the canvas
+    const { x, y } = this.coordsContext.getCoords();
+    this.coordsContext.setCoords(x - e.deltaX, y - e.deltaY);
+    this.draw();
+    this.requestUpdate();
+  }
+
   handleTouchEnd() {
     this.handleDrawingEnd();
   }
@@ -573,6 +595,7 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
           @mousedown="${this.handleMouseDown}"
           @mouseup="${this.handleMouseUp}"
           @mousemove="${this.handleMouseMove}"
+          @wheel="${this.handleWheel}"
           @touchstart="${this.handleTouchStart}"
           @touchmove="${this.handleTouchMove}"
           @touchend="${this.handleTouchEnd}"

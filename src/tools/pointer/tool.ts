@@ -158,7 +158,6 @@ export class PointerTool extends WhiteboardTool<PointerItem> {
     x: number,
     y: number
   ): ResizeHandle | null {
-    console.log(resizeHandles, x, y);
     for (const handle of resizeHandles) {
       const { x: handleX, y: handleY } = handle;
       const handleSize = 10;
