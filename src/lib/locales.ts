@@ -1,8 +1,10 @@
 import i18next, { i18n, TFunction } from "i18next";
 
+const locales = import.meta.glob("../../locales/*.json", { eager: true });
+
 const getLocaleContent = async (locale: string): Promise<any> => {
-  const content = (await import(`../../locales/${locale}.json`)).default;
-  return content;
+  const match = locales[`../../locales/${locale}.json`] as { default: any };
+  return match?.default;
 };
 
 export class I18nContext {
