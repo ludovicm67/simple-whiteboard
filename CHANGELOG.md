@@ -1,5 +1,12 @@
 # @ludovicm67/whiteboard
 
+## 0.3.2
+
+### Patch Changes
+
+- df245ba: Inline locales files instead of having them generated as modules
+- f574cb6: Handle wheel events for zooming and moving on the canvas.
+
 ## 0.3.1
 
 ### Patch Changes
