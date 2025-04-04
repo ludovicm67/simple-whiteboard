@@ -44,9 +44,18 @@
         });
 
         // Listen for tool-registered event
-        app.addEventListener("tool-registered", (e) => {
-          const toolName = e.detail?.name || "Unknown";
-          console.log("Tool registered event:", toolName, e.detail);
+        let toolCounter = 0;
+        await new Promise((resolve) => {
+          app.addEventListener("tool-registered", (e) => {
+            const toolName = e.detail?.name || "Unknown";
+            console.log("Tool registered event:", toolName, e.detail);
+            toolCounter++;
+            console.log("Tool counter:", toolCounter);
+            if (toolCounter === 10) {
+              resolve();
+              console.log("All tools registered");
+            }
+          });
         });
 
         // Listen for items-updated event
