@@ -1,5 +1,12 @@
 # @ludovicm67/whiteboard
 
+## 0.3.3
+
+### Patch Changes
+
+- 99cb3a6: It is possible to configure the max size of a picture
+- 3c2f651: Cancel hover effect if the user is not selecting an item
+
 ## 0.3.2
 
 ### Patch Changes
