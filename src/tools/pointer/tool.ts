@@ -78,8 +78,8 @@ export class PointerTool extends WhiteboardTool<PointerItem> {
       e.offsetY
     );
 
-    // Cancel the hover effect if the user is dragging an item
-    if (this.action === PointerAction.DRAG) {
+    // Cancel the hover effect if the user is not selecting an item
+    if (this.action !== PointerAction.SELECT) {
       const hoveredItemId = whiteboard.getHoveredItemId();
       if (hoveredItemId) {
         whiteboard.setHoveredItemId(null);
