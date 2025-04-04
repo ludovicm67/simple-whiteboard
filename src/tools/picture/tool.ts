@@ -6,7 +6,72 @@ import { PictureItem } from "./item";
 
 export const PICTURE_TOOL_NAME = "picture";
 
+/**
+ * Resize an image to fit within the specified maximum width and height, maintaining the aspect ratio.
+ *
+ * @param image - The image element to resize.
+ * @param maxWidth - The maximum width of the resized image.
+ * @param maxHeight - The maximum height of the resized image.
+ * @returns The resized image as a Data URL.
+ */
+const resizeImage = (
+  image: HTMLImageElement,
+  maxWidth: number,
+  maxHeight: number
+): string => {
+  let width = image.width;
+  let height = image.height;
+
+  // Maintain aspect ratio
+  if (width > height) {
+    if (width > maxWidth) {
+      height *= maxWidth / width;
+      width = maxWidth;
+    }
+  } else {
+    if (height > maxHeight) {
+      width *= maxHeight / height;
+      height = maxHeight;
+    }
+  }
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    throw new Error("Canvas context is null");
+  }
+
+  ctx.drawImage(image, 0, 0, width, height);
+
+  // Return resized image as Data URL
+  return canvas.toDataURL("image/png");
+};
+
 export class PictureTool extends WhiteboardTool<PictureItem> {
+  private maxWidth: number = 1200;
+  private maxHeight: number = 1200;
+
+  /**
+   * Set the maximum height of the image to be uploaded.
+   *
+   * @param maxWidth Maximum width of the image to be uploaded.
+   */
+  public setMaxWidth(maxWidth: number) {
+    this.maxWidth = maxWidth;
+  }
+
+  /**
+   * Set the maximum height of the image to be uploaded.
+   *
+   * @param maxHeight Maximum height of the image to be uploaded.
+   */
+  public setMaxHeight(maxHeight: number) {
+    this.maxHeight = maxHeight;
+  }
+
   /**
    * Get the icon of the tool.
    * Return `null` if the tool does not have an icon.
@@ -92,42 +157,49 @@ export class PictureTool extends WhiteboardTool<PictureItem> {
             reader.onload = (e) => {
               const img = new Image();
               img.onload = () => {
-                let newWidth = img.width;
-                let newHeight = img.height;
-
-                // Image should be at most 80% of the canvas size
-                const width = Math.min(img.width, canvasWidth);
-                const height = Math.min(img.height, canvasHeight);
-
-                // Fix aspect ratio
-                const aspectRatio = img.width / img.height;
-                if (width / aspectRatio > height) {
-                  newWidth = height * aspectRatio;
-                  newHeight = height;
-                } else {
-                  newWidth = width;
-                  newHeight = width / aspectRatio;
-                }
-
-                const coordsContext = whiteboard.getCoordsContext();
-                const { x, y } = coordsContext.getCoords();
-
-                whiteboard.partialItemUpdateById(newItemId, {
-                  src: img.src,
-                  x: -newWidth / 2 + x,
-                  y: -newHeight / 2 + y,
-                  width: newWidth,
-                  height: newHeight,
-                });
-
-                // Use the default tool after adding the image
-                whiteboard.setCurrentTool(
-                  whiteboard.getDefaultToolName() ?? ""
+                // First resize the image to a maximum size (to avoid using too much memory)
+                const resizedDataUrl = resizeImage(
+                  img,
+                  this.maxWidth,
+                  this.maxHeight
                 );
 
-                // Select the new item, so that the user can delete it
-                whiteboard.setSelectedItemId(newItemId);
+                const resizedImg = new Image();
+                resizedImg.onload = () => {
+                  let newWidth = resizedImg.width;
+                  let newHeight = resizedImg.height;
+
+                  const width = Math.min(resizedImg.width, canvasWidth);
+                  const height = Math.min(resizedImg.height, canvasHeight);
+
+                  const aspectRatio = resizedImg.width / resizedImg.height;
+                  if (width / aspectRatio > height) {
+                    newWidth = height * aspectRatio;
+                    newHeight = height;
+                  } else {
+                    newWidth = width;
+                    newHeight = width / aspectRatio;
+                  }
+
+                  const coordsContext = whiteboard.getCoordsContext();
+                  const { x, y } = coordsContext.getCoords();
+
+                  whiteboard.partialItemUpdateById(newItemId, {
+                    src: resizedImg.src,
+                    x: -newWidth / 2 + x,
+                    y: -newHeight / 2 + y,
+                    width: newWidth,
+                    height: newHeight,
+                  });
+
+                  whiteboard.setCurrentTool(
+                    whiteboard.getDefaultToolName() ?? ""
+                  );
+                  whiteboard.setSelectedItemId(newItemId);
+                };
+                resizedImg.src = resizedDataUrl;
               };
+
               img.src = e.target?.result as string;
             };
             reader.readAsDataURL(file);
