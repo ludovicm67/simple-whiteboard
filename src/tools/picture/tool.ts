@@ -3,7 +3,6 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { WhiteboardTool } from "../../lib/tool";
 import { getIconSvg } from "../../lib/icons";
 import { PictureItem } from "./item";
-import { SimpleWhiteboard } from "../../simple-whiteboard";
 
 export const PICTURE_TOOL_NAME = "picture";
 
@@ -52,19 +51,25 @@ const resizeImage = (
 };
 
 export class PictureTool extends WhiteboardTool<PictureItem> {
-  private maxWidth: number;
-  private maxHeight: number;
+  private maxWidth: number = 1200;
+  private maxHeight: number = 1200;
 
-  constructor(
-    simpleWhiteboardInstance: SimpleWhiteboard,
-    itemBuilder: (item: any, id?: string) => PictureItem,
-    options?: { maxWidth?: number; maxHeight?: number }
-  ) {
-    super(simpleWhiteboardInstance, itemBuilder);
+  /**
+   * Set the maximum height of the image to be uploaded.
+   *
+   * @param maxWidth Maximum width of the image to be uploaded.
+   */
+  public setMaxWidth(maxWidth: number) {
+    this.maxWidth = maxWidth;
+  }
 
-    // Some custom options for the tool
-    this.maxHeight = options?.maxHeight ?? 1200;
-    this.maxWidth = options?.maxWidth ?? 1200;
+  /**
+   * Set the maximum height of the image to be uploaded.
+   *
+   * @param maxHeight Maximum height of the image to be uploaded.
+   */
+  public setMaxHeight(maxHeight: number) {
+    this.maxHeight = maxHeight;
   }
 
   /**

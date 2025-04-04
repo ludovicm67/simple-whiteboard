@@ -35,8 +35,8 @@ export class DefaultTools extends LitElement {
       <simple-whiteboard--tool-text slot="tools"></simple-whiteboard--tool-text>
       <simple-whiteboard--tool-picture
         slot="tools"
-        maxWidth="120"
-        maxHeight="120"
+        maxWidth="1200"
+        maxHeight="1200"
       ></simple-whiteboard--tool-picture>
       <simple-whiteboard--tool-eraser
         slot="tools"

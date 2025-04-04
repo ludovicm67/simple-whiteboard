@@ -18,4 +18,14 @@ export class PictureElement extends WhiteboardElement<PictureTool> {
   constructor() {
     super(toolBuilder);
   }
+
+  protected updated(changedProperties: Map<string | number | symbol, unknown>) {
+    const tool = this.getTool();
+    if (changedProperties.has("maxWidth")) {
+      tool.setMaxWidth(this.maxWidth);
+    }
+    if (changedProperties.has("maxHeight")) {
+      tool.setMaxHeight(this.maxHeight);
+    }
+  }
 }
