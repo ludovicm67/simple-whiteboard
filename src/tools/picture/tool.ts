@@ -138,10 +138,10 @@ export class PictureTool extends WhiteboardTool<PictureItem> {
           accept="image/*"
           @change=${(e: Event) => {
             const newItem = this.newItem({
-              x: 0,
-              y: 0,
-              width: 0,
-              height: 0,
+              x1: 0,
+              x2: 0,
+              y1: 0,
+              y2: 0,
               src: null,
             });
             const newItemId = newItem.getId();
@@ -184,12 +184,15 @@ export class PictureTool extends WhiteboardTool<PictureItem> {
                   const coordsContext = whiteboard.getCoordsContext();
                   const { x, y } = coordsContext.getCoords();
 
+                  const newX = -newWidth / 2 + x;
+                  const newY = -newHeight / 2 + y;
+
                   whiteboard.partialItemUpdateById(newItemId, {
                     src: resizedImg.src,
-                    x: -newWidth / 2 + x,
-                    y: -newHeight / 2 + y,
-                    width: newWidth,
-                    height: newHeight,
+                    x1: newX,
+                    y1: newY,
+                    x2: newX + newWidth,
+                    y2: newY + newHeight,
                   });
 
                   whiteboard.setCurrentTool(
