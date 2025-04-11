@@ -14,10 +14,10 @@ export const itemBuilder = (item: PictureItemType, id?: string) =>
  * Type for a picture item.
  */
 export interface PictureItemType extends WhiteboardItemType {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+  x1: number;
+  x2: number;
+  y1: number;
+  y2: number;
   src: string | null;
 }
 
@@ -27,10 +27,10 @@ export interface PictureItemType extends WhiteboardItemType {
 export class PictureItem extends WhiteboardItem<PictureItemType> {
   private cachedPicture: HTMLImageElement | null = null;
 
-  private x: number;
-  private y: number;
-  private width: number;
-  private height: number;
+  private x1: number;
+  private x2: number;
+  private y1: number;
+  private y2: number;
   private src: string | null;
 
   constructor(item: PictureItemType, id?: string) {
@@ -38,10 +38,10 @@ export class PictureItem extends WhiteboardItem<PictureItemType> {
 
     this.cachedPicture = null;
 
-    this.x = item.x;
-    this.y = item.y;
-    this.width = item.width;
-    this.height = item.height;
+    this.x1 = item.x1;
+    this.x2 = item.x2;
+    this.y1 = item.y1;
+    this.y2 = item.y2;
     this.src = item.src;
   }
 
@@ -64,10 +64,10 @@ export class PictureItem extends WhiteboardItem<PictureItemType> {
       id: this.getId(),
       type: this.getType(),
       data: {
-        x: this.x,
-        y: this.y,
-        width: this.width,
-        height: this.height,
+        x1: this.x1,
+        x2: this.x2,
+        y1: this.y1,
+        y2: this.y2,
         src: this.src,
       },
     };
@@ -85,10 +85,10 @@ export class PictureItem extends WhiteboardItem<PictureItemType> {
       this.cachedPicture = null;
     }
 
-    this.x = item.x ?? this.x;
-    this.y = item.y ?? this.y;
-    this.width = item.width ?? this.width;
-    this.height = item.height ?? this.height;
+    this.x1 = item.x1 ?? this.x1;
+    this.x2 = item.x2 ?? this.x2;
+    this.y1 = item.y1 ?? this.y1;
+    this.y2 = item.y2 ?? this.y2;
     this.src = item.src ?? this.src;
   }
 
@@ -102,10 +102,10 @@ export class PictureItem extends WhiteboardItem<PictureItemType> {
     // Reset cached picture
     this.cachedPicture = null;
 
-    this.x = item.x;
-    this.y = item.y;
-    this.width = item.width;
-    this.height = item.height;
+    this.x1 = item.x1;
+    this.x2 = item.x2;
+    this.y1 = item.y1;
+    this.y2 = item.y2;
     this.src = item.src;
   }
 
@@ -120,8 +120,14 @@ export class PictureItem extends WhiteboardItem<PictureItemType> {
       return;
     }
 
+    const { x1, y1, x2, y2 } = this;
+    const minX = Math.min(x1, x2);
+    const minY = Math.min(y1, y2);
+    const width = Math.abs(x2 - x1);
+    const height = Math.abs(y2 - y1);
+
     // Convert the coordinates to canvas coordinates
-    const { x, y } = context.coords.convertToCanvas(this.x, this.y);
+    const { x, y } = context.coords.convertToCanvas(minX, minY);
     const zoom = context.coords.getZoom();
 
     if (this.cachedPicture) {
@@ -129,20 +135,14 @@ export class PictureItem extends WhiteboardItem<PictureItemType> {
         this.cachedPicture,
         x,
         y,
-        this.width * zoom,
-        this.height * zoom
+        width * zoom,
+        height * zoom
       );
     } else {
       const img = new Image();
       img.onload = () => {
         this.cachedPicture = img;
-        context.canvas.drawImage(
-          img,
-          x,
-          y,
-          this.width * zoom,
-          this.height * zoom
-        );
+        context.canvas.drawImage(img, x, y, width * zoom, height * zoom);
       };
       img.src = this.src;
     }
@@ -157,11 +157,17 @@ export class PictureItem extends WhiteboardItem<PictureItemType> {
     width: number;
     height: number;
   } | null {
+    const { x1, y1, x2, y2 } = this;
+    const minX = Math.min(x1, x2);
+    const minY = Math.min(y1, y2);
+    const width = Math.abs(x2 - x1);
+    const height = Math.abs(y2 - y1);
+
     return {
-      x: this.x,
-      y: this.y,
-      width: this.width,
-      height: this.height,
+      x: minX,
+      y: minY,
+      width,
+      height,
     };
   }
 
@@ -179,8 +185,10 @@ export class PictureItem extends WhiteboardItem<PictureItemType> {
     dy: number
   ): Partial<PictureItemType> | null {
     return {
-      x: this.x + dx,
-      y: this.y + dy,
+      x1: this.x1 + dx,
+      x2: this.x2 + dx,
+      y1: this.y1 + dy,
+      y2: this.y2 + dy,
     };
   }
 
@@ -208,29 +216,15 @@ export class PictureItem extends WhiteboardItem<PictureItemType> {
     name: string
   ): Partial<PictureItemType> | null {
     switch (name) {
-      case "top-left":
+      case "point-1":
         return {
-          x: this.x + dx,
-          y: this.y + dy,
-          width: this.width - dx,
-          height: this.height - dy,
+          x1: this.x1 + dx,
+          y1: this.y1 + dy,
         };
-      case "top-right":
+      case "point-2":
         return {
-          y: this.y + dy,
-          width: this.width + dx,
-          height: this.height - dy,
-        };
-      case "bottom-left":
-        return {
-          x: this.x + dx,
-          width: this.width - dx,
-          height: this.height + dy,
-        };
-      case "bottom-right":
-        return {
-          width: this.width + dx,
-          height: this.height + dy,
+          x2: this.x2 + dx,
+          y2: this.y2 + dy,
         };
       default:
         return null;
@@ -238,16 +232,9 @@ export class PictureItem extends WhiteboardItem<PictureItemType> {
   }
 
   public override getResizeHandles(): ResizeHandle[] {
-    const boundingBox = this.getBoundingBox();
-    if (!boundingBox) {
-      return [];
-    }
-    const { x, y, width, height } = boundingBox;
     return [
-      { x, y, name: "top-left" },
-      { x: x + width, y, name: "top-right" },
-      { x, y: y + height, name: "bottom-left" },
-      { x: x + width, y: y + height, name: "bottom-right" },
+      { x: this.x1, y: this.y1, name: "point-1" },
+      { x: this.x2, y: this.y2, name: "point-2" },
     ];
   }
 }

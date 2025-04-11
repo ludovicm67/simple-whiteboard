@@ -18,10 +18,10 @@ export const itemBuilder = (item: RectItemType, id?: string) =>
  * Type for a rect item.
  */
 export interface RectItemType extends WhiteboardItemType {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+  x1: number;
+  x2: number;
+  y1: number;
+  y2: number;
   options: RoughCanvasOptions;
 }
 
@@ -29,19 +29,19 @@ export interface RectItemType extends WhiteboardItemType {
  * Class for a rect item.
  */
 export class RectItem extends WhiteboardItem<RectItemType> {
-  private x: number;
-  private y: number;
-  private width: number;
-  private height: number;
+  private x1: number;
+  private x2: number;
+  private y1: number;
+  private y2: number;
   private options: RoughCanvasOptions;
 
   constructor(item: RectItemType, id?: string) {
     super(item, id);
 
-    this.x = item.x;
-    this.y = item.y;
-    this.width = item.width;
-    this.height = item.height;
+    this.x1 = item.x1;
+    this.x2 = item.x2;
+    this.y1 = item.y1;
+    this.y2 = item.y2;
     this.options = item.options;
   }
 
@@ -64,10 +64,10 @@ export class RectItem extends WhiteboardItem<RectItemType> {
       id: this.getId(),
       type: this.getType(),
       data: {
-        x: this.x,
-        y: this.y,
-        width: this.width,
-        height: this.height,
+        x1: this.x1,
+        x2: this.x2,
+        y1: this.y1,
+        y2: this.y2,
         options: this.options,
       },
     };
@@ -80,10 +80,10 @@ export class RectItem extends WhiteboardItem<RectItemType> {
    * @param item item with the properties to update.
    */
   public override partialUpdate(item: Partial<RectItemType>): void {
-    this.x = item.x ?? this.x;
-    this.y = item.y ?? this.y;
-    this.width = item.width ?? this.width;
-    this.height = item.height ?? this.height;
+    this.x1 = item.x1 ?? this.x1;
+    this.x2 = item.x2 ?? this.x2;
+    this.y1 = item.y1 ?? this.y1;
+    this.y2 = item.y2 ?? this.y2;
     this.options = item.options ?? this.options;
   }
 
@@ -94,10 +94,10 @@ export class RectItem extends WhiteboardItem<RectItemType> {
    * @param item item with all the properties.
    */
   public override update(item: RectItemType): void {
-    this.x = item.x;
-    this.y = item.y;
-    this.width = item.width;
-    this.height = item.height;
+    this.x1 = item.x1;
+    this.x2 = item.x2;
+    this.y1 = item.y1;
+    this.y2 = item.y2;
     this.options = item.options;
   }
 
@@ -107,8 +107,14 @@ export class RectItem extends WhiteboardItem<RectItemType> {
    * @param context The context to draw on.
    */
   public override draw(context: DrawingContext): void {
+    const { x1, y1, x2, y2 } = this;
+    const minX = Math.min(x1, x2);
+    const minY = Math.min(y1, y2);
+    const width = Math.abs(x2 - x1);
+    const height = Math.abs(y2 - y1);
+
     // Convert the coordinates to canvas coordinates
-    const { x, y } = context.coords.convertToCanvas(this.x, this.y);
+    const { x, y } = context.coords.convertToCanvas(minX, minY);
 
     // Handle zoom
     const zoom = context.coords.getZoom();
@@ -118,7 +124,7 @@ export class RectItem extends WhiteboardItem<RectItemType> {
     }
 
     // Draw the item on the canvas
-    context.roughCanvas.rectangle(x, y, this.width * zoom, this.height * zoom, {
+    context.roughCanvas.rectangle(x, y, width * zoom, height * zoom, {
       ...this.options,
       ...optionsOverride,
     });
@@ -162,11 +168,17 @@ export class RectItem extends WhiteboardItem<RectItemType> {
     const strokeWidth = this.options.strokeWidth ?? 1;
     const halfStrokeWidth = strokeWidth / 2;
 
+    const { x1, y1, x2, y2 } = this;
+    const minX = Math.min(x1, x2);
+    const minY = Math.min(y1, y2);
+    const width = Math.abs(x2 - x1);
+    const height = Math.abs(y2 - y1);
+
     return {
-      x: this.x - halfStrokeWidth,
-      y: this.y - halfStrokeWidth,
-      width: this.width + strokeWidth,
-      height: this.height + strokeWidth,
+      x: minX - halfStrokeWidth,
+      y: minY - halfStrokeWidth,
+      width: width + strokeWidth,
+      height: height + strokeWidth,
     };
   }
 
@@ -184,8 +196,10 @@ export class RectItem extends WhiteboardItem<RectItemType> {
     dy: number
   ): Partial<RectItemType> | null {
     return {
-      x: this.x + dx,
-      y: this.y + dy,
+      x1: this.x1 + dx,
+      x2: this.x2 + dx,
+      y1: this.y1 + dy,
+      y2: this.y2 + dy,
     };
   }
 
@@ -213,29 +227,15 @@ export class RectItem extends WhiteboardItem<RectItemType> {
     name: string
   ): Partial<RectItemType> | null {
     switch (name) {
-      case "top-left":
+      case "point-1":
         return {
-          x: this.x + dx,
-          y: this.y + dy,
-          width: this.width - dx,
-          height: this.height - dy,
+          x1: this.x1 + dx,
+          y1: this.y1 + dy,
         };
-      case "top-right":
+      case "point-2":
         return {
-          y: this.y + dy,
-          width: this.width + dx,
-          height: this.height - dy,
-        };
-      case "bottom-left":
-        return {
-          x: this.x + dx,
-          width: this.width - dx,
-          height: this.height + dy,
-        };
-      case "bottom-right":
-        return {
-          width: this.width + dx,
-          height: this.height + dy,
+          x2: this.x2 + dx,
+          y2: this.y2 + dy,
         };
       default:
         return null;
@@ -243,16 +243,9 @@ export class RectItem extends WhiteboardItem<RectItemType> {
   }
 
   public override getResizeHandles(): ResizeHandle[] {
-    const boundingBox = this.getBoundingBox();
-    if (!boundingBox) {
-      return [];
-    }
-    const { x, y, width, height } = boundingBox;
     return [
-      { x, y, name: "top-left" },
-      { x: x + width, y, name: "top-right" },
-      { x, y: y + height, name: "bottom-left" },
-      { x: x + width, y: y + height, name: "bottom-right" },
+      { x: this.x1, y: this.y1, name: "point-1" },
+      { x: this.x2, y: this.y2, name: "point-2" },
     ];
   }
 }

@@ -46,10 +46,10 @@ export class RectTool extends WhiteboardTool<RectItem> {
       .convertFromCanvas(x, y);
 
     const item = this.newItem({
-      x: whiteboardX,
-      y: whiteboardY,
-      width: 0,
-      height: 0,
+      x1: whiteboardX,
+      x2: whiteboardX,
+      y1: whiteboardY,
+      y2: whiteboardY,
       options: {
         ...this.getCurrentOptions(),
       },
@@ -73,14 +73,9 @@ export class RectTool extends WhiteboardTool<RectItem> {
       return;
     }
 
-    const itemData = item.export().data;
-
-    const width = whiteboardX - itemData.x;
-    const height = whiteboardY - itemData.y;
-
     whiteboard.partialItemUpdateById(this.currentItemId, {
-      width,
-      height,
+      x2: whiteboardX,
+      y2: whiteboardY,
     });
   }
 
