@@ -1,5 +1,12 @@
 # @ludovicm67/whiteboard
 
+## 0.3.4
+
+### Patch Changes
+
+- 484dfbe: Fix an edge case where picture items could not be selected anymore
+- 3fc3d2d: Make sure that rectangle items can be selected in all cases
+
 ## 0.3.3
 
 ### Patch Changes
