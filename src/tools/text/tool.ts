@@ -5,7 +5,6 @@ import { getIconSvg } from "../../lib/icons";
 import { TextItem, TextOptions } from "./item";
 
 import "../../components/colorSelect";
-import { SimpleWhiteboard } from "../../simple-whiteboard";
 
 export const TEXT_TOOL_NAME = "text";
 
@@ -17,23 +16,6 @@ export class TextTool extends WhiteboardTool<TextItem> {
     fontFamily: "sans-serif",
     color: "#000000",
   };
-
-  constructor(
-    simpleWhiteboardInstance: SimpleWhiteboard,
-    itemBuilder: (item: any, id?: string) => any
-  ) {
-    super(simpleWhiteboardInstance, itemBuilder);
-
-    const editZone = simpleWhiteboardInstance
-      .querySelector("simple-whiteboard--tool-text")
-      ?.shadowRoot?.getElementById("simple-whiteboard-text-tool-edit-zone");
-
-    const sizeZone = simpleWhiteboardInstance
-      .querySelector("simple-whiteboard--tool-text")
-      ?.shadowRoot?.getElementById("simple-whiteboard-text-tool-size-zone");
-
-    console.log(editZone, sizeZone);
-  }
 
   /**
    * Get the icon of the tool.
