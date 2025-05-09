@@ -1,11 +1,16 @@
 import { css } from "lit";
 
 export const styles = css`
+  :host {
+    overflow: hidden;
+  }
+
   .root {
     height: 100%;
     width: 100%;
     background-color: #fcfcff;
     position: relative;
+    overflow: hidden;
   }
 
   .button {
