@@ -62,6 +62,8 @@ export class TextItem extends WhiteboardItem<TextItemType> {
   private content: string;
   private options: TextOptions;
 
+  private whiteboard: SimpleWhiteboard | null = null;
+
   private editElement: HTMLTextAreaElement | null = null;
   private sizeElement: HTMLPreElement | null = null;
 
@@ -139,11 +141,12 @@ export class TextItem extends WhiteboardItem<TextItemType> {
    */
   public override draw(context: DrawingContext): void {
     const parentOfCanvasElement = context.canvas.canvas.parentElement;
-    const whiteboard = (
-      parentOfCanvasElement
-        ? findSimpleWhiteboardElementFromElement(parentOfCanvasElement)
-        : null
-    ) as SimpleWhiteboard | null;
+    const whiteboard =
+      this.whiteboard === null
+        ? ((parentOfCanvasElement
+            ? findSimpleWhiteboardElementFromElement(parentOfCanvasElement)
+            : null) as SimpleWhiteboard | null)
+        : this.whiteboard;
 
     const selectedItemId = whiteboard?.getSelectedItemId();
     if (selectedItemId !== this.getId()) {
