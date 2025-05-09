@@ -5,15 +5,35 @@ import { getIconSvg } from "../../lib/icons";
 import { TextItem, TextOptions } from "./item";
 
 import "../../components/colorSelect";
+import { SimpleWhiteboard } from "../../simple-whiteboard";
 
 export const TEXT_TOOL_NAME = "text";
 
 export class TextTool extends WhiteboardTool<TextItem> {
+  private lastSelectedItemId: string | null = null;
+
   private currentOptions: TextOptions = {
     fontSize: 16,
     fontFamily: "sans-serif",
     color: "#000000",
   };
+
+  constructor(
+    simpleWhiteboardInstance: SimpleWhiteboard,
+    itemBuilder: (item: any, id?: string) => any
+  ) {
+    super(simpleWhiteboardInstance, itemBuilder);
+
+    const editZone = simpleWhiteboardInstance
+      .querySelector("simple-whiteboard--tool-text")
+      ?.shadowRoot?.getElementById("simple-whiteboard-text-tool-edit-zone");
+
+    const sizeZone = simpleWhiteboardInstance
+      .querySelector("simple-whiteboard--tool-text")
+      ?.shadowRoot?.getElementById("simple-whiteboard-text-tool-size-zone");
+
+    console.log(editZone, sizeZone);
+  }
 
   /**
    * Get the icon of the tool.
@@ -54,6 +74,9 @@ export class TextTool extends WhiteboardTool<TextItem> {
     whiteboard.addItem(item);
     whiteboard.setCurrentTool(whiteboard.getDefaultToolName());
     whiteboard.setSelectedItemId(item.getId());
+
+    this.lastSelectedItemId = item.getId();
+    item.setEditing(true);
   }
 
   public getCurrentOptions(): TextOptions {
@@ -90,7 +113,7 @@ export class TextTool extends WhiteboardTool<TextItem> {
 
     // Case: no item selected = new item
     if (!item) {
-      return html` <p>Click somewhere to create a text zone</p> `;
+      return html`<p>Click somewhere to create a text zone</p>`;
     }
 
     // Case: item selected
@@ -98,19 +121,15 @@ export class TextTool extends WhiteboardTool<TextItem> {
     const itemId = item.getId();
     return html`
       <p>${i18n.t("tool-text-edit")}</p>
-      <textarea
-        autofocus
-        class="width-100-percent"
-        @input=${(e: Event) => {
-          const target = e.target as HTMLTextAreaElement;
-          const content = target.value;
-
-          whiteboard.partialItemUpdateById(itemId, {
-            content,
-          });
+      <button
+        class="button width-100-percent"
+        @click=${() => {
+          this.lastSelectedItemId = itemId;
+          item.setEditing(true);
         }}
-        .value=${item.getContent()}
-      ></textarea>
+      >
+        ${i18n.t("tool-text-edit")}
+      </button>
       <p>${i18n.t("tool-options-size")}</p>
       <input
         class="width-100-percent"
@@ -155,5 +174,20 @@ export class TextTool extends WhiteboardTool<TextItem> {
         ${i18n.t("tool-options-delete")}
       </button>
     `;
+  }
+
+  public override onToolUnselected(): void {
+    super.onToolUnselected();
+    const whiteboard = this.getSimpleWhiteboardInstance();
+    const item = (
+      this.lastSelectedItemId
+        ? whiteboard.getItemById(this.lastSelectedItemId)
+        : null
+    ) as TextItem | null;
+    if (item) {
+      item.setEditing(false);
+      this.lastSelectedItemId = null;
+      this.getSimpleWhiteboardInstance().requestUpdate();
+    }
   }
 }

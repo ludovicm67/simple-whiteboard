@@ -4,8 +4,30 @@ import {
   WhiteboardItemType,
 } from "../../lib/item";
 import { DrawingContext } from "../../lib/types";
+import { SimpleWhiteboard } from "../../simple-whiteboard";
 
 export const TEXT_ITEM_TYPE = "text";
+
+const TEXTAREA_EDIT_ID = "simple-whiteboard-text-tool-edit-zone";
+const TEXTAREA_SIZE_ID = "simple-whiteboard-text-tool-size-zone";
+
+const findSimpleWhiteboardElementFromElement = (element: HTMLElement) => {
+  let current: Node | null = element;
+
+  while (current) {
+    if (
+      current instanceof HTMLElement &&
+      current.tagName?.toLowerCase() === "simple-whiteboard"
+    ) {
+      return current;
+    }
+
+    const root = current.getRootNode();
+    current = root instanceof ShadowRoot ? root.host : current.parentNode;
+  }
+
+  return null; // Not found
+};
 
 export const itemBuilder = (item: TextItemType, id?: string) =>
   new TextItem(item, id);
@@ -33,10 +55,15 @@ export interface TextItemType extends WhiteboardItemType {
  * Class for a text item.
  */
 export class TextItem extends WhiteboardItem<TextItemType> {
+  private editing: boolean = false;
+
   private x: number;
   private y: number;
   private content: string;
   private options: TextOptions;
+
+  private editElement: HTMLTextAreaElement | null = null;
+  private sizeElement: HTMLPreElement | null = null;
 
   private ctx: OffscreenCanvasRenderingContext2D | null = new OffscreenCanvas(
     1,
@@ -86,7 +113,6 @@ export class TextItem extends WhiteboardItem<TextItemType> {
    * @param item item with the properties to update.
    */
   public override partialUpdate(item: Partial<TextItemType>): void {
-    console.log(item);
     this.x = item.x ?? this.x;
     this.y = item.y ?? this.y;
     this.content = item.content ?? this.content;
@@ -112,6 +138,18 @@ export class TextItem extends WhiteboardItem<TextItemType> {
    * @param context The context to draw on.
    */
   public override draw(context: DrawingContext): void {
+    const parentOfCanvasElement = context.canvas.canvas.parentElement;
+    const whiteboard = (
+      parentOfCanvasElement
+        ? findSimpleWhiteboardElementFromElement(parentOfCanvasElement)
+        : null
+    ) as SimpleWhiteboard | null;
+
+    const selectedItemId = whiteboard?.getSelectedItemId();
+    if (selectedItemId !== this.getId()) {
+      this.setEditing(false);
+    }
+
     // Convert the coordinates to canvas coordinates
     const { x, y } = context.coords.convertToCanvas(this.x, this.y);
 
@@ -123,17 +161,95 @@ export class TextItem extends WhiteboardItem<TextItemType> {
     }
 
     // Draw the item on the canvas
-    context.canvas.font = `${this.options.fontSize * zoom}px ${
-      this.options.fontFamily
-    }`;
-    context.canvas.fillStyle = this.options.color || "#000000";
-    this.content.split("\n").forEach((line, i) => {
-      context.canvas.fillText(
-        line,
-        x,
-        y + (i + 1) * this.options.fontSize * zoom
-      );
-    });
+    if (!this.editing) {
+      context.canvas.font = `${this.options.fontSize * zoom}px ${
+        this.options.fontFamily
+      }`;
+      context.canvas.fillStyle = this.options.color || "#000000";
+      this.content.split("\n").forEach((line, i) => {
+        context.canvas.fillText(
+          line,
+          x,
+          y + (i + 1) * this.options.fontSize * zoom
+        );
+      });
+    }
+
+    if (parentOfCanvasElement) {
+      // Check if the size element exists and create it if not
+      let sizeElement = this.sizeElement;
+      if (!sizeElement) {
+        sizeElement = document.createElement("pre");
+        sizeElement.id = TEXTAREA_SIZE_ID;
+        parentOfCanvasElement.appendChild(sizeElement);
+        this.sizeElement = sizeElement;
+      }
+      sizeElement.style.position = "absolute";
+      sizeElement.style.visibility = "hidden";
+      sizeElement.style.whiteSpace = "pre";
+      sizeElement.style.font = this.options.fontFamily;
+
+      // Check if there is an existing textarea an create it if not
+      let textareaElement = this.editElement;
+      if (!textareaElement) {
+        textareaElement = document.createElement("textarea");
+        textareaElement.id = TEXTAREA_EDIT_ID;
+        parentOfCanvasElement.appendChild(textareaElement);
+        this.editElement = textareaElement;
+
+        const resizeTextareaToFitText = () => {
+          const text = this.getContent() || " ";
+          const zoom = context.coords.getZoom();
+          sizeElement.textContent = text;
+          sizeElement.style.fontSize = `${this.options.fontSize * zoom}px`;
+          if (!textareaElement) {
+            return;
+          }
+          textareaElement.style.width = `${sizeElement.scrollWidth + 10}px`;
+          textareaElement.style.height = `${sizeElement.scrollHeight + 10}px`;
+        };
+        const inputAction = (event: Event) => {
+          const target = event.target as HTMLTextAreaElement;
+          this.content = target.value;
+
+          // Propagate the change to the whiteboard
+          whiteboard?.partialItemUpdateById(
+            this.getId(),
+            {
+              content: this.content,
+            },
+            true
+          );
+
+          resizeTextareaToFitText();
+        };
+        textareaElement.addEventListener("input", inputAction);
+        resizeTextareaToFitText();
+      }
+      textareaElement.value = this.getContent();
+      textareaElement.style.position = "absolute";
+      textareaElement.style.left = `${x + 1}px`;
+      textareaElement.style.top = `${y + 3}px`;
+      textareaElement.style.outline = "none";
+      textareaElement.style.resize = "none";
+      textareaElement.style.margin = "0";
+      textareaElement.style.padding = "0";
+      textareaElement.style.lineHeight = "1";
+      textareaElement.style.fontSize = `${this.options.fontSize * zoom}px`;
+      textareaElement.style.fontFamily = this.options.fontFamily;
+      textareaElement.style.color = this.options.color;
+      textareaElement.style.background = "transparent";
+      textareaElement.style.border = "none";
+
+      // We are in editing mode, so we need to show the textarea
+      if (this.editing) {
+        textareaElement.style.display = "block";
+        // Set focus on the textarea
+        textareaElement.focus({ preventScroll: true });
+      } else {
+        textareaElement.style.display = "none";
+      }
+    }
   }
 
   /**
@@ -237,5 +353,20 @@ export class TextItem extends WhiteboardItem<TextItemType> {
    */
   public isRemovableWithBackspace(): boolean {
     return false;
+  }
+
+  /**
+   * Set the editing state of the item.
+   *
+   * @param editing The new editing state.
+   */
+  public setEditing(editing: boolean): void {
+    this.editing = editing;
+    if (this.editElement) {
+      this.editElement.style.display = editing ? "block" : "none";
+    }
+    if (this.sizeElement) {
+      this.sizeElement.style.display = editing ? "block" : "none";
+    }
   }
 }
