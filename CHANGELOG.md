@@ -1,5 +1,11 @@
 # @ludovicm67/whiteboard
 
+## 0.3.5
+
+### Patch Changes
+
+- 17a92d3: Improve text tool to allow users to edit text content directly from the canvas.
+
 ## 0.3.4
 
 ### Patch Changes
