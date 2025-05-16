@@ -227,6 +227,7 @@ export class TextItem extends WhiteboardItem<TextItemType> {
           resizeTextareaToFitText();
         };
         textareaElement.addEventListener("input", inputAction);
+        textareaElement.addEventListener("focus", inputAction);
         resizeTextareaToFitText();
       }
       textareaElement.value = this.getContent();
@@ -370,6 +371,17 @@ export class TextItem extends WhiteboardItem<TextItemType> {
     }
     if (this.sizeElement) {
       this.sizeElement.style.display = editing ? "block" : "none";
+    }
+  }
+
+  public override onRemove(): void {
+    if (this.editElement) {
+      this.editElement.remove();
+      this.editElement = null;
+    }
+    if (this.sizeElement) {
+      this.sizeElement.remove();
+      this.sizeElement = null;
     }
   }
 }

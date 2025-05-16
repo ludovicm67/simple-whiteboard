@@ -454,6 +454,7 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   resetWhiteboard() {
+    this.items.forEach((item) => item.onRemove());
     this.items = [];
     this.selectedItemId = null;
   }
@@ -840,7 +841,8 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
       return;
     }
 
-    this.items.splice(index, 1);
+    // Remove the items from the list and call the callback function on items
+    this.items.splice(index, 1).forEach((item) => item.onRemove());
     this.draw();
 
     if (sendEvent) {

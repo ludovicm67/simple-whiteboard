@@ -42,6 +42,7 @@ export interface WhiteboardItemInterface<T extends WhiteboardItemType> {
     _name: string
   ): Partial<T> | null;
   getResizeHandles(): ResizeHandle[];
+  onRemove(): void;
 }
 
 /**
@@ -189,5 +190,13 @@ export abstract class WhiteboardItem<T extends WhiteboardItemType>
 
   public getResizeHandles(): ResizeHandle[] {
     return [];
+  }
+
+  /**
+   * This is called when the item is removed from the whiteboard.
+   * It can be used to perform any cleanup that is needed.
+   */
+  public onRemove(): void {
+    // To be implemented by the subclass
   }
 }
