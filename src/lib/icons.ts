@@ -1,4 +1,34 @@
-import * as icons from "lucide-static";
+import {
+  Circle,
+  createElement,
+  Edit2,
+  Eraser,
+  IconNode,
+  Image,
+  Menu,
+  Minus,
+  MousePointer,
+  Move,
+  Square,
+  Trash2,
+  Type,
+} from "lucide";
+
+const icons = {
+  Menu,
+
+  // Tools
+  Move,
+  MousePointer,
+  Square,
+  Circle,
+  Minus,
+  Edit2,
+  Type,
+  Image,
+  Eraser,
+  Trash2,
+};
 
 export type IconName = keyof typeof icons;
 export type IconNameExtended = IconName | (string & {});
@@ -15,26 +45,16 @@ export type IconOptions = Partial<{
  * @param name Name of the Lucide icon.
  * @returns The Lucide icon.
  */
-export const getIcon = (name: IconNameExtended): string => {
+export const getIcon = (name: IconNameExtended): IconNode => {
   if (!(iconNames as string[]).includes(name)) {
     throw new Error(`Icon "${name}" not found.`);
   }
-  return `${icons[name as IconName]}`; // Type assertion
+  return icons[name as IconName];
 };
 
 export const defaultSvgIconOptions: IconOptions = {
   width: 16,
   height: 16,
-};
-
-const createElementFromString = (htmlString: string): Element => {
-  const template = document.createElement("template");
-  template.innerHTML = htmlString.trim();
-  const element = template.content.firstElementChild;
-  if (!element) {
-    throw new Error("Invalid HTML string.");
-  }
-  return element;
 };
 
 /**
@@ -49,10 +69,9 @@ export const getIconSvg = (
   options?: IconOptions
 ): string => {
   const icon = getIcon(name);
-  const svgElement = createElementFromString(icon);
-  const iconOptions = { ...defaultSvgIconOptions, ...(options || {}) };
-  Object.entries(iconOptions).forEach(([key, value]) => {
-    svgElement.setAttribute(key, value.toString());
+  const svgElement = createElement(icon, {
+    ...defaultSvgIconOptions,
+    ...(options || {}),
   });
   return svgElement.outerHTML;
 };
