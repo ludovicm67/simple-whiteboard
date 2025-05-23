@@ -9,7 +9,6 @@ import { SimpleWhiteboard } from "../../simple-whiteboard";
 export const TEXT_ITEM_TYPE = "text";
 
 const TEXTAREA_EDIT_ID = "simple-whiteboard-text-tool-edit-zone";
-const TEXTAREA_SIZE_ID = "simple-whiteboard-text-tool-size-zone";
 
 const findSimpleWhiteboardElementFromElement = (element: HTMLElement) => {
   let current: Node | null = element;
