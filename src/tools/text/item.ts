@@ -9,7 +9,6 @@ import { SimpleWhiteboard } from "../../simple-whiteboard";
 export const TEXT_ITEM_TYPE = "text";
 
 const TEXTAREA_EDIT_ID = "simple-whiteboard-text-tool-edit-zone";
-const TEXTAREA_SIZE_ID = "simple-whiteboard-text-tool-size-zone";
 
 const findSimpleWhiteboardElementFromElement = (element: HTMLElement) => {
   let current: Node | null = element;
@@ -65,7 +64,6 @@ export class TextItem extends WhiteboardItem<TextItemType> {
   private whiteboard: SimpleWhiteboard | null = null;
 
   private editElement: HTMLTextAreaElement | null = null;
-  private sizeElement: HTMLPreElement | null = null;
 
   private ctx: OffscreenCanvasRenderingContext2D | null = new OffscreenCanvas(
     1,
@@ -179,19 +177,6 @@ export class TextItem extends WhiteboardItem<TextItemType> {
     }
 
     if (parentOfCanvasElement) {
-      // Check if the size element exists and create it if not
-      let sizeElement = this.sizeElement;
-      if (!sizeElement) {
-        sizeElement = document.createElement("pre");
-        sizeElement.id = TEXTAREA_SIZE_ID;
-        parentOfCanvasElement.appendChild(sizeElement);
-        this.sizeElement = sizeElement;
-      }
-      sizeElement.style.position = "absolute";
-      sizeElement.style.visibility = "hidden";
-      sizeElement.style.whiteSpace = "pre";
-      sizeElement.style.font = this.options.fontFamily;
-
       // Check if there is an existing textarea an create it if not
       let textareaElement = this.editElement;
       if (!textareaElement) {
@@ -201,15 +186,15 @@ export class TextItem extends WhiteboardItem<TextItemType> {
         this.editElement = textareaElement;
 
         const resizeTextareaToFitText = () => {
-          const text = this.getContent() || " ";
-          const zoom = context.coords.getZoom();
-          sizeElement.textContent = text;
-          sizeElement.style.fontSize = `${this.options.fontSize * zoom}px`;
           if (!textareaElement) {
             return;
           }
-          textareaElement.style.width = `${sizeElement.scrollWidth + 10}px`;
-          textareaElement.style.height = `${sizeElement.scrollHeight + 10}px`;
+          const { width, height } = this.getBoundingBox() ?? {
+            width: 0,
+            height: 0,
+          };
+          textareaElement.style.width = `${width + 10}px`;
+          textareaElement.style.height = `${height + 10}px`;
         };
         const inputAction = (event: Event) => {
           const target = event.target as HTMLTextAreaElement;
@@ -232,8 +217,8 @@ export class TextItem extends WhiteboardItem<TextItemType> {
       }
       textareaElement.value = this.getContent();
       textareaElement.style.position = "absolute";
-      textareaElement.style.left = `${x + 1}px`;
-      textareaElement.style.top = `${y + 3}px`;
+      textareaElement.style.left = `${x}px`;
+      textareaElement.style.top = `${y}px`;
       textareaElement.style.outline = "none";
       textareaElement.style.resize = "none";
       textareaElement.style.margin = "0";
@@ -244,6 +229,7 @@ export class TextItem extends WhiteboardItem<TextItemType> {
       textareaElement.style.color = this.options.color;
       textareaElement.style.background = "transparent";
       textareaElement.style.border = "none";
+      textareaElement.style.overflow = "hidden";
 
       // We are in editing mode, so we need to show the textarea
       if (this.editing) {
@@ -368,9 +354,9 @@ export class TextItem extends WhiteboardItem<TextItemType> {
     this.editing = editing;
     if (this.editElement) {
       this.editElement.style.display = editing ? "block" : "none";
-    }
-    if (this.sizeElement) {
-      this.sizeElement.style.display = editing ? "block" : "none";
+      if (editing) {
+        this.editElement.focus({ preventScroll: true });
+      }
     }
   }
 
@@ -378,10 +364,6 @@ export class TextItem extends WhiteboardItem<TextItemType> {
     if (this.editElement) {
       this.editElement.remove();
       this.editElement = null;
-    }
-    if (this.sizeElement) {
-      this.sizeElement.remove();
-      this.sizeElement = null;
     }
   }
 }

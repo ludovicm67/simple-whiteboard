@@ -108,6 +108,7 @@ export class TextTool extends WhiteboardTool<TextItem> {
         @click=${() => {
           this.lastSelectedItemId = itemId;
           item.setEditing(true);
+          whiteboard.requestUpdate();
         }}
       >
         ${i18n.t("tool-text-edit")}
