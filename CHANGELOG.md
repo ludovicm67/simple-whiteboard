@@ -1,5 +1,15 @@
 # @ludovicm67/whiteboard
 
+## 0.3.6
+
+### Patch Changes
+
+- 3166a7c: Rectangle: autoselect once item is added
+- 55c3e7b: Reduce bundle size
+- a999abb: The text tool feels more interactive, as some little bugs have been fixed.
+- ccc1c02: Line: autoselect once item is added
+- a23646b: Circle: autoselect once item is added
+
 ## 0.3.5
 
 ### Patch Changes
