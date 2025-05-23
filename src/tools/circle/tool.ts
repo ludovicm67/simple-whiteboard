@@ -86,6 +86,13 @@ export class CircleTool extends WhiteboardTool<CircleItem> {
   }
 
   public override handleDrawingEnd(): void {
+    if (!this.currentItemId) {
+      return;
+    }
+
+    const whiteboard = this.getSimpleWhiteboardInstance();
+    whiteboard.setCurrentTool(whiteboard.getDefaultToolName());
+    whiteboard.setSelectedItemId(this.currentItemId);
     this.currentItemId = null;
   }
 
