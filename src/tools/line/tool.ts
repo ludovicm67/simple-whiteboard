@@ -79,6 +79,13 @@ export class LineTool extends WhiteboardTool<LineItem> {
   }
 
   public override handleDrawingEnd(): void {
+    if (!this.currentItemId) {
+      return;
+    }
+
+    const whiteboard = this.getSimpleWhiteboardInstance();
+    whiteboard.setCurrentTool(whiteboard.getDefaultToolName());
+    whiteboard.setSelectedItemId(this.currentItemId);
     this.currentItemId = null;
   }
 

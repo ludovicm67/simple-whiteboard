@@ -80,6 +80,13 @@ export class RectTool extends WhiteboardTool<RectItem> {
   }
 
   public override handleDrawingEnd(): void {
+    if (!this.currentItemId) {
+      return;
+    }
+
+    const whiteboard = this.getSimpleWhiteboardInstance();
+    whiteboard.setCurrentTool(whiteboard.getDefaultToolName());
+    whiteboard.setSelectedItemId(this.currentItemId);
     this.currentItemId = null;
   }
 
