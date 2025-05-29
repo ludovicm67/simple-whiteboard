@@ -26,19 +26,19 @@
     "url": "https://ludovic-muller.fr/"
   },
   "dependencies": {
-    "i18next": "^25.0.2",
-    "lit": "^3.2.1",
+    "i18next": "^25.2.1",
+    "lit": "^3.3.0",
     "lucide": "^0.511.0",
     "perfect-freehand": "^1.2.2",
     "roughjs": "^4.6.6",
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.28.1",
+    "@changesets/cli": "^2.29.4",
     "@types/uuid": "^10.0.0",
-    "typescript": "^5.8.2",
-    "vite": "^6.2.2",
-    "vite-plugin-dts": "^4.5.3",
+    "typescript": "^5.8.3",
+    "vite": "^6.3.5",
+    "vite-plugin-dts": "^4.5.4",
     "vite-plugin-html": "^3.2.2"
   },
   "files": [
