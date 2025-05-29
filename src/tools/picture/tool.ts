@@ -133,6 +133,7 @@ export class PictureTool extends WhiteboardTool<PictureItem> {
           >${i18n.t("tool-options-select-picture")}</label
         >
         <input
+          id="picture-src"
           class="width-100-percent"
           type="file"
           accept="image/*"

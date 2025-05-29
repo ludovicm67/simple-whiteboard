@@ -35,6 +35,9 @@ export class SimpleWhiteboard extends LitElement {
   @state()
   isReady: boolean = false;
 
+  @state()
+  private cursor: string = "default";
+
   private i18nContext: I18nContext = new I18nContext();
   private coordsContext: CoordsContext = new CoordsContext();
 
@@ -584,7 +587,7 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
     }
 
     return html`
-      <div class="root">
+      <div class="root" style="cursor: ${this.cursor}">
         ${this.renderMenu()}
 
         <slot name="tools"></slot>
@@ -913,5 +916,13 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
    */
   public getCanvasElement(): HTMLCanvasElement | undefined {
     return this.canvas;
+  }
+
+  /**
+   * Set the cursor style for the whiteboard.
+   */
+  public setCursor(cursor: string): void {
+    this.cursor = cursor;
+    this.requestUpdate("cursor", this.cursor);
   }
 }

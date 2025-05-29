@@ -159,9 +159,16 @@ export class TextTool extends WhiteboardTool<TextItem> {
     `;
   }
 
+  public override onToolSelected(): void {
+    super.onToolSelected();
+    const whiteboard = this.getSimpleWhiteboardInstance();
+    whiteboard.setCursor("crosshair");
+  }
+
   public override onToolUnselected(): void {
     super.onToolUnselected();
     const whiteboard = this.getSimpleWhiteboardInstance();
+    whiteboard.setCursor("default");
     const item = (
       this.lastSelectedItemId
         ? whiteboard.getItemById(this.lastSelectedItemId)
