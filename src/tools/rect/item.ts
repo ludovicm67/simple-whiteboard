@@ -119,15 +119,25 @@ export class RectItem extends WhiteboardItem<RectItemType> {
     // Handle zoom
     const zoom = context.coords.getZoom();
     const optionsOverride: RoughCanvasOptions = {};
+    let strokeWidth = 0;
+    let halfStrokeWidth = 0;
     if (this.options.strokeWidth) {
-      optionsOverride.strokeWidth = this.options.strokeWidth * zoom;
+      strokeWidth = this.options.strokeWidth;
+      optionsOverride.strokeWidth = strokeWidth * zoom;
+      halfStrokeWidth = (strokeWidth * zoom) / 2;
     }
 
     // Draw the item on the canvas
-    context.roughCanvas.rectangle(x, y, width * zoom, height * zoom, {
-      ...this.options,
-      ...optionsOverride,
-    });
+    context.roughCanvas.rectangle(
+      x + halfStrokeWidth,
+      y + halfStrokeWidth,
+      (width - strokeWidth) * zoom,
+      (height - strokeWidth) * zoom,
+      {
+        ...this.options,
+        ...optionsOverride,
+      }
+    );
   }
 
   /**
@@ -165,9 +175,6 @@ export class RectItem extends WhiteboardItem<RectItemType> {
     width: number;
     height: number;
   } | null {
-    const strokeWidth = this.options.strokeWidth ?? 1;
-    const halfStrokeWidth = strokeWidth / 2;
-
     const { x1, y1, x2, y2 } = this;
     const minX = Math.min(x1, x2);
     const minY = Math.min(y1, y2);
@@ -175,10 +182,10 @@ export class RectItem extends WhiteboardItem<RectItemType> {
     const height = Math.abs(y2 - y1);
 
     return {
-      x: minX - halfStrokeWidth,
-      y: minY - halfStrokeWidth,
-      width: width + strokeWidth,
-      height: height + strokeWidth,
+      x: minX,
+      y: minY,
+      width: width,
+      height: height,
     };
   }
 

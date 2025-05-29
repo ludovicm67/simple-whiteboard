@@ -160,14 +160,11 @@ export class LineItem extends WhiteboardItem<LineItemType> {
     width: number;
     height: number;
   } | null {
-    const strokeWidth = this.options.strokeWidth ?? 1;
-    const halfStrokeWidth = strokeWidth / 2;
-
     return {
-      x: Math.min(this.x1, this.x2) - halfStrokeWidth,
-      y: Math.min(this.y1, this.y2) - halfStrokeWidth,
-      width: Math.abs(this.x2 - this.x1) + strokeWidth,
-      height: Math.abs(this.y2 - this.y1) + strokeWidth,
+      x: Math.min(this.x1, this.x2),
+      y: Math.min(this.y1, this.y2),
+      width: Math.abs(this.x2 - this.x1),
+      height: Math.abs(this.y2 - this.y1),
     };
   }
 
