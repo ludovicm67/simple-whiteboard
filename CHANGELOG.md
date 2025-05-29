@@ -1,5 +1,11 @@
 # @ludovicm67/whiteboard
 
+## 0.3.8
+
+### Patch Changes
+
+- 5f47338: Improve bounding boxes of some kind of items
+
 ## 0.3.7
 
 ### Patch Changes
