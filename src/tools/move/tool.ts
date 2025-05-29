@@ -35,6 +35,9 @@ export class MoveTool extends WhiteboardTool<MoveItem> {
   public override handleDrawingStart(x: number, y: number): void {
     this.originX = x;
     this.originY = y;
+
+    const whiteboard = this.getSimpleWhiteboardInstance();
+    whiteboard.setCursor("grab");
   }
 
   public override handleDrawingMove(x: number, y: number): void {
@@ -43,6 +46,7 @@ export class MoveTool extends WhiteboardTool<MoveItem> {
     }
 
     const whiteboard = this.getSimpleWhiteboardInstance();
+    whiteboard.setCursor("grabbing");
     const { x: offsetX, y: offsetY } = whiteboard
       .getCoordsContext()
       .getOffset();
@@ -57,5 +61,20 @@ export class MoveTool extends WhiteboardTool<MoveItem> {
   public override handleDrawingEnd(): void {
     this.originX = null;
     this.originY = null;
+
+    const whiteboard = this.getSimpleWhiteboardInstance();
+    whiteboard.setCursor("grab");
+  }
+
+  public override onToolSelected(): void {
+    super.onToolSelected();
+    const whiteboard = this.getSimpleWhiteboardInstance();
+    whiteboard.setCursor("grab");
+  }
+
+  public override onToolUnselected(): void {
+    super.onToolUnselected();
+    const whiteboard = this.getSimpleWhiteboardInstance();
+    whiteboard.setCursor("default");
   }
 }

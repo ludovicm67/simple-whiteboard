@@ -202,4 +202,16 @@ export class LineTool extends WhiteboardTool<LineItem> {
       </button>
     `;
   }
+
+  public override onToolSelected(): void {
+    super.onToolSelected();
+    const whiteboard = this.getSimpleWhiteboardInstance();
+    whiteboard.setCursor("crosshair");
+  }
+
+  public override onToolUnselected(): void {
+    super.onToolUnselected();
+    const whiteboard = this.getSimpleWhiteboardInstance();
+    whiteboard.setCursor("default");
+  }
 }
