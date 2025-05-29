@@ -1,5 +1,11 @@
 # @ludovicm67/whiteboard
 
+## 0.3.7
+
+### Patch Changes
+
+- 4c33018: Dynamically update the cursor style
+
 ## 0.3.6
 
 ### Patch Changes
