@@ -107,12 +107,14 @@ export class CircleItem extends WhiteboardItem<CircleItemType> {
     // Handle zoom
     const zoom = context.coords.getZoom();
     const optionsOverride: RoughCanvasOptions = {};
+    let strokeWidth = 0;
     if (this.options.strokeWidth) {
-      optionsOverride.strokeWidth = this.options.strokeWidth * zoom;
+      strokeWidth = this.options.strokeWidth;
+      optionsOverride.strokeWidth = strokeWidth * zoom;
     }
 
     // Draw the item on the canvas
-    context.roughCanvas.circle(x, y, this.diameter * zoom, {
+    context.roughCanvas.circle(x, y, (this.diameter - strokeWidth) * zoom, {
       ...this.options,
       ...optionsOverride,
     });
@@ -153,16 +155,14 @@ export class CircleItem extends WhiteboardItem<CircleItemType> {
     width: number;
     height: number;
   } | null {
-    const strokeWidth = this.options.strokeWidth ?? 1;
-    const halfStrokeWidth = strokeWidth / 2;
     const diameter = this.diameter;
     const radius = diameter / 2;
 
     return {
-      x: this.x - radius - halfStrokeWidth,
-      y: this.y - radius - halfStrokeWidth,
-      width: diameter + strokeWidth,
-      height: diameter + strokeWidth,
+      x: this.x - radius,
+      y: this.y - radius,
+      width: diameter,
+      height: diameter,
     };
   }
 
