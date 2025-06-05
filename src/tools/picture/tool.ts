@@ -79,7 +79,11 @@ export class PictureTool extends WhiteboardTool<PictureItem> {
    * @returns The icon of the tool.
    */
   public override getIcon(): TemplateResult | null {
-    return html`${unsafeHTML(getIconSvg("Image"))}`;
+    return html`<label
+        for="picture-src"
+        style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; padding-top: 8px; cursor: pointer;"
+        >${unsafeHTML(getIconSvg("Image"))}</label
+      ><span style="display: block; height: 19px; width: 16.5px;"></span>`;
   }
 
   /**
@@ -92,23 +96,6 @@ export class PictureTool extends WhiteboardTool<PictureItem> {
    */
   public override getName(): string {
     return PICTURE_TOOL_NAME;
-  }
-
-  generateColorSelect(
-    colors: string[],
-    currentColor: string,
-    clickCallback: (color: string) => void
-  ) {
-    return colors.map((color) => {
-      return html`<color-select
-        color=${color}
-        .selected=${currentColor === color}
-        @color-click=${(e: CustomEvent) => {
-          clickCallback(e.detail.color);
-          this.getSimpleWhiteboardInstance().requestUpdate();
-        }}
-      ></color-select>`;
-    });
   }
 
   public override renderToolOptions(item: PictureItem | null) {
@@ -129,12 +116,16 @@ export class PictureTool extends WhiteboardTool<PictureItem> {
     // Case: no item selected = new item
     if (!item) {
       return html`
-        <label for="picture-src"
-          >${i18n.t("tool-options-select-picture")}</label
+        <label
+          for="picture-src"
+          class="button"
+          style="display: block; text-align: center;"
         >
+          ${i18n.t("tool-options-select-picture")}
+        </label>
         <input
           id="picture-src"
-          class="width-100-percent"
+          class="hidden"
           type="file"
           accept="image/*"
           @change=${(e: Event) => {

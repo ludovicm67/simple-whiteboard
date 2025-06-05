@@ -150,6 +150,7 @@ export class EraserTool extends WhiteboardTool<EraserItem> {
   }
 
   public override onToolSelected(): void {
+    super.onToolSelected();
     const whiteboard = this.getSimpleWhiteboardInstance();
     whiteboard.setCursor("crosshair");
   }
