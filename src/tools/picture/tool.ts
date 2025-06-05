@@ -176,8 +176,8 @@ export class PictureTool extends WhiteboardTool<PictureItem> {
                   const coordsContext = whiteboard.getCoordsContext();
                   const { x, y } = coordsContext.getCoords();
 
-                  const newX = -newWidth / 2 + x;
-                  const newY = -newHeight / 2 + y;
+                  const newX = -newWidth / 2 - x;
+                  const newY = -newHeight / 2 - y;
 
                   whiteboard.partialItemUpdateById(newItemId, {
                     src: resizedImg.src,
