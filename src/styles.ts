@@ -28,6 +28,10 @@ export const styles = css`
     width: 100%;
   }
 
+  .hidden {
+    display: none;
+  }
+
   .menu {
     position: absolute;
     z-index: 2;
@@ -41,8 +45,12 @@ export const styles = css`
   }
 
   .tools {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
     user-select: none;
-    gap: 8px;
+    gap: 2px;
     padding: 3px;
     border-radius: 8px;
     background-color: #fff;
@@ -67,6 +75,7 @@ export const styles = css`
     padding: 8px;
     border-radius: 4px;
     transition: background-color 0.2s;
+    position: relative;
   }
 
   .tools button:hover {
