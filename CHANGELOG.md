@@ -1,5 +1,13 @@
 # @ludovicm67/whiteboard
 
+## 0.3.9
+
+### Patch Changes
+
+- 09aeae3: The fill is not dependent of the stroke width anymore
+- 2a80426: Fix location of pictures
+- 8db1866: Automatically ask for the picture when selecting the tool
+
 ## 0.3.8
 
 ### Patch Changes
