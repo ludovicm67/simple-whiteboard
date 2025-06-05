@@ -134,6 +134,8 @@ export class RectItem extends WhiteboardItem<RectItemType> {
       (width - strokeWidth) * zoom,
       (height - strokeWidth) * zoom,
       {
+        hachureGap: 6 * zoom,
+        fillWeight: 1 * zoom,
         ...this.options,
         ...optionsOverride,
       }

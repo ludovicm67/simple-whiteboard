@@ -115,6 +115,8 @@ export class CircleItem extends WhiteboardItem<CircleItemType> {
 
     // Draw the item on the canvas
     context.roughCanvas.circle(x, y, (this.diameter - strokeWidth) * zoom, {
+      hachureGap: 6 * zoom,
+      fillWeight: 1 * zoom,
       ...this.options,
       ...optionsOverride,
     });
