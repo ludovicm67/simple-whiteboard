@@ -1,5 +1,11 @@
 # @ludovicm67/whiteboard
 
+## 0.3.10
+
+### Patch Changes
+
+- 58f67d5: Add tooltips for tools
+
 ## 0.3.9
 
 ### Patch Changes
