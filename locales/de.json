@@ -13,5 +13,15 @@
   "tool-options-stroke-width": "Linienbreite",
   "tool-options-width": "Breite",
   "tool-pointer-no-item-selected": "Wählen Sie ein Element aus, indem Sie darauf klicken.",
-  "tool-text-edit": "Text bearbeiten"
+  "tool-text-edit": "Text bearbeiten",
+  "tool-tooltip-move": "Verschieben (Ansicht)",
+  "tool-tooltip-pointer": "Auswahl",
+  "tool-tooltip-rect": "Rechteck",
+  "tool-tooltip-circle": "Kreis",
+  "tool-tooltip-line": "Linie",
+  "tool-tooltip-pen": "Zeichnen",
+  "tool-tooltip-text": "Text",
+  "tool-tooltip-picture": "Bild einfügen",
+  "tool-tooltip-eraser": "Radiergummi",
+  "tool-tooltip-clear": "Whiteboard löschen"
 }

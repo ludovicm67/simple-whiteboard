@@ -13,5 +13,15 @@
   "tool-options-stroke-width": "Kontur genişliği",
   "tool-options-width": "Genişlik",
   "tool-pointer-no-item-selected": "Üzerine tıklayarak bir öğeyi seçin",
-  "tool-text-edit": "Metni düzenle"
+  "tool-text-edit": "Metni düzenle",
+  "tool-tooltip-move": "Taşı (görünüm)",
+  "tool-tooltip-pointer": "Seçim",
+  "tool-tooltip-rect": "Dikdörtgen",
+  "tool-tooltip-circle": "Daire",
+  "tool-tooltip-line": "Çizgi",
+  "tool-tooltip-pen": "Çizim",
+  "tool-tooltip-text": "Metin",
+  "tool-tooltip-picture": "Resim ekle",
+  "tool-tooltip-eraser": "Silgi",
+  "tool-tooltip-clear": "Tahtayı temizle"
 }

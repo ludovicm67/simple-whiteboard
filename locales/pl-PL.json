@@ -13,5 +13,15 @@
   "tool-options-stroke-width": "Szerokość obrysu",
   "tool-options-width": "Szerokość obrysu",
   "tool-pointer-no-item-selected": "Wybierz element, klikając na niego.",
-  "tool-text-edit": "Edytuj swój tekst"
+  "tool-text-edit": "Edytuj swój tekst",
+  "tool-tooltip-move": "Przesuń (widok)",
+  "tool-tooltip-pointer": "Zaznaczanie",
+  "tool-tooltip-rect": "Prostokąt",
+  "tool-tooltip-circle": "Okrąg",
+  "tool-tooltip-line": "Linia",
+  "tool-tooltip-pen": "Rysuj",
+  "tool-tooltip-text": "Tekst",
+  "tool-tooltip-picture": "Wstaw obraz",
+  "tool-tooltip-eraser": "Gumka",
+  "tool-tooltip-clear": "Wyczyść tablicę"
 }

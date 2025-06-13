@@ -13,5 +13,15 @@
   "tool-options-stroke-width": "Stroke width",
   "tool-options-width": "Width",
   "tool-pointer-no-item-selected": "Select an item by clicking on it.",
-  "tool-text-edit": "Edit your text"
+  "tool-text-edit": "Edit your text",
+  "tool-tooltip-move": "Move (view)",
+  "tool-tooltip-pointer": "Selection",
+  "tool-tooltip-rect": "Rectangle",
+  "tool-tooltip-circle": "Circle",
+  "tool-tooltip-line": "Line",
+  "tool-tooltip-pen": "Draw",
+  "tool-tooltip-text": "Text",
+  "tool-tooltip-picture": "Insert image",
+  "tool-tooltip-eraser": "Eraser",
+  "tool-tooltip-clear": "Clear whiteboard"
 }
