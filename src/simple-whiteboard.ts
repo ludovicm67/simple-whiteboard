@@ -49,6 +49,9 @@ export class SimpleWhiteboard extends LitElement {
   private lastDistance = 0;
   private lastOrigin: Point = { x: 0, y: 0 };
 
+  private toolsTooltip?: HTMLDivElement;
+  private toolsTooltipCurrentElement?: HTMLElement;
+
   @state() private registeredTools: Map<
     string,
     WhiteboardTool<WhiteboardItem<WhiteboardItemType>>
@@ -503,6 +506,64 @@ export class SimpleWhiteboard extends LitElement {
 
       const button = html`<button
         class=${this.currentTool === toolName ? "tools--active" : ""}
+        @mouseover=${(e: MouseEvent) => {
+          if (!this.toolsTooltip) {
+            this.toolsTooltip = this.shadowRoot?.querySelector(
+              "#tools-tooltip"
+            ) as HTMLDivElement;
+          }
+          if (!this.toolsTooltip) {
+            return;
+          }
+
+          let target = e.target;
+          if (!target) {
+            this.toolsTooltip.style.display = "none";
+            return;
+          }
+
+          // If target is not a button, get the closest button
+          if (
+            !(target instanceof HTMLButtonElement) &&
+            target instanceof Element &&
+            typeof target.closest === "function"
+          ) {
+            const buttonTarget = target.closest("button");
+            if (buttonTarget) {
+              target = buttonTarget;
+            } else {
+              this.toolsTooltip.style.display = "none";
+              return;
+            }
+          }
+
+          // If the target is already the current element, do nothing
+          if (this.toolsTooltipCurrentElement === target) {
+            return;
+          }
+          this.toolsTooltipCurrentElement = target as HTMLElement;
+          this.toolsTooltip.textContent = this.i18nContext.t(
+            `tool-tooltip-${toolName}`
+          );
+          if (!this.toolsTooltip.textContent) {
+            this.toolsTooltip.textContent =
+              toolName.charAt(0).toLocaleUpperCase() + toolName.slice(1);
+          }
+
+          const rect = (target as HTMLButtonElement).getBoundingClientRect();
+          this.toolsTooltip.style.display = "block";
+          const width = this.toolsTooltip.offsetWidth;
+          this.toolsTooltip.style.left = `${
+            rect.left + window.scrollX - width / 2 + rect.width / 2
+          }px`;
+        }}
+        @mouseout=${(_e: MouseEvent) => {
+          this.toolsTooltipCurrentElement = undefined;
+          if (this.toolsTooltip) {
+            this.toolsTooltip.textContent = "";
+            this.toolsTooltip.style.display = "none";
+          }
+        }}
         @click=${(e: Event) => this.handleToolChange(toolName, e)}
       >
         ${icon}
@@ -591,6 +652,7 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
         ${this.renderMenu()}
 
         <slot name="tools"></slot>
+        <div id="tools-tooltip"></div>
 
         ${this.renderToolsList()} ${this.renderToolsOptions()}
         ${this.renderFooterTools()}

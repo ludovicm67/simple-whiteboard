@@ -87,6 +87,17 @@ export const styles = css`
     background-color: rgba(0, 0, 0, 0.1);
   }
 
+  #tools-tooltip {
+    position: absolute;
+    top: 58px;
+    z-index: 2;
+    background-color: #fff;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+    padding: 4px 8px;
+    font-size: 12px;
+    border-radius: 4px;
+  }
+
   .tools-options {
     user-select: none;
     position: absolute;

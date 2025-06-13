@@ -13,5 +13,15 @@
   "tool-options-stroke-width": "Largeur de trait",
   "tool-options-width": "Largeur",
   "tool-pointer-no-item-selected": "Sélectionnez un élément en cliquant dessus.",
-  "tool-text-edit": "Modifiez votre texte"
+  "tool-text-edit": "Modifiez votre texte",
+  "tool-tooltip-move": "Déplacement (vue)",
+  "tool-tooltip-pointer": "Sélection",
+  "tool-tooltip-rect": "Rectangle",
+  "tool-tooltip-circle": "Cercle",
+  "tool-tooltip-line": "Ligne",
+  "tool-tooltip-pen": "Dessiner",
+  "tool-tooltip-text": "Texte",
+  "tool-tooltip-picture": "Insérer une image",
+  "tool-tooltip-eraser": "Gomme",
+  "tool-tooltip-clear": "Réinitialiser"
 }
