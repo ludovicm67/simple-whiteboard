@@ -1,7 +1,7 @@
 {
   "name": "@ludovicm67/simple-whiteboard",
   "description": "Simple Whiteboard is a simple and lightweight web component that can be integrated in any web application",
-  "version": "0.3.9",
+  "version": "0.3.10",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
