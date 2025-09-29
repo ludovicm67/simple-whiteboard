@@ -823,6 +823,13 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
     const toolInstance = this.registeredTools.get(tool);
     if (toolInstance) {
       toolInstance.onToolSelected();
+      const toolUpdatedEvent = new CustomEvent("tool-updated", {
+        detail: {
+          type: "select",
+          name: toolInstance.getName(),
+        },
+      });
+      this.dispatchEvent(toolUpdatedEvent);
     }
   }
 

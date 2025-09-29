@@ -36,6 +36,11 @@
           console.info("Whiteboard is ready!", e.detail);
         });
 
+        // Listen for tool-updated events
+        app.addEventListener("tool-updated", (e) => {
+          console.log("Tool updated event:", e.detail);
+        });
+
         // Just make sure that the simple-whiteboard element is defined
         await new Promise((resolve) => {
           window.customElements.whenDefined("simple-whiteboard").then(() => {
