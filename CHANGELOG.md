@@ -1,5 +1,11 @@
 # @ludovicm67/whiteboard
 
+## 0.3.11
+
+### Patch Changes
+
+- 4d44435: Add tool-updated events
+
 ## 0.3.10
 
 ### Patch Changes
