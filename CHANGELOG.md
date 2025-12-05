@@ -1,5 +1,11 @@
 # @ludovicm67/whiteboard
 
+## 0.3.12
+
+### Patch Changes
+
+- ef30a9c: Upgrade dependencies
+
 ## 0.3.11
 
 ### Patch Changes
