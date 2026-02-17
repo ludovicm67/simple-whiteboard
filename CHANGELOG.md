@@ -1,5 +1,11 @@
 # @ludovicm67/whiteboard
 
+## 0.3.13
+
+### Patch Changes
+
+- 1d5729a: Upgrade various dependencies and pin `lucide` to version 0.562.0, as the package is broken for the newer releases (see: https://github.com/lucide-icons/lucide/issues/4027).
+
 ## 0.3.12
 
 ### Patch Changes
