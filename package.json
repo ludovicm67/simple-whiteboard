@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.8",
-    "typescript": "^5.9.3",
+    "typescript": "^6.0.2",
     "unplugin-dts": "^1.0.0-beta.6",
     "vite": "^8.0.0",
     "vite-plugin-html": "^3.2.2"
