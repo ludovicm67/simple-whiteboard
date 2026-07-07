@@ -1,5 +1,20 @@
 # @ludovicm67/whiteboard
 
+## 0.4.0
+
+### Minor Changes
+
+- 231c095: Move canvas using the middle click
+- aad45b9: Allow to customize theme
+- 6ab1595: Enable the dotted background by default (disable it with `dotted-background="false"`)
+- 9db2751: Add stacking-order controls: move a selected item forward/backward or to the front/back, propagated through a new `reorder` event (`moveItemForward`/`moveItemBackward`/`bringItemToFront`/`sendItemToBack`/`moveItemToIndex`/`applyItemsOrder` API)
+- 25a9eea: Add undo/redo (toolbar buttons, `Ctrl`/`Cmd`+`Z` shortcuts, and `undo()`/`redo()`/`canUndo()`/`canRedo()` API)
+
+### Patch Changes
+
+- 47a93e5: Improve zoom
+- eb16827: Improve the look and feel of the hamburger menu (icons, active-language indicator, open/close animation, close on outside click / Escape) and give every floating panel the same frosted, translucent background (menu, tool options, toolbar, footer)
+
 ## 0.3.13
 
 ### Patch Changes
