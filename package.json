@@ -11,6 +11,7 @@
     "dev": "vite --host 0.0.0.0",
     "build": "tsc && vite build",
     "preview": "vite preview",
+    "test": "node --test",
     "i18n:extract": "lit-localize extract",
     "i18n:build": "lit-localize build",
     "i18n": "true",

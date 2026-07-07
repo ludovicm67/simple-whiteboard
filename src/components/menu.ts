@@ -7,6 +7,17 @@ import { SimpleWhiteboard } from "../simple-whiteboard";
 @customElement("simple-whiteboard-menu")
 export class SimpleWhiteboardMenu extends LitElement {
   static styles = css`
+    :host {
+      /* Fallbacks in case the component is used outside a simple-whiteboard. */
+      --sw-surface: #ffffff;
+      --sw-border: rgba(15, 23, 42, 0.08);
+      --sw-accent-soft: rgba(19, 90, 160, 0.12);
+      --sw-radius: 10px;
+      --sw-radius-sm: 6px;
+      --sw-shadow: 0 1px 2px rgba(15, 23, 42, 0.06),
+        0 6px 16px rgba(15, 23, 42, 0.1);
+      color: #1f2933;
+    }
     menu {
       padding: 0;
       margin: 0;
@@ -15,38 +26,49 @@ export class SimpleWhiteboardMenu extends LitElement {
       align-items: flex-start;
     }
     .btn-container {
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-      background-color: #fff;
+      box-shadow: var(--sw-shadow);
+      background-color: var(--sw-surface);
+      border: 1px solid var(--sw-border);
       user-select: none;
-      padding: 3px;
-      border-radius: 8px;
+      padding: 4px;
+      border-radius: var(--sw-radius);
     }
     button {
-      background-color: #fff;
-      border-radius: 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: transparent;
+      color: inherit;
+      border-radius: var(--sw-radius-sm);
       padding: 8px;
       border: none;
       cursor: pointer;
+      transition: background-color 0.15s ease;
     }
     button:hover,
     li:hover {
-      background-color: rgba(0, 0, 0, 0.05);
+      background-color: var(--sw-accent-soft);
+    }
+    button:focus-visible,
+    li:focus-visible {
+      outline: 2px solid var(--sw-accent, #135aa0);
+      outline-offset: 2px;
     }
     ul {
-      margin: 4px 0 0 0;
+      margin: 6px 0 0 0;
       list-style-type: none;
 
-      background-color: #fff;
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-      padding: 3px;
-      border: none;
+      background-color: var(--sw-surface);
+      box-shadow: var(--sw-shadow);
+      border: 1px solid var(--sw-border);
+      border-radius: var(--sw-radius);
+      padding: 4px;
     }
     li {
       font-size: 14px;
-      padding: 4px 8px;
+      padding: 6px 10px;
       cursor: pointer;
-      border-radius: 3px;
+      border-radius: var(--sw-radius-sm);
     }
 
     ul ul > li {

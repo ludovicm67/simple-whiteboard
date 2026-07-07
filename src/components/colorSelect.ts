@@ -9,13 +9,15 @@ export class ColorSelect extends LitElement {
       width: 24px;
       height: 24px;
       background-color: var(--bg-color, #fff);
-      border-radius: 5px;
+      border-radius: 6px;
       padding: 12px;
       cursor: pointer;
-      border: 2px solid var(--border-color, #fff);
+      border: 2px solid var(--border-color, transparent);
+      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.12);
       box-sizing: border-box;
       background-image: var(--bg-image, none);
       margin: 2px;
+      transition: border-color 0.15s ease, transform 0.1s ease;
     }
 
     div.transparent {
@@ -28,7 +30,8 @@ export class ColorSelect extends LitElement {
     }
 
     div:hover {
-      border: 2px solid #000;
+      border-color: var(--sw-accent, #135aa0);
+      transform: scale(1.05);
     }
   `;
 
@@ -51,7 +54,10 @@ export class ColorSelect extends LitElement {
     }
 
     if (changedProperties.has("selected")) {
-      this.style.setProperty("--border-color", this.selected ? "#000" : "#fff");
+      this.style.setProperty(
+        "--border-color",
+        this.selected ? "var(--sw-accent, #135aa0)" : "transparent"
+      );
     }
   }
 

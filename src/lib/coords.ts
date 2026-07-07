@@ -108,4 +108,49 @@ export class CoordsContext {
     this.y = 0;
     this.zoom = 1;
   }
+
+  /**
+   * Get a plain snapshot of the camera (pan, offset and zoom).
+   * This is handy to pass around to pure helpers (e.g. the dotted background)
+   * without exposing the whole context.
+   *
+   * @returns The current camera.
+   */
+  public toCamera(): {
+    panX: number;
+    panY: number;
+    offsetX: number;
+    offsetY: number;
+    zoom: number;
+  } {
+    return {
+      panX: this.x,
+      panY: this.y,
+      offsetX: this.offsetX,
+      offsetY: this.offsetY,
+      zoom: this.zoom,
+    };
+  }
+
+  /**
+   * Get the world-space rectangle that is currently visible on a canvas of the
+   * given size. This is used to skip drawing items that are off-screen.
+   *
+   * @param canvasWidth The width of the canvas, in pixels.
+   * @param canvasHeight The height of the canvas, in pixels.
+   * @returns The visible rectangle expressed in world coordinates.
+   */
+  public getVisibleWorldRect(
+    canvasWidth: number,
+    canvasHeight: number
+  ): { x: number; y: number; width: number; height: number } {
+    const topLeft = this.convertFromCanvas(0, 0);
+    const bottomRight = this.convertFromCanvas(canvasWidth, canvasHeight);
+    return {
+      x: topLeft.x,
+      y: topLeft.y,
+      width: bottomRight.x - topLeft.x,
+      height: bottomRight.y - topLeft.y,
+    };
+  }
 }
