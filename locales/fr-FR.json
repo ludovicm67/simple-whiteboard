@@ -27,6 +27,7 @@
   "tool-tooltip-rect": "Rectangle",
   "tool-tooltip-circle": "Cercle",
   "tool-tooltip-line": "Ligne",
+  "tool-tooltip-arrow": "Flèche",
   "tool-tooltip-pen": "Dessiner",
   "tool-tooltip-text": "Texte",
   "tool-tooltip-sticky": "Note autocollante",

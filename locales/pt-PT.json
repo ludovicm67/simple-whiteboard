@@ -27,6 +27,7 @@
   "tool-tooltip-rect": "Retângulo",
   "tool-tooltip-circle": "Círculo",
   "tool-tooltip-line": "Linha",
+  "tool-tooltip-arrow": "Seta",
   "tool-tooltip-pen": "Desenhar",
   "tool-tooltip-text": "Texto",
   "tool-tooltip-sticky": "Nota adesiva",

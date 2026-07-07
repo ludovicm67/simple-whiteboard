@@ -27,6 +27,7 @@
   "tool-tooltip-rect": "Rechteck",
   "tool-tooltip-circle": "Kreis",
   "tool-tooltip-line": "Linie",
+  "tool-tooltip-arrow": "Pfeil",
   "tool-tooltip-pen": "Zeichnen",
   "tool-tooltip-text": "Text",
   "tool-tooltip-sticky": "Haftnotiz",
