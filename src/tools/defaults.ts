@@ -7,6 +7,7 @@ import "./pointer/element";
 import "./rect/element";
 import "./circle/element";
 import "./line/element";
+import "./arrow/element";
 import "./pen/element";
 import "./text/element";
 import "./sticky/element";
@@ -32,6 +33,9 @@ export class DefaultTools extends LitElement {
         slot="tools"
       ></simple-whiteboard--tool-circle>
       <simple-whiteboard--tool-line slot="tools"></simple-whiteboard--tool-line>
+      <simple-whiteboard--tool-arrow
+        slot="tools"
+      ></simple-whiteboard--tool-arrow>
       <simple-whiteboard--tool-pen slot="tools"></simple-whiteboard--tool-pen>
       <simple-whiteboard--tool-text slot="tools"></simple-whiteboard--tool-text>
       <simple-whiteboard--tool-sticky

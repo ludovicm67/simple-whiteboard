@@ -27,6 +27,7 @@
   "tool-tooltip-rect": "Rettangolo",
   "tool-tooltip-circle": "Cerchio",
   "tool-tooltip-line": "Linea",
+  "tool-tooltip-arrow": "Freccia",
   "tool-tooltip-pen": "Disegna",
   "tool-tooltip-text": "Testo",
   "tool-tooltip-sticky": "Nota adesiva",

@@ -14,6 +14,7 @@ This allows the whiteboard to be easily embedded in any web application regardle
   - Rectangle
   - Circle
   - Line
+  - Arrow
   - Pen
   - Text
   - Sticky note
