@@ -181,6 +181,37 @@ export const styles = css`
     accent-color: var(--sw-accent);
   }
 
+  /* Stacking-order ("Arrange") controls. */
+  .layer-tools {
+    display: flex;
+    flex-direction: row;
+    gap: 4px;
+  }
+
+  .layer-button {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--sw-surface-muted);
+    color: var(--sw-text);
+    border: 1px solid var(--sw-border);
+    border-radius: var(--sw-radius-sm);
+    padding: 6px;
+    cursor: pointer;
+    transition: background-color 0.15s ease, color 0.15s ease;
+  }
+
+  .layer-button:hover:not(:disabled) {
+    background-color: var(--sw-accent-soft);
+    color: var(--sw-accent);
+  }
+
+  .layer-button:disabled {
+    color: rgba(15, 23, 42, 0.25);
+    cursor: default;
+  }
+
   .footer-tools {
     position: absolute;
     z-index: 1;

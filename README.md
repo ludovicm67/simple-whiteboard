@@ -18,6 +18,7 @@ This allows the whiteboard to be easily embedded in any web application regardle
   - Text
   - Picture
 - Move the canvas using the Move tool, the middle mouse button, or scrolling
+- Reorder items in the stacking order (bring forward / send backward / to front / to back)
 - Clear the canvas
 - Undo / redo (`Ctrl`/`Cmd`+`Z`, `Ctrl`/`Cmd`+`Shift`+`Z`)
 - Support mouse and touch input

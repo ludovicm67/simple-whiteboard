@@ -110,6 +110,13 @@
                 items: e.detail.items,
               });
               break;
+            case "reorder":
+              // Stacking-order change: share the new order of item ids.
+              bc.postMessage({
+                type: "reorder",
+                order: e.detail.order,
+              });
+              break;
           }
         });
 
@@ -140,6 +147,9 @@
               break;
             case "sync":
               app.importItems(e.data.items);
+              break;
+            case "reorder":
+              app.applyItemsOrder(e.data.order, false);
               break;
             case "clear":
               app.clear();
