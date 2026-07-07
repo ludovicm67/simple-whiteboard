@@ -3,6 +3,8 @@
 [![NPM](https://badge.fury.io/js/@ludovicm67%2Fsimple-whiteboard.svg)](https://npm.im/@ludovicm67/simple-whiteboard)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fludovicm67%2Fsimple-whiteboard.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fludovicm67%2Fsimple-whiteboard?ref=badge_shield)
 
+**[Home](https://simple-whiteboard.ludovicm67.fr/)** · **[Docs](https://simple-whiteboard.ludovicm67.fr/api.html)** · **[Demo](https://simple-whiteboard.ludovicm67.fr/app.html)**
+
 Simple Whiteboard is a simple web-based whiteboard application that allows users to draw on a canvas.
 
 The application is built as a Web Component using [LitElement](https://lit.dev/).
