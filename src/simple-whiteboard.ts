@@ -1,6 +1,13 @@
-import { LitElement, PropertyDeclaration, TemplateResult, html } from "lit";
+import {
+  LitElement,
+  PropertyDeclaration,
+  PropertyValues,
+  TemplateResult,
+  html,
+} from "lit";
 import rough from "roughjs";
 import { customElement, property, state } from "lit/decorators.js";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { I18nContext } from "./lib/locales";
 import { WhiteboardTool } from "./lib/tool";
 import {
@@ -10,16 +17,15 @@ import {
 } from "./lib/item";
 import { DrawingContext, Point } from "./lib/types";
 import { CoordsContext } from "./lib/coords";
+import { clamp, distance, midpoint, rectsIntersect } from "./lib/geometry";
+import { drawDottedBackground } from "./lib/background";
+import { downloadCanvasAsPng } from "./lib/canvasExport";
+import { ToolbarTooltip } from "./lib/toolbarTooltip";
+import { HistoryStack } from "./lib/history";
+import { getIconSvg } from "./lib/icons";
 import { styles } from "./styles";
-import { item } from "./tools/line";
 
 import "./components/menu";
-
-const getTouchDistance = (touches: TouchList): number => {
-  const dx = touches[0].clientX - touches[1].clientX;
-  const dy = touches[0].clientY - touches[1].clientY;
-  return Math.sqrt(dx * dx + dy * dy);
-};
 
 @customElement("simple-whiteboard")
 export class SimpleWhiteboard extends LitElement {
@@ -31,6 +37,25 @@ export class SimpleWhiteboard extends LitElement {
 
   @property()
   locale: string = "en";
+
+  /**
+   * Whether to render a dotted grid behind the content.
+   *
+   * Enabled by default. It can be disabled declaratively with
+   * `dotted-background="false"`, or programmatically by setting the
+   * `dottedBackground` property to `false`.
+   */
+  @property({
+    attribute: "dotted-background",
+    converter: {
+      // A missing attribute keeps the default (enabled). Any present value
+      // other than "false" enables it, so `dotted-background` on its own still
+      // works; only `dotted-background="false"` disables it.
+      fromAttribute: (value: string | null) => value !== "false",
+      toAttribute: (value: boolean) => (value ? "" : "false"),
+    },
+  })
+  dottedBackground = true;
 
   @state()
   isReady: boolean = false;
@@ -46,11 +71,41 @@ export class SimpleWhiteboard extends LitElement {
   private canvas?: HTMLCanvasElement;
   private canvasContext?: CanvasRenderingContext2D;
 
+  // State for the two-finger pinch/zoom gesture.
   private lastDistance = 0;
   private lastOrigin: Point = { x: 0, y: 0 };
 
-  private toolsTooltip?: HTMLDivElement;
-  private toolsTooltipCurrentElement?: HTMLElement;
+  // State for the middle-click "pan the canvas" gesture. It works with any tool
+  // selected. While panning, we listen on the window so the gesture keeps going
+  // (and ends reliably) even when the pointer leaves the canvas.
+  private isPanning = false;
+  private panLast: Point = { x: 0, y: 0 };
+  private cursorBeforePan = "default";
+
+  // Undo/redo history. Each entry is a JSON snapshot of the exported items.
+  private history = new HistoryStack<string>({ limit: 50 });
+  // `true` while a snapshot is being restored, to avoid recording that as a
+  // new history entry.
+  private isRestoringHistory = false;
+  // `true` between a drawing start and end (a pointer interaction). Item changes
+  // during an interaction are committed once, at the end, as a single step.
+  private isInteracting = false;
+
+  // Manages the little tooltip shown under the toolbar buttons.
+  private toolbarTooltip = new ToolbarTooltip(() => this.shadowRoot);
+
+  // Used to coalesce redraws: multiple `draw()` calls within the same frame are
+  // batched into a single render (CPU optimization).
+  private drawScheduled = false;
+  private rafId = 0;
+
+  // Bound event handlers, kept as stable references so they can actually be
+  // removed again on disconnect.
+  private readonly onKeyDown = (e: KeyboardEvent) => this.handleKeyDown(e);
+  private readonly onResize = () => this.handleResize();
+  private readonly onVisibilityChange = () => this.handleVisibilityChange();
+  private readonly onPanMove = (e: MouseEvent) => this.handlePanMove(e);
+  private readonly onPanEnd = (e: MouseEvent) => this.handlePanEnd(e);
 
   @state() private registeredTools: Map<
     string,
@@ -80,6 +135,9 @@ export class SimpleWhiteboard extends LitElement {
     this.canvasContext = canvasContext;
     this.handleResize();
 
+    // Establish the initial history baseline (usually an empty board).
+    this.resetHistory();
+
     // Just send a ready event ; the whiteboard element is available
     const readyEvent = new CustomEvent("ready", {
       detail: {
@@ -87,6 +145,14 @@ export class SimpleWhiteboard extends LitElement {
       },
     });
     this.dispatchEvent(readyEvent);
+  }
+
+  protected updated(changedProperties: PropertyValues): void {
+    // The dotted background is drawn on the canvas, not via the Lit template, so
+    // we need to trigger a redraw ourselves when the property changes.
+    if (changedProperties.has("dottedBackground")) {
+      this.draw();
+    }
   }
 
   handleResize() {
@@ -182,17 +248,78 @@ export class SimpleWhiteboard extends LitElement {
     };
   }
 
-  draw() {
+  /**
+   * Request a redraw of the canvas.
+   *
+   * Redraws are coalesced using `requestAnimationFrame`: calling this many
+   * times within the same frame results in a single render. This keeps CPU
+   * usage low during intensive interactions such as drawing or panning.
+   */
+  public draw(): void {
+    if (this.drawScheduled) {
+      return;
+    }
+    this.drawScheduled = true;
+    this.rafId = requestAnimationFrame(() => {
+      this.drawScheduled = false;
+      this.renderCanvas();
+    });
+  }
+
+  /**
+   * Force a synchronous redraw, cancelling any pending scheduled one.
+   * Used when the canvas pixels need to be up-to-date immediately (e.g. before
+   * exporting the canvas as an image).
+   */
+  private flushDraw(): void {
+    if (this.drawScheduled) {
+      cancelAnimationFrame(this.rafId);
+      this.drawScheduled = false;
+    }
+    this.renderCanvas();
+  }
+
+  /**
+   * Actually render the canvas: dotted background (if enabled), items, then the
+   * hover/selection boxes.
+   *
+   * Items whose bounding box lies entirely outside the viewport are skipped
+   * (viewport culling), so only what is visible is ever drawn.
+   */
+  private renderCanvas(): void {
     if (!this.canvas || !this.canvasContext) {
       return;
     }
 
     const context = this.canvasContext;
-    context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    const { width, height } = this.canvas;
+    context.clearRect(0, 0, width, height);
 
+    // Optional dotted background, drawn behind every item.
+    if (this.dottedBackground) {
+      drawDottedBackground(
+        context,
+        this.coordsContext.toCamera(),
+        width,
+        height
+      );
+    }
+
+    // Draw the items, skipping the ones that are not visible. The selected item
+    // is always drawn: it may manage an on-screen editor (e.g. the text tool).
     const drawingContext = this.generateDrawingContext();
-    this.items.forEach((item) => item.draw(drawingContext));
+    const visibleRect = this.coordsContext.getVisibleWorldRect(width, height);
+    this.items.forEach((item) => {
+      if (item.getId() !== this.selectedItemId) {
+        const box = item.getBoundingBox();
+        if (box && !rectsIntersect(box, visibleRect)) {
+          return;
+        }
+      }
+      item.draw(drawingContext);
+    });
 
+    // Draw the hover and selection boxes on top of the items.
     const selectedItem = this.getSelectedItem();
     const hoveredItem = this.getHoveredItem();
     if (hoveredItem) {
@@ -204,7 +331,39 @@ export class SimpleWhiteboard extends LitElement {
     }
   }
 
+  /**
+   * Whether the event originates from a text input, so we can let the browser
+   * handle shortcuts (like undo) natively instead of hijacking them.
+   */
+  private isEditableTarget(e: Event): boolean {
+    const path = (e.composedPath && e.composedPath()) || [];
+    const el = (path[0] as HTMLElement) || (e.target as HTMLElement);
+    if (!el || !el.tagName) {
+      return false;
+    }
+    const tag = el.tagName;
+    return tag === "TEXTAREA" || tag === "INPUT" || el.isContentEditable;
+  }
+
   handleKeyDown(e: KeyboardEvent) {
+    const isModifier = e.metaKey || e.ctrlKey;
+    const key = e.key.toLowerCase();
+
+    // Undo / redo shortcuts (Cmd/Ctrl+Z, Cmd/Ctrl+Shift+Z, Ctrl+Y).
+    // Skipped while typing in a text field so the field's own undo keeps working.
+    if (isModifier && (key === "z" || key === "y")) {
+      if (this.isEditableTarget(e)) {
+        return;
+      }
+      e.preventDefault();
+      if (key === "y" || e.shiftKey) {
+        this.redo();
+      } else {
+        this.undo();
+      }
+      return;
+    }
+
     // If it is the backspace key, we remove the selected item
     if (e.key === "Backspace") {
       const selectedItem = this.getSelectedItem();
@@ -224,12 +383,9 @@ export class SimpleWhiteboard extends LitElement {
       }
       this.requestUpdate();
     });
-    window.addEventListener("keydown", this.handleKeyDown.bind(this));
-    window.addEventListener("resize", this.handleResize.bind(this));
-    document.addEventListener(
-      "visibilitychange",
-      this.handleVisibilityChange.bind(this)
-    );
+    window.addEventListener("keydown", this.onKeyDown);
+    window.addEventListener("resize", this.onResize);
+    document.addEventListener("visibilitychange", this.onVisibilityChange);
     super.connectedCallback();
   }
 
@@ -237,12 +393,18 @@ export class SimpleWhiteboard extends LitElement {
     this.isReady = false;
     const i18n = this.i18nContext.getInstance();
     i18n.off("languageChanged");
-    document.removeEventListener(
-      "visibilitychange",
-      this.handleVisibilityChange.bind(this)
-    );
-    window.removeEventListener("resize", this.handleResize.bind(this));
-    window.removeEventListener("keydown", this.handleKeyDown.bind(this));
+    document.removeEventListener("visibilitychange", this.onVisibilityChange);
+    window.removeEventListener("resize", this.onResize);
+    window.removeEventListener("keydown", this.onKeyDown);
+
+    // Make sure no pan gesture keeps window listeners alive after detaching.
+    this.endPan();
+
+    // Cancel any pending redraw so we do not run after being detached.
+    if (this.drawScheduled) {
+      cancelAnimationFrame(this.rafId);
+      this.drawScheduled = false;
+    }
     super.disconnectedCallback();
   }
 
@@ -251,6 +413,10 @@ export class SimpleWhiteboard extends LitElement {
     if (!tool) {
       return;
     }
+    // Flush any pending change (e.g. text being typed) as its own history step
+    // before starting a new interaction.
+    this.commitHistory();
+    this.isInteracting = true;
     tool.handleDrawingStart(x, y);
     this.draw();
   }
@@ -269,17 +435,32 @@ export class SimpleWhiteboard extends LitElement {
   handleDrawingEnd() {
     const tool = this.registeredTools.get(this.currentTool);
     if (!tool) {
+      this.isInteracting = false;
       return;
     }
     tool.handleDrawingEnd();
+    this.isInteracting = false;
     this.draw();
+    // Record the whole interaction (draw / drag / resize) as a single step.
+    this.commitHistory();
   }
 
   handleMouseDown(e: MouseEvent) {
+    // Middle-click pans the canvas, regardless of the currently selected tool.
+    if (e.button === 1) {
+      e.preventDefault();
+      this.startPan(e);
+      return;
+    }
     this.handleDrawingStart(e.offsetX, e.offsetY);
   }
 
   handleMouseMove(e: MouseEvent) {
+    // While panning, the gesture is driven by the window listeners.
+    if (this.isPanning) {
+      return;
+    }
+
     this.requestUpdate();
     this.handleDrawingMove(e.offsetX, e.offsetY);
 
@@ -292,7 +473,77 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   handleMouseUp() {
+    if (this.isPanning) {
+      return;
+    }
     this.handleDrawingEnd();
+  }
+
+  /**
+   * Start a middle-click pan gesture. The move/end of the gesture is tracked on
+   * the window so it keeps working (and ends reliably) even if the pointer
+   * leaves the canvas.
+   *
+   * @param e The triggering `mousedown` event.
+   */
+  private startPan(e: MouseEvent): void {
+    this.isPanning = true;
+    this.panLast = { x: e.clientX, y: e.clientY };
+    this.cursorBeforePan = this.cursor;
+    this.setCursor("grabbing");
+
+    window.addEventListener("mousemove", this.onPanMove);
+    window.addEventListener("mouseup", this.onPanEnd);
+  }
+
+  /**
+   * Handle a pointer move during a middle-click pan: translate the canvas by
+   * however much the pointer moved.
+   *
+   * @param e The `mousemove` event.
+   */
+  private handlePanMove(e: MouseEvent): void {
+    if (!this.isPanning) {
+      return;
+    }
+
+    // Safety net: if the middle button is no longer pressed, stop panning.
+    if ((e.buttons & 4) === 0) {
+      this.endPan();
+      return;
+    }
+
+    const dx = e.clientX - this.panLast.x;
+    const dy = e.clientY - this.panLast.y;
+    this.panLast = { x: e.clientX, y: e.clientY };
+
+    const { x, y } = this.coordsContext.getCoords();
+    this.coordsContext.setCoords(x + dx, y + dy);
+    this.draw();
+  }
+
+  /**
+   * End the middle-click pan gesture when the middle button is released.
+   *
+   * @param e The `mouseup` event.
+   */
+  private handlePanEnd(e: MouseEvent): void {
+    if (e.button === 1) {
+      this.endPan();
+    }
+  }
+
+  /**
+   * Stop the middle-click pan gesture and restore the previous cursor.
+   */
+  private endPan(): void {
+    if (!this.isPanning) {
+      return;
+    }
+    this.isPanning = false;
+    window.removeEventListener("mousemove", this.onPanMove);
+    window.removeEventListener("mouseup", this.onPanEnd);
+    this.setCursor(this.cursorBeforePan);
   }
 
   handleTouchStart(e: TouchEvent) {
@@ -303,26 +554,23 @@ export class SimpleWhiteboard extends LitElement {
     // Prevent the default action to prevent scrolling
     e.preventDefault();
 
+    // Position of the touches relative to the canvas.
+    const rect = this.canvas.getBoundingClientRect();
+
     // Handle zooming
     if (e.touches.length === 2) {
-      // Set the zoom origin to the midpoint between the fingers
-      this.lastOrigin = {
-        x:
-          (e.touches[0].clientX + e.touches[1].clientX) / 2 -
-          this.canvas.offsetLeft,
-        y:
-          (e.touches[0].clientY + e.touches[1].clientY) / 2 -
-          this.canvas.offsetTop,
-      };
-      this.lastDistance = getTouchDistance(e.touches);
+      const touchA = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      const touchB = { x: e.touches[1].clientX, y: e.touches[1].clientY };
+
+      // Remember the pinch center (relative to the canvas) and the spacing
+      // between the fingers, both used to drive the gesture in touchmove.
+      const center = midpoint(touchA, touchB);
+      this.lastOrigin = { x: center.x - rect.left, y: center.y - rect.top };
+      this.lastDistance = distance(touchA, touchB);
     }
 
     // Get the first touch
     const touch = e.touches[0];
-
-    // Get the position of the touch relative to the canvas
-    const rect = this.canvas.getBoundingClientRect();
-
     const x = touch.clientX - rect.left;
     const y = touch.clientY - rect.top;
 
@@ -337,16 +585,19 @@ export class SimpleWhiteboard extends LitElement {
     // Prevent the default action to prevent scrolling
     e.preventDefault();
 
-    // Handle zooming
+    // Position of the touches relative to the canvas.
+    const rect = this.canvas.getBoundingClientRect();
+
+    // Handle panning + pinch-to-zoom
     if (e.touches.length === 2) {
-      const origin = {
-        x:
-          (e.touches[0].clientX + e.touches[1].clientX) / 2 -
-          this.canvas.offsetLeft,
-        y:
-          (e.touches[0].clientY + e.touches[1].clientY) / 2 -
-          this.canvas.offsetTop,
-      };
+      const touchA = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      const touchB = { x: e.touches[1].clientX, y: e.touches[1].clientY };
+
+      // Current pinch center, relative to the canvas.
+      const center = midpoint(touchA, touchB);
+      const origin = { x: center.x - rect.left, y: center.y - rect.top };
+
+      // Pan by how much the pinch center moved (two-finger drag).
       const dx = origin.x - this.lastOrigin.x;
       const dy = origin.y - this.lastOrigin.y;
       this.lastOrigin = origin;
@@ -354,21 +605,19 @@ export class SimpleWhiteboard extends LitElement {
       const { x, y } = this.coordsContext.getCoords();
       this.coordsContext.setCoords(x + dx, y + dy);
 
-      const distance = getTouchDistance(e.touches);
-      const zoomFactor = distance / this.lastDistance;
-      this.lastDistance = distance;
+      // Zoom by how much the fingers spread, anchored on the pinch center so
+      // the content scales around the fingers.
+      const touchDistance = distance(touchA, touchB);
+      const zoomFactor = touchDistance / this.lastDistance;
+      this.lastDistance = touchDistance;
 
       const zoom = this.coordsContext.getZoom() * zoomFactor;
-      this.setZoom(zoom);
+      this.setZoomAtPoint(zoom, origin.x, origin.y);
       return;
     }
 
     // Get the first touch
     const touch = e.touches[0];
-
-    // Get the position of the touch relative to the canvas
-    const rect = this.canvas.getBoundingClientRect();
-
     const x = touch.clientX - rect.left;
     const y = touch.clientY - rect.top;
 
@@ -383,10 +632,10 @@ export class SimpleWhiteboard extends LitElement {
 
     // Handle zooming
     if (e.ctrlKey || e.metaKey) {
-      // Zoom in or out
+      // Zoom in or out, anchored on the cursor position.
       const zoomFactor = e.deltaY > 0 ? 1 - scaleFactor : 1 + scaleFactor;
       const zoom = this.coordsContext.getZoom() * zoomFactor;
-      this.setZoom(zoom);
+      this.setZoomAtPoint(zoom, e.offsetX, e.offsetY);
       return;
     }
 
@@ -476,6 +725,9 @@ export class SimpleWhiteboard extends LitElement {
       },
     });
     this.dispatchEvent(itemsUpdatedEvent);
+
+    // Clearing is an undoable action.
+    this.commitHistory();
   }
 
   renderToolsOptions(): TemplateResult | null {
@@ -495,6 +747,22 @@ export class SimpleWhiteboard extends LitElement {
     return html`<div class="tools-options">${options}</div>`;
   }
 
+  /**
+   * Resolve the tooltip label for a tool, falling back to a capitalized version
+   * of the tool name when no translation is available.
+   *
+   * @param toolName The internal name of the tool.
+   * @returns The label to show in the tooltip.
+   */
+  private getToolTooltip(toolName: string): string {
+    const key = `tool-tooltip-${toolName}`;
+    const label = this.i18nContext.t(key);
+    if (!label || label === key) {
+      return toolName.charAt(0).toLocaleUpperCase() + toolName.slice(1);
+    }
+    return label;
+  }
+
   renderToolsList() {
     const tools = [];
 
@@ -506,64 +774,9 @@ export class SimpleWhiteboard extends LitElement {
 
       const button = html`<button
         class=${this.currentTool === toolName ? "tools--active" : ""}
-        @mouseover=${(e: MouseEvent) => {
-          if (!this.toolsTooltip) {
-            this.toolsTooltip = this.shadowRoot?.querySelector(
-              "#tools-tooltip"
-            ) as HTMLDivElement;
-          }
-          if (!this.toolsTooltip) {
-            return;
-          }
-
-          let target = e.target;
-          if (!target) {
-            this.toolsTooltip.style.display = "none";
-            return;
-          }
-
-          // If target is not a button, get the closest button
-          if (
-            !(target instanceof HTMLButtonElement) &&
-            target instanceof Element &&
-            typeof target.closest === "function"
-          ) {
-            const buttonTarget = target.closest("button");
-            if (buttonTarget) {
-              target = buttonTarget;
-            } else {
-              this.toolsTooltip.style.display = "none";
-              return;
-            }
-          }
-
-          // If the target is already the current element, do nothing
-          if (this.toolsTooltipCurrentElement === target) {
-            return;
-          }
-          this.toolsTooltipCurrentElement = target as HTMLElement;
-          this.toolsTooltip.textContent = this.i18nContext.t(
-            `tool-tooltip-${toolName}`
-          );
-          if (!this.toolsTooltip.textContent) {
-            this.toolsTooltip.textContent =
-              toolName.charAt(0).toLocaleUpperCase() + toolName.slice(1);
-          }
-
-          const rect = (target as HTMLButtonElement).getBoundingClientRect();
-          this.toolsTooltip.style.display = "block";
-          const width = this.toolsTooltip.offsetWidth;
-          this.toolsTooltip.style.left = `${
-            rect.left + window.scrollX - width / 2 + rect.width / 2
-          }px`;
-        }}
-        @mouseout=${(_e: MouseEvent) => {
-          this.toolsTooltipCurrentElement = undefined;
-          if (this.toolsTooltip) {
-            this.toolsTooltip.textContent = "";
-            this.toolsTooltip.style.display = "none";
-          }
-        }}
+        @mouseover=${(e: MouseEvent) =>
+          this.toolbarTooltip.show(e.target, this.getToolTooltip(toolName))}
+        @mouseout=${() => this.toolbarTooltip.hide()}
         @click=${(e: Event) => this.handleToolChange(toolName, e)}
       >
         ${icon}
@@ -579,9 +792,39 @@ export class SimpleWhiteboard extends LitElement {
     return html`<div class="tools">${tools}</div>`;
   }
 
+  /**
+   * Set the zoom level, anchored on the center of the canvas.
+   * Used for programmatic zoom changes such as the zoom dropdown.
+   *
+   * @param zoom The new zoom level (clamped between 25% and 400%).
+   */
   setZoom(zoom: number) {
-    this.coordsContext.setZoom(Math.max(0.25, Math.min(4, zoom)));
+    if (this.canvas) {
+      this.setZoomAtPoint(zoom, this.canvas.width / 2, this.canvas.height / 2);
+    } else {
+      this.coordsContext.setZoom(clamp(zoom, 0.25, 4));
+      this.draw();
+    }
+  }
+
+  /**
+   * Set the zoom level while keeping a given screen point anchored, so the
+   * content zooms around that point (the cursor or the pinch center) rather
+   * than around the canvas origin.
+   *
+   * @param zoom The new zoom level (clamped between 25% and 400%).
+   * @param screenX The x-coordinate to anchor, in canvas pixels.
+   * @param screenY The y-coordinate to anchor, in canvas pixels.
+   */
+  setZoomAtPoint(zoom: number, screenX: number, screenY: number) {
+    this.coordsContext.zoomToScreenPoint(
+      clamp(zoom, 0.25, 4),
+      screenX,
+      screenY
+    );
     this.draw();
+    // Keep the footer zoom indicator in sync with wheel/pinch zooming.
+    this.requestUpdate();
   }
 
   renderZoomSelect() {
@@ -629,9 +872,34 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
     >`;
   }
 
+  renderHistoryControls() {
+    const i18n = this.i18nContext;
+    return html`<div class="history-tools">
+      <button
+        class="history-button"
+        ?disabled=${!this.canUndo()}
+        title=${i18n.t("history-undo")}
+        aria-label=${i18n.t("history-undo")}
+        @click=${() => this.undo()}
+      >
+        ${unsafeHTML(getIconSvg("Undo2"))}
+      </button>
+      <button
+        class="history-button"
+        ?disabled=${!this.canRedo()}
+        title=${i18n.t("history-redo")}
+        aria-label=${i18n.t("history-redo")}
+        @click=${() => this.redo()}
+      >
+        ${unsafeHTML(getIconSvg("Redo2"))}
+      </button>
+    </div>`;
+  }
+
   renderFooterTools() {
     return html`<div class="footer-tools">
-      ${this.renderZoomSelect()} ${this.renderDebug()}
+      ${this.renderHistoryControls()} ${this.renderZoomSelect()}
+      ${this.renderDebug()}
     </div>`;
   }
 
@@ -719,6 +987,12 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
     this.items = items
       .map((item) => this.importItem(item, shouldThrow))
       .filter((item) => item !== null);
+
+    // Loading a fresh set of items becomes the new history baseline (unless we
+    // are ourselves restoring a snapshot, in which case the history is driving).
+    if (!this.isRestoringHistory) {
+      this.resetHistory();
+    }
   }
 
   public setItems(items: WhiteboardItem<WhiteboardItemType>[]) {
@@ -741,6 +1015,13 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
         },
       });
       this.dispatchEvent(itemsUpdatedEvent);
+    }
+
+    // Adds that happen outside a pointer interaction (e.g. inserting a picture)
+    // are committed right away. Adds during an interaction are committed once
+    // at the end of that interaction instead.
+    if (!this.isInteracting) {
+      this.commitHistory();
     }
   }
 
@@ -800,6 +1081,115 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
   public clear() {
     this.resetWhiteboard();
     this.draw();
+  }
+
+  // --- Undo / redo history ---------------------------------------------------
+
+  /**
+   * Serialize the current board state to a comparable snapshot.
+   */
+  private snapshotItems(): string {
+    return JSON.stringify(this.exportItems());
+  }
+
+  /**
+   * Reset the undo/redo history so the current state becomes the baseline.
+   * Nothing before it can be undone.
+   */
+  private resetHistory(): void {
+    this.history.reset(this.snapshotItems());
+    this.requestUpdate();
+    this.dispatchHistoryChanged();
+  }
+
+  /**
+   * Record the current board state as a new undo step.
+   * Does nothing if the state has not changed since the last step, or if a
+   * snapshot is currently being restored.
+   */
+  public commitHistory(): void {
+    if (this.isRestoringHistory) {
+      return;
+    }
+    if (this.history.push(this.snapshotItems())) {
+      this.requestUpdate();
+      this.dispatchHistoryChanged();
+    }
+  }
+
+  /**
+   * Restore the board to a previously recorded snapshot.
+   *
+   * @param snapshot The JSON snapshot to restore.
+   */
+  private restoreHistoryState(snapshot: string): void {
+    this.isRestoringHistory = true;
+    // Dispose the current items first so their DOM overlays (e.g. the text
+    // editor) are cleaned up, then rebuild from the snapshot.
+    this.resetWhiteboard();
+    const items = JSON.parse(snapshot) as ExportedWhiteboardItem<
+      WhiteboardItemType
+    >[];
+    this.importItems(items);
+    this.isRestoringHistory = false;
+    this.draw();
+    this.requestUpdate();
+
+    // Let hosts (e.g. a collaborative layer) react to the full new state.
+    this.dispatchEvent(
+      new CustomEvent("items-updated", {
+        detail: { type: "set", items: this.exportItems() },
+      })
+    );
+    this.dispatchHistoryChanged();
+  }
+
+  /**
+   * Whether there is a change that can be undone.
+   */
+  public canUndo(): boolean {
+    return this.history.canUndo();
+  }
+
+  /**
+   * Whether there is a change that can be redone.
+   */
+  public canRedo(): boolean {
+    return this.history.canRedo();
+  }
+
+  /**
+   * Undo the last change.
+   */
+  public undo(): void {
+    // Flush any pending change first, so it can be redone afterwards.
+    this.commitHistory();
+    const snapshot = this.history.undo();
+    if (snapshot !== undefined) {
+      this.restoreHistoryState(snapshot);
+    }
+  }
+
+  /**
+   * Redo the last undone change.
+   */
+  public redo(): void {
+    this.commitHistory();
+    const snapshot = this.history.redo();
+    if (snapshot !== undefined) {
+      this.restoreHistoryState(snapshot);
+    }
+  }
+
+  /**
+   * Notify listeners that the undo/redo availability changed.
+   */
+  private dispatchHistoryChanged(): void {
+    this.dispatchEvent(
+      new CustomEvent("history-changed", {
+        detail: { canUndo: this.canUndo(), canRedo: this.canRedo() },
+      })
+    );
   }
 
   public getPreviousTool() {
@@ -925,6 +1315,10 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
         },
       });
       this.dispatchEvent(itemsUpdatedEvent);
+
+      // A local removal is an undoable action (remote ones, with
+      // `sendEvent = false`, are not recorded locally).
+      this.commitHistory();
     }
 
     this.requestUpdate();
@@ -943,40 +1337,10 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
       return;
     }
 
-    const opts = options || {};
-    const fileName = opts.fileName || "whiteboard.png";
-    const backgroundColor = opts.backgroundColor || "#ffffff";
-
-    // Create a temporary canvas
-    const tempCanvas = document.createElement("canvas");
-    tempCanvas.width = this.canvas.width;
-    tempCanvas.height = this.canvas.height;
-
-    // Draw the background
-    const tempCanvasContext = tempCanvas.getContext("2d");
-    if (!tempCanvasContext) {
-      return;
-    }
-    tempCanvasContext.fillStyle = backgroundColor;
-    tempCanvasContext.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-
-    // Draw the whiteboard
-    tempCanvasContext.drawImage(this.canvas, 0, 0);
-
-    // Create a link and download the image
-    const link = document.createElement("a");
-    link.download = fileName;
-    link.href = tempCanvas.toDataURL("image/png");
-    link.click();
-
-    // Revoke the object URL
-    URL.revokeObjectURL(link.href);
-
-    // Remove temporary canvas
-    tempCanvas.remove();
-
-    // Remove the link
-    link.remove();
+    // Make sure the latest state is rendered before capturing the pixels, as
+    // redraws are otherwise deferred to the next animation frame.
+    this.flushDraw();
+    downloadCanvasAsPng(this.canvas, options);
   }
 
   /**

@@ -74,6 +74,33 @@ export class CoordsContext {
   }
 
   /**
+   * Set the zoom level while keeping a given screen point visually anchored.
+   *
+   * The world point that is currently under `(screenX, screenY)` stays under
+   * the exact same screen position after the zoom changes. This is what makes
+   * zooming feel natural: the content grows/shrinks around the cursor (or the
+   * pinch center) instead of around the canvas origin.
+   *
+   * @param zoom The new zoom level.
+   * @param screenX The x-coordinate to anchor, in canvas pixels.
+   * @param screenY The y-coordinate to anchor, in canvas pixels.
+   */
+  public zoomToScreenPoint(
+    zoom: number,
+    screenX: number,
+    screenY: number
+  ): void {
+    // World point currently under the anchor.
+    const world = this.convertFromCanvas(screenX, screenY);
+
+    this.zoom = zoom;
+
+    // Adjust the pan so that this same world point maps back to the anchor.
+    this.x = screenX - this.offsetX - world.x * zoom;
+    this.y = screenY - this.offsetY - world.y * zoom;
+  }
+
+  /**
    * Get the zoom level.
    *
    * @returns The zoom level.
@@ -107,5 +134,50 @@ export class CoordsContext {
     this.x = 0;
     this.y = 0;
     this.zoom = 1;
+  }
+
+  /**
+   * Get a plain snapshot of the camera (pan, offset and zoom).
+   * This is handy to pass around to pure helpers (e.g. the dotted background)
+   * without exposing the whole context.
+   *
+   * @returns The current camera.
+   */
+  public toCamera(): {
+    panX: number;
+    panY: number;
+    offsetX: number;
+    offsetY: number;
+    zoom: number;
+  } {
+    return {
+      panX: this.x,
+      panY: this.y,
+      offsetX: this.offsetX,
+      offsetY: this.offsetY,
+      zoom: this.zoom,
+    };
+  }
+
+  /**
+   * Get the world-space rectangle that is currently visible on a canvas of the
+   * given size. This is used to skip drawing items that are off-screen.
+   *
+   * @param canvasWidth The width of the canvas, in pixels.
+   * @param canvasHeight The height of the canvas, in pixels.
+   * @returns The visible rectangle expressed in world coordinates.
+   */
+  public getVisibleWorldRect(
+    canvasWidth: number,
+    canvasHeight: number
+  ): { x: number; y: number; width: number; height: number } {
+    const topLeft = this.convertFromCanvas(0, 0);
+    const bottomRight = this.convertFromCanvas(canvasWidth, canvasHeight);
+    return {
+      x: topLeft.x,
+      y: topLeft.y,
+      width: bottomRight.x - topLeft.x,
+      height: bottomRight.y - topLeft.y,
+    };
   }
 }

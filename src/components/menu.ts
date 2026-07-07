@@ -7,6 +7,25 @@ import { SimpleWhiteboard } from "../simple-whiteboard";
 @customElement("simple-whiteboard-menu")
 export class SimpleWhiteboardMenu extends LitElement {
   static styles = css`
+    :host {
+      /* Fallbacks in case the component is used outside a simple-whiteboard. */
+      --sw-surface: #ffffff;
+      --sw-surface-translucent: color-mix(
+        in srgb,
+        var(--sw-surface) 88%,
+        transparent
+      );
+      --sw-border: rgba(15, 23, 42, 0.08);
+      --sw-text-muted: rgba(31, 41, 51, 0.55);
+      --sw-accent: #135aa0;
+      --sw-accent-soft: rgba(19, 90, 160, 0.12);
+      --sw-radius: 10px;
+      --sw-radius-sm: 6px;
+      --sw-shadow: 0 1px 2px rgba(15, 23, 42, 0.06),
+        0 6px 16px rgba(15, 23, 42, 0.1);
+      color: #1f2933;
+    }
+
     menu {
       padding: 0;
       margin: 0;
@@ -14,56 +33,140 @@ export class SimpleWhiteboardMenu extends LitElement {
       flex-direction: column;
       align-items: flex-start;
     }
+
     .btn-container {
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-      background-color: #fff;
+      box-shadow: var(--sw-shadow);
+      background-color: var(--sw-surface-translucent);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--sw-border);
       user-select: none;
-      padding: 3px;
-      border-radius: 8px;
+      padding: 4px;
+      border-radius: var(--sw-radius);
     }
-    button {
-      background-color: #fff;
-      border-radius: 8px;
+
+    .menu-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background-color: transparent;
+      color: inherit;
+      border-radius: var(--sw-radius-sm);
       padding: 8px;
       border: none;
       cursor: pointer;
+      transition: background-color 0.15s ease, color 0.15s ease;
     }
-    button:hover,
-    li:hover {
-      background-color: rgba(0, 0, 0, 0.05);
+    .menu-button:hover {
+      background-color: rgba(15, 23, 42, 0.06);
     }
-    ul {
-      margin: 4px 0 0 0;
+    .menu-button.active {
+      background-color: var(--sw-accent-soft);
+      color: var(--sw-accent);
+    }
+    .menu-button:focus-visible,
+    .menu-item:focus-visible,
+    .submenu-item:focus-visible {
+      outline: 2px solid var(--sw-accent);
+      outline-offset: -2px;
+    }
+
+    /* Dropdown panels (top-level and submenus). */
+    .dropdown,
+    .submenu {
       list-style-type: none;
-
-      background-color: #fff;
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-      border-radius: 8px;
-      padding: 3px;
-      border: none;
-    }
-    li {
-      font-size: 14px;
-      padding: 4px 8px;
-      cursor: pointer;
-      border-radius: 3px;
+      margin: 0;
+      padding: 4px;
+      background-color: var(--sw-surface-translucent);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      box-shadow: var(--sw-shadow);
+      border: 1px solid var(--sw-border);
+      border-radius: var(--sw-radius);
     }
 
-    ul ul > li {
-      width: max-content;
-    }
-
-    li > ul {
+    .dropdown {
+      margin-top: 6px;
+      min-width: 190px;
       display: none;
     }
-
-    li:hover > ul {
+    .dropdown.open {
       display: block;
+      animation: menu-pop 0.13s ease;
+    }
+
+    /* Menu rows: [icon] [label] [chevron/spacer]. */
+    .menu-item,
+    .submenu-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 14px;
+      padding: 7px 10px;
+      cursor: pointer;
+      border-radius: var(--sw-radius-sm);
+      position: relative;
+      white-space: nowrap;
+      color: inherit;
+    }
+    .menu-item:hover,
+    .submenu-item:hover {
+      background-color: var(--sw-accent-soft);
+    }
+
+    .menu-item-icon,
+    .menu-item-chevron,
+    .submenu-check {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--sw-text-muted);
+      flex: none;
+    }
+    .menu-item-label {
+      flex: 1;
+    }
+    .menu-item-chevron {
+      margin-left: 6px;
+    }
+    .submenu-check {
+      width: 16px;
+    }
+
+    /* Submenus open to the right of their parent row, on hover. */
+    .submenu {
       position: absolute;
-      left: calc(100% - 10px);
-      margin-top: -28px;
-      max-height: 200px;
+      top: -5px;
+      left: calc(100% - 2px);
+      min-width: 170px;
+      display: none;
+    }
+    .menu-item:hover > .submenu {
+      display: block;
+      animation: menu-pop 0.13s ease;
+    }
+    .submenu-scroll {
+      max-height: 260px;
       overflow-y: auto;
+      scrollbar-width: thin;
+    }
+
+    .submenu-item.active {
+      color: var(--sw-accent);
+    }
+    .submenu-item.active .submenu-check {
+      color: var(--sw-accent);
+    }
+
+    @keyframes menu-pop {
+      from {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
     }
   `;
 
@@ -72,6 +175,20 @@ export class SimpleWhiteboardMenu extends LitElement {
 
   @state()
   isMenuOpen = false;
+
+  // Close the menu when clicking anywhere outside of it.
+  private readonly onDocumentPointerDown = (e: Event) => {
+    if (this.isMenuOpen && !e.composedPath().includes(this)) {
+      this.isMenuOpen = false;
+    }
+  };
+
+  // Close the menu when pressing Escape.
+  private readonly onKeyDown = (e: KeyboardEvent) => {
+    if (e.key === "Escape" && this.isMenuOpen) {
+      this.isMenuOpen = false;
+    }
+  };
 
   connectedCallback(): void {
     if (!this.instance) {
@@ -84,6 +201,9 @@ export class SimpleWhiteboardMenu extends LitElement {
       this.requestUpdate();
     });
 
+    document.addEventListener("pointerdown", this.onDocumentPointerDown);
+    document.addEventListener("keydown", this.onKeyDown);
+
     super.connectedCallback();
   }
 
@@ -93,7 +213,16 @@ export class SimpleWhiteboardMenu extends LitElement {
       const i18n = i18nContext.getInstance();
       i18n.off("languageChanged");
     }
+    document.removeEventListener("pointerdown", this.onDocumentPointerDown);
+    document.removeEventListener("keydown", this.onKeyDown);
     super.disconnectedCallback();
+  }
+
+  /**
+   * Render a Lucide icon by name.
+   */
+  private icon(name: string, size = 16) {
+    return unsafeHTML(getIconSvg(name, { width: size, height: size }));
   }
 
   renderLocaleSelect() {
@@ -130,24 +259,34 @@ export class SimpleWhiteboardMenu extends LitElement {
       { value: "tr", label: "Türkçe" },
     ];
 
-    const menuEntry = html`
-      <li>
-        ${i18nContext.t("menu-language")}
-        <ul>
+    const currentLocale = i18nContext.getLocale();
+
+    return html`
+      <li class="menu-item" role="menuitem" aria-haspopup="true">
+        <span class="menu-item-icon">${this.icon("Languages")}</span>
+        <span class="menu-item-label">${i18nContext.t("menu-language")}</span>
+        <span class="menu-item-chevron">${this.icon("ChevronRight")}</span>
+        <ul class="submenu submenu-scroll" role="menu">
           ${locales.map((locale) => {
+            const isActive = currentLocale === locale.value;
             return html`<li
+              class="submenu-item ${isActive ? "active" : ""}"
+              role="menuitemradio"
+              aria-checked=${isActive}
               @click=${() => {
                 i18nContext.setLocale(locale.value);
+                this.isMenuOpen = false;
               }}
             >
-              ${locale.label}
+              <span class="submenu-check"
+                >${isActive ? this.icon("Check", 15) : null}</span
+              >
+              <span class="menu-item-label">${locale.label}</span>
             </li>`;
           })}
         </ul>
       </li>
     `;
-
-    return menuEntry;
   }
 
   exportCurrentCanvasAsPng() {
@@ -157,6 +296,7 @@ export class SimpleWhiteboardMenu extends LitElement {
         fileName: `whiteboard-${dateTime}.png`,
       });
     }
+    this.isMenuOpen = false;
   }
 
   render() {
@@ -169,17 +309,32 @@ export class SimpleWhiteboardMenu extends LitElement {
     return html`
       <menu>
         <div class="btn-container">
-          <button @click=${() => (this.isMenuOpen = !this.isMenuOpen)}>
-            ${unsafeHTML(getIconSvg("Menu"))}
+          <button
+            class="menu-button ${this.isMenuOpen ? "active" : ""}"
+            aria-label="Menu"
+            aria-haspopup="true"
+            aria-expanded=${this.isMenuOpen}
+            @click=${() => (this.isMenuOpen = !this.isMenuOpen)}
+          >
+            ${this.icon("Menu", 18)}
           </button>
         </div>
 
-        <ul style="display: ${this.isMenuOpen ? "block" : "none"}">
-          <li>
-            ${i18nContext.t("menu-export")}
-            <ul>
-              <li @click=${() => this.exportCurrentCanvasAsPng()}>
-                ${i18nContext.t("menu-export-current-view-png")}
+        <ul class="dropdown ${this.isMenuOpen ? "open" : ""}" role="menu">
+          <li class="menu-item" role="menuitem" aria-haspopup="true">
+            <span class="menu-item-icon">${this.icon("Download")}</span>
+            <span class="menu-item-label">${i18nContext.t("menu-export")}</span>
+            <span class="menu-item-chevron">${this.icon("ChevronRight")}</span>
+            <ul class="submenu" role="menu">
+              <li
+                class="submenu-item"
+                role="menuitem"
+                @click=${() => this.exportCurrentCanvasAsPng()}
+              >
+                <span class="menu-item-icon">${this.icon("ImageDown")}</span>
+                <span class="menu-item-label"
+                  >${i18nContext.t("menu-export-current-view-png")}</span
+                >
               </li>
             </ul>
           </li>

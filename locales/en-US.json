@@ -1,4 +1,6 @@
 {
+  "history-redo": "Redo",
+  "history-undo": "Undo",
   "menu-export": "Export",
   "menu-export-current-view-png": "Current view as PNG",
   "menu-language": "Language",

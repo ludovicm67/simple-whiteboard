@@ -1,4 +1,6 @@
 {
+  "history-redo": "Ponów",
+  "history-undo": "Cofnij",
   "menu-export": "Eksportuj",
   "menu-export-current-view-png": "Aktualny widok jako PNG",
   "menu-language": "Język",

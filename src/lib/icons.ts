@@ -1,21 +1,39 @@
 import {
+  Check,
+  ChevronRight,
   Circle,
   createElement,
+  Download,
   Edit2,
   Eraser,
   IconNode,
   Image,
+  ImageDown,
+  Languages,
   Menu,
   Minus,
   MousePointer,
   Move,
+  Redo2,
   Square,
   Trash2,
   Type,
+  Undo2,
 } from "lucide";
 
 const icons = {
   Menu,
+
+  // Menu
+  Download,
+  ImageDown,
+  Languages,
+  ChevronRight,
+  Check,
+
+  // History
+  Undo2,
+  Redo2,
 
   // Tools
   Move,
