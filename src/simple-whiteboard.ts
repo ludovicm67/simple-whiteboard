@@ -7,6 +7,7 @@ import {
 } from "lit";
 import rough from "roughjs";
 import { customElement, property, state } from "lit/decorators.js";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { I18nContext } from "./lib/locales";
 import { WhiteboardTool } from "./lib/tool";
 import {
@@ -20,6 +21,8 @@ import { clamp, distance, midpoint, rectsIntersect } from "./lib/geometry";
 import { drawDottedBackground } from "./lib/background";
 import { downloadCanvasAsPng } from "./lib/canvasExport";
 import { ToolbarTooltip } from "./lib/toolbarTooltip";
+import { HistoryStack } from "./lib/history";
+import { getIconSvg } from "./lib/icons";
 import { styles } from "./styles";
 
 import "./components/menu";
@@ -79,6 +82,15 @@ export class SimpleWhiteboard extends LitElement {
   private panLast: Point = { x: 0, y: 0 };
   private cursorBeforePan = "default";
 
+  // Undo/redo history. Each entry is a JSON snapshot of the exported items.
+  private history = new HistoryStack<string>({ limit: 50 });
+  // `true` while a snapshot is being restored, to avoid recording that as a
+  // new history entry.
+  private isRestoringHistory = false;
+  // `true` between a drawing start and end (a pointer interaction). Item changes
+  // during an interaction are committed once, at the end, as a single step.
+  private isInteracting = false;
+
   // Manages the little tooltip shown under the toolbar buttons.
   private toolbarTooltip = new ToolbarTooltip(() => this.shadowRoot);
 
@@ -122,6 +134,9 @@ export class SimpleWhiteboard extends LitElement {
     }
     this.canvasContext = canvasContext;
     this.handleResize();
+
+    // Establish the initial history baseline (usually an empty board).
+    this.resetHistory();
 
     // Just send a ready event ; the whiteboard element is available
     const readyEvent = new CustomEvent("ready", {
@@ -316,7 +331,39 @@ export class SimpleWhiteboard extends LitElement {
     }
   }
 
+  /**
+   * Whether the event originates from a text input, so we can let the browser
+   * handle shortcuts (like undo) natively instead of hijacking them.
+   */
+  private isEditableTarget(e: Event): boolean {
+    const path = (e.composedPath && e.composedPath()) || [];
+    const el = (path[0] as HTMLElement) || (e.target as HTMLElement);
+    if (!el || !el.tagName) {
+      return false;
+    }
+    const tag = el.tagName;
+    return tag === "TEXTAREA" || tag === "INPUT" || el.isContentEditable;
+  }
+
   handleKeyDown(e: KeyboardEvent) {
+    const isModifier = e.metaKey || e.ctrlKey;
+    const key = e.key.toLowerCase();
+
+    // Undo / redo shortcuts (Cmd/Ctrl+Z, Cmd/Ctrl+Shift+Z, Ctrl+Y).
+    // Skipped while typing in a text field so the field's own undo keeps working.
+    if (isModifier && (key === "z" || key === "y")) {
+      if (this.isEditableTarget(e)) {
+        return;
+      }
+      e.preventDefault();
+      if (key === "y" || e.shiftKey) {
+        this.redo();
+      } else {
+        this.undo();
+      }
+      return;
+    }
+
     // If it is the backspace key, we remove the selected item
     if (e.key === "Backspace") {
       const selectedItem = this.getSelectedItem();
@@ -366,6 +413,10 @@ export class SimpleWhiteboard extends LitElement {
     if (!tool) {
       return;
     }
+    // Flush any pending change (e.g. text being typed) as its own history step
+    // before starting a new interaction.
+    this.commitHistory();
+    this.isInteracting = true;
     tool.handleDrawingStart(x, y);
     this.draw();
   }
@@ -384,10 +435,14 @@ export class SimpleWhiteboard extends LitElement {
   handleDrawingEnd() {
     const tool = this.registeredTools.get(this.currentTool);
     if (!tool) {
+      this.isInteracting = false;
       return;
     }
     tool.handleDrawingEnd();
+    this.isInteracting = false;
     this.draw();
+    // Record the whole interaction (draw / drag / resize) as a single step.
+    this.commitHistory();
   }
 
   handleMouseDown(e: MouseEvent) {
@@ -670,6 +725,9 @@ export class SimpleWhiteboard extends LitElement {
       },
     });
     this.dispatchEvent(itemsUpdatedEvent);
+
+    // Clearing is an undoable action.
+    this.commitHistory();
   }
 
   renderToolsOptions(): TemplateResult | null {
@@ -814,9 +872,34 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
     >`;
   }
 
+  renderHistoryControls() {
+    const i18n = this.i18nContext;
+    return html`<div class="history-tools">
+      <button
+        class="history-button"
+        ?disabled=${!this.canUndo()}
+        title=${i18n.t("history-undo")}
+        aria-label=${i18n.t("history-undo")}
+        @click=${() => this.undo()}
+      >
+        ${unsafeHTML(getIconSvg("Undo2"))}
+      </button>
+      <button
+        class="history-button"
+        ?disabled=${!this.canRedo()}
+        title=${i18n.t("history-redo")}
+        aria-label=${i18n.t("history-redo")}
+        @click=${() => this.redo()}
+      >
+        ${unsafeHTML(getIconSvg("Redo2"))}
+      </button>
+    </div>`;
+  }
+
   renderFooterTools() {
     return html`<div class="footer-tools">
-      ${this.renderZoomSelect()} ${this.renderDebug()}
+      ${this.renderHistoryControls()} ${this.renderZoomSelect()}
+      ${this.renderDebug()}
     </div>`;
   }
 
@@ -904,6 +987,12 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
     this.items = items
       .map((item) => this.importItem(item, shouldThrow))
       .filter((item) => item !== null);
+
+    // Loading a fresh set of items becomes the new history baseline (unless we
+    // are ourselves restoring a snapshot, in which case the history is driving).
+    if (!this.isRestoringHistory) {
+      this.resetHistory();
+    }
   }
 
   public setItems(items: WhiteboardItem<WhiteboardItemType>[]) {
@@ -926,6 +1015,13 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
         },
       });
       this.dispatchEvent(itemsUpdatedEvent);
+    }
+
+    // Adds that happen outside a pointer interaction (e.g. inserting a picture)
+    // are committed right away. Adds during an interaction are committed once
+    // at the end of that interaction instead.
+    if (!this.isInteracting) {
+      this.commitHistory();
     }
   }
 
@@ -985,6 +1081,115 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
   public clear() {
     this.resetWhiteboard();
     this.draw();
+  }
+
+  // --- Undo / redo history ---------------------------------------------------
+
+  /**
+   * Serialize the current board state to a comparable snapshot.
+   */
+  private snapshotItems(): string {
+    return JSON.stringify(this.exportItems());
+  }
+
+  /**
+   * Reset the undo/redo history so the current state becomes the baseline.
+   * Nothing before it can be undone.
+   */
+  private resetHistory(): void {
+    this.history.reset(this.snapshotItems());
+    this.requestUpdate();
+    this.dispatchHistoryChanged();
+  }
+
+  /**
+   * Record the current board state as a new undo step.
+   * Does nothing if the state has not changed since the last step, or if a
+   * snapshot is currently being restored.
+   */
+  public commitHistory(): void {
+    if (this.isRestoringHistory) {
+      return;
+    }
+    if (this.history.push(this.snapshotItems())) {
+      this.requestUpdate();
+      this.dispatchHistoryChanged();
+    }
+  }
+
+  /**
+   * Restore the board to a previously recorded snapshot.
+   *
+   * @param snapshot The JSON snapshot to restore.
+   */
+  private restoreHistoryState(snapshot: string): void {
+    this.isRestoringHistory = true;
+    // Dispose the current items first so their DOM overlays (e.g. the text
+    // editor) are cleaned up, then rebuild from the snapshot.
+    this.resetWhiteboard();
+    const items = JSON.parse(snapshot) as ExportedWhiteboardItem<
+      WhiteboardItemType
+    >[];
+    this.importItems(items);
+    this.isRestoringHistory = false;
+    this.draw();
+    this.requestUpdate();
+
+    // Let hosts (e.g. a collaborative layer) react to the full new state.
+    this.dispatchEvent(
+      new CustomEvent("items-updated", {
+        detail: { type: "set", items: this.exportItems() },
+      })
+    );
+    this.dispatchHistoryChanged();
+  }
+
+  /**
+   * Whether there is a change that can be undone.
+   */
+  public canUndo(): boolean {
+    return this.history.canUndo();
+  }
+
+  /**
+   * Whether there is a change that can be redone.
+   */
+  public canRedo(): boolean {
+    return this.history.canRedo();
+  }
+
+  /**
+   * Undo the last change.
+   */
+  public undo(): void {
+    // Flush any pending change first, so it can be redone afterwards.
+    this.commitHistory();
+    const snapshot = this.history.undo();
+    if (snapshot !== undefined) {
+      this.restoreHistoryState(snapshot);
+    }
+  }
+
+  /**
+   * Redo the last undone change.
+   */
+  public redo(): void {
+    this.commitHistory();
+    const snapshot = this.history.redo();
+    if (snapshot !== undefined) {
+      this.restoreHistoryState(snapshot);
+    }
+  }
+
+  /**
+   * Notify listeners that the undo/redo availability changed.
+   */
+  private dispatchHistoryChanged(): void {
+    this.dispatchEvent(
+      new CustomEvent("history-changed", {
+        detail: { canUndo: this.canUndo(), canRedo: this.canRedo() },
+      })
+    );
   }
 
   public getPreviousTool() {
@@ -1110,6 +1315,10 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
         },
       });
       this.dispatchEvent(itemsUpdatedEvent);
+
+      // A local removal is an undoable action (remote ones, with
+      // `sendEvent = false`, are not recorded locally).
+      this.commitHistory();
     }
 
     this.requestUpdate();

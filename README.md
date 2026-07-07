@@ -19,6 +19,7 @@ This allows the whiteboard to be easily embedded in any web application regardle
   - Picture
 - Move the canvas using the Move tool, the middle mouse button, or scrolling
 - Clear the canvas
+- Undo / redo (`Ctrl`/`Cmd`+`Z`, `Ctrl`/`Cmd`+`Shift`+`Z`)
 - Support mouse and touch input
 - Optional dotted grid background
 - Pan & pinch-to-zoom (zoom follows the cursor / pinch center)
@@ -43,6 +44,22 @@ its `tools` slot:
 | `dotted-background`  | `boolean` | `true`  | Render a dotted grid behind the content. Use `="false"` to hide. |
 | `hide-locale-picker` | `boolean` | `false` | Hide the language picker from the menu.                          |
 | `debug`              | `boolean` | `false` | Log debug information and show the pointer coordinates.          |
+
+### Undo / redo
+
+Every drawing, edit, move, resize, deletion and clear can be undone and redone,
+either with the toolbar buttons, the keyboard (`Ctrl`/`Cmd`+`Z` to undo,
+`Ctrl`/`Cmd`+`Shift`+`Z` or `Ctrl`+`Y` to redo), or programmatically:
+
+```js
+whiteboard.undo();
+whiteboard.redo();
+whiteboard.canUndo(); // boolean
+whiteboard.canRedo(); // boolean
+```
+
+A `history-changed` event (`detail: { canUndo, canRedo }`) is emitted whenever
+availability changes, so a host application can keep its own controls in sync.
 
 ### Theming
 

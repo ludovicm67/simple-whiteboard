@@ -1,4 +1,6 @@
 {
+  "history-redo": "Wiederholen",
+  "history-undo": "Rückgängig",
   "menu-export": "Exportieren",
   "menu-export-current-view-png": "Aktuelle Ansicht als PNG",
   "menu-language": "Sprache",

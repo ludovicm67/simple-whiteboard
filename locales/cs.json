@@ -1,4 +1,6 @@
 {
+  "history-redo": "Znovu",
+  "history-undo": "Zpět",
   "menu-export": "Exportovat",
   "menu-export-current-view-png": "Aktuální zobrazení v PNG",
   "menu-language": "Jazyk",

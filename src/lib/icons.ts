@@ -9,13 +9,19 @@ import {
   Minus,
   MousePointer,
   Move,
+  Redo2,
   Square,
   Trash2,
   Type,
+  Undo2,
 } from "lucide";
 
 const icons = {
   Menu,
+
+  // History
+  Undo2,
+  Redo2,
 
   // Tools
   Move,

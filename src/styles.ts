@@ -202,6 +202,35 @@ export const styles = css`
     cursor: pointer;
   }
 
+  .history-tools {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .history-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+    color: var(--sw-text);
+    border: none;
+    border-radius: var(--sw-radius-sm);
+    padding: 4px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+  }
+
+  .history-button:hover:not(:disabled) {
+    background-color: rgba(15, 23, 42, 0.06);
+  }
+
+  .history-button:disabled {
+    color: rgba(15, 23, 42, 0.25);
+    cursor: default;
+  }
+
   .footer-tools pre {
     margin: 0;
     font-size: 12px;

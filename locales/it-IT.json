@@ -1,4 +1,6 @@
 {
+  "history-redo": "Ripeti",
+  "history-undo": "Annulla",
   "menu-export": "Esporta",
   "menu-export-current-view-png": "Visualizzazione attuale in PNG",
   "menu-language": "Lingua",

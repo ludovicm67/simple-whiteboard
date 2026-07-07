@@ -1,4 +1,6 @@
 {
+  "history-redo": "Refazer",
+  "history-undo": "Desfazer",
   "menu-export": "Exportar",
   "menu-export-current-view-png": "Visualização atual como PNG",
   "menu-language": "Idioma",

@@ -1,4 +1,6 @@
 {
+  "history-redo": "Rétablir",
+  "history-undo": "Annuler",
   "menu-export": "Exporter",
   "menu-export-current-view-png": "La vue actuelle en PNG",
   "menu-language": "Langue",

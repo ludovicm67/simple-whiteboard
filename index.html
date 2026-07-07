@@ -103,6 +103,13 @@
                 itemId: e.detail.itemId,
               });
               break;
+            case "set":
+              // Full-state change (e.g. undo/redo): sync the whole board.
+              bc.postMessage({
+                type: "sync",
+                items: e.detail.items,
+              });
+              break;
           }
         });
 
