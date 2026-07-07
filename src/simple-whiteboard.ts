@@ -394,26 +394,23 @@ export class SimpleWhiteboard extends LitElement {
     // Prevent the default action to prevent scrolling
     e.preventDefault();
 
+    // Position of the touches relative to the canvas.
+    const rect = this.canvas.getBoundingClientRect();
+
     // Handle zooming
     if (e.touches.length === 2) {
       const touchA = { x: e.touches[0].clientX, y: e.touches[0].clientY };
       const touchB = { x: e.touches[1].clientX, y: e.touches[1].clientY };
 
-      // Set the zoom origin to the midpoint between the fingers
+      // Remember the pinch center (relative to the canvas) and the spacing
+      // between the fingers, both used to drive the gesture in touchmove.
       const center = midpoint(touchA, touchB);
-      this.lastOrigin = {
-        x: center.x - this.canvas.offsetLeft,
-        y: center.y - this.canvas.offsetTop,
-      };
+      this.lastOrigin = { x: center.x - rect.left, y: center.y - rect.top };
       this.lastDistance = distance(touchA, touchB);
     }
 
     // Get the first touch
     const touch = e.touches[0];
-
-    // Get the position of the touch relative to the canvas
-    const rect = this.canvas.getBoundingClientRect();
-
     const x = touch.clientX - rect.left;
     const y = touch.clientY - rect.top;
 
@@ -428,16 +425,19 @@ export class SimpleWhiteboard extends LitElement {
     // Prevent the default action to prevent scrolling
     e.preventDefault();
 
-    // Handle zooming
+    // Position of the touches relative to the canvas.
+    const rect = this.canvas.getBoundingClientRect();
+
+    // Handle panning + pinch-to-zoom
     if (e.touches.length === 2) {
       const touchA = { x: e.touches[0].clientX, y: e.touches[0].clientY };
       const touchB = { x: e.touches[1].clientX, y: e.touches[1].clientY };
 
+      // Current pinch center, relative to the canvas.
       const center = midpoint(touchA, touchB);
-      const origin = {
-        x: center.x - this.canvas.offsetLeft,
-        y: center.y - this.canvas.offsetTop,
-      };
+      const origin = { x: center.x - rect.left, y: center.y - rect.top };
+
+      // Pan by how much the pinch center moved (two-finger drag).
       const dx = origin.x - this.lastOrigin.x;
       const dy = origin.y - this.lastOrigin.y;
       this.lastOrigin = origin;
@@ -445,21 +445,19 @@ export class SimpleWhiteboard extends LitElement {
       const { x, y } = this.coordsContext.getCoords();
       this.coordsContext.setCoords(x + dx, y + dy);
 
+      // Zoom by how much the fingers spread, anchored on the pinch center so
+      // the content scales around the fingers.
       const touchDistance = distance(touchA, touchB);
       const zoomFactor = touchDistance / this.lastDistance;
       this.lastDistance = touchDistance;
 
       const zoom = this.coordsContext.getZoom() * zoomFactor;
-      this.setZoom(zoom);
+      this.setZoomAtPoint(zoom, origin.x, origin.y);
       return;
     }
 
     // Get the first touch
     const touch = e.touches[0];
-
-    // Get the position of the touch relative to the canvas
-    const rect = this.canvas.getBoundingClientRect();
-
     const x = touch.clientX - rect.left;
     const y = touch.clientY - rect.top;
 
@@ -474,10 +472,10 @@ export class SimpleWhiteboard extends LitElement {
 
     // Handle zooming
     if (e.ctrlKey || e.metaKey) {
-      // Zoom in or out
+      // Zoom in or out, anchored on the cursor position.
       const zoomFactor = e.deltaY > 0 ? 1 - scaleFactor : 1 + scaleFactor;
       const zoom = this.coordsContext.getZoom() * zoomFactor;
-      this.setZoom(zoom);
+      this.setZoomAtPoint(zoom, e.offsetX, e.offsetY);
       return;
     }
 
@@ -631,9 +629,39 @@ export class SimpleWhiteboard extends LitElement {
     return html`<div class="tools">${tools}</div>`;
   }
 
+  /**
+   * Set the zoom level, anchored on the center of the canvas.
+   * Used for programmatic zoom changes such as the zoom dropdown.
+   *
+   * @param zoom The new zoom level (clamped between 25% and 400%).
+   */
   setZoom(zoom: number) {
-    this.coordsContext.setZoom(clamp(zoom, 0.25, 4));
+    if (this.canvas) {
+      this.setZoomAtPoint(zoom, this.canvas.width / 2, this.canvas.height / 2);
+    } else {
+      this.coordsContext.setZoom(clamp(zoom, 0.25, 4));
+      this.draw();
+    }
+  }
+
+  /**
+   * Set the zoom level while keeping a given screen point anchored, so the
+   * content zooms around that point (the cursor or the pinch center) rather
+   * than around the canvas origin.
+   *
+   * @param zoom The new zoom level (clamped between 25% and 400%).
+   * @param screenX The x-coordinate to anchor, in canvas pixels.
+   * @param screenY The y-coordinate to anchor, in canvas pixels.
+   */
+  setZoomAtPoint(zoom: number, screenX: number, screenY: number) {
+    this.coordsContext.zoomToScreenPoint(
+      clamp(zoom, 0.25, 4),
+      screenX,
+      screenY
+    );
     this.draw();
+    // Keep the footer zoom indicator in sync with wheel/pinch zooming.
+    this.requestUpdate();
   }
 
   renderZoomSelect() {

@@ -74,6 +74,33 @@ export class CoordsContext {
   }
 
   /**
+   * Set the zoom level while keeping a given screen point visually anchored.
+   *
+   * The world point that is currently under `(screenX, screenY)` stays under
+   * the exact same screen position after the zoom changes. This is what makes
+   * zooming feel natural: the content grows/shrinks around the cursor (or the
+   * pinch center) instead of around the canvas origin.
+   *
+   * @param zoom The new zoom level.
+   * @param screenX The x-coordinate to anchor, in canvas pixels.
+   * @param screenY The y-coordinate to anchor, in canvas pixels.
+   */
+  public zoomToScreenPoint(
+    zoom: number,
+    screenX: number,
+    screenY: number
+  ): void {
+    // World point currently under the anchor.
+    const world = this.convertFromCanvas(screenX, screenY);
+
+    this.zoom = zoom;
+
+    // Adjust the pan so that this same world point maps back to the anchor.
+    this.x = screenX - this.offsetX - world.x * zoom;
+    this.y = screenY - this.offsetY - world.y * zoom;
+  }
+
+  /**
    * Get the zoom level.
    *
    * @returns The zoom level.

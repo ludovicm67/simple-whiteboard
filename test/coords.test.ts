@@ -58,6 +58,34 @@ test("getVisibleWorldRect accounts for zoom", () => {
   assert.equal(rect.height, 300);
 });
 
+test("zoomToScreenPoint keeps the anchored point under the cursor", () => {
+  const coords = new CoordsContext();
+  coords.setOffset(400, 300); // centered origin, like the real component
+  coords.setCoords(30, -20);
+
+  const anchor = { x: 512, y: 337 };
+  // World point currently under the anchor, before zooming.
+  const worldBefore = coords.convertFromCanvas(anchor.x, anchor.y);
+
+  coords.zoomToScreenPoint(2.5, anchor.x, anchor.y);
+  assert.equal(coords.getZoom(), 2.5);
+
+  // That same world point must still map back to the anchor after the zoom.
+  const screenAfter = coords.convertToCanvas(worldBefore.x, worldBefore.y);
+  assert.ok(Math.abs(screenAfter.x - anchor.x) < 1e-9);
+  assert.ok(Math.abs(screenAfter.y - anchor.y) < 1e-9);
+});
+
+test("zoomToScreenPoint with an unchanged zoom does not move anything", () => {
+  const coords = new CoordsContext(10, 20, 1.5);
+  coords.setOffset(100, 100);
+  const before = coords.getCoords();
+
+  coords.zoomToScreenPoint(1.5, 400, 250);
+
+  assert.deepEqual(coords.getCoords(), before);
+});
+
 test("reset restores pan and zoom but keeps the offset", () => {
   const coords = new CoordsContext(50, 60, 3);
   coords.setOffset(100, 100);
