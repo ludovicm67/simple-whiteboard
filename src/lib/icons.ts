@@ -1,10 +1,15 @@
 import {
+  Check,
+  ChevronRight,
   Circle,
   createElement,
+  Download,
   Edit2,
   Eraser,
   IconNode,
   Image,
+  ImageDown,
+  Languages,
   Menu,
   Minus,
   MousePointer,
@@ -18,6 +23,13 @@ import {
 
 const icons = {
   Menu,
+
+  // Menu
+  Download,
+  ImageDown,
+  Languages,
+  ChevronRight,
+  Check,
 
   // History
   Undo2,
