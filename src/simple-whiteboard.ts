@@ -37,10 +37,22 @@ export class SimpleWhiteboard extends LitElement {
 
   /**
    * Whether to render a dotted grid behind the content.
-   * Disabled by default. Toggle it with the `dotted-background` attribute.
+   *
+   * Enabled by default. It can be disabled declaratively with
+   * `dotted-background="false"`, or programmatically by setting the
+   * `dottedBackground` property to `false`.
    */
-  @property({ type: Boolean, attribute: "dotted-background" })
-  dottedBackground = false;
+  @property({
+    attribute: "dotted-background",
+    converter: {
+      // A missing attribute keeps the default (enabled). Any present value
+      // other than "false" enables it, so `dotted-background` on its own still
+      // works; only `dotted-background="false"` disables it.
+      fromAttribute: (value: string | null) => value !== "false",
+      toAttribute: (value: boolean) => (value ? "" : "false"),
+    },
+  })
+  dottedBackground = true;
 
   @state()
   isReady: boolean = false;
