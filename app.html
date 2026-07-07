@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple Whiteboard — Live Demo</title>
+    <link rel="stylesheet" href="./src/index.css" />
+    <script type="module" src="/src/simple-whiteboard.ts"></script>
+    <script type="module" src="/src/tools/defaults.ts"></script>
+  </head>
+  <body>
+    <main>
+      <simple-whiteboard id="app" locale="en" debug>
+        <simple-whiteboard--tool-defaults
+          slot="tools"
+        ></simple-whiteboard--tool-defaults>
+      </simple-whiteboard>
+    </main>
+    <footer>
+      <a href="/">← Home</a>
+      -
+      <a href="/api.html">Docs</a>
+      -
+      <a href="https://github.com/ludovicm67/simple-whiteboard" target="_blank"
+        >GitHub</a
+      >
+      -
+      <a href="/app.html" target="_blank">New Tab</a>
+      -
+      <a href="https://ludovic-muller.fr/" target="_blank"
+        >Created by Ludovic Muller</a
+      >
+    </footer>
+    <script>
+      const id = Math.random().toString(36).substr(2, 9);
+      const app = document.getElementById("app");
+      (async () => {
+        // Listen for ready event
+        app.addEventListener("ready", (e) => {
+          console.info("Whiteboard is ready!", e.detail);
+        });
+
+        // Listen for tool-updated events
+        app.addEventListener("tool-updated", (e) => {
+          console.log("Tool updated event:", e.detail);
+        });
+
+        // Just make sure that the simple-whiteboard element is defined
+        await new Promise((resolve) => {
+          window.customElements.whenDefined("simple-whiteboard").then(() => {
+            resolve();
+          });
+        });
+
+        // Listen for tool-registered event
+        let toolCounter = 0;
+        await new Promise((resolve) => {
+          app.addEventListener("tool-registered", (e) => {
+            const toolName = e.detail?.name || "Unknown";
+            console.log("Tool registered event:", toolName, e.detail);
+            toolCounter++;
+            console.log("Tool counter:", toolCounter);
+            if (toolCounter === 12) {
+              resolve();
+              console.log("All tools registered");
+            }
+          });
+        });
+
+        // Listen for items-updated event
+        app.addEventListener("items-updated", (e) => {
+          if (!e.detail.type) {
+            return;
+          }
+
+          console.log("Items updated event:", e.detail);
+
+          switch (e.detail.type) {
+            case "add":
+              bc.postMessage({
+                type: "item-add",
+                item: e.detail.item,
+              });
+              break;
+            case "update":
+              bc.postMessage({
+                type: "item-update",
+                itemId: e.detail.itemId,
+                item: e.detail.item,
+              });
+              break;
+            case "partial-update":
+              bc.postMessage({
+                type: "item-partial-update",
+                itemId: e.detail.itemId,
+                updates: e.detail.updates,
+              });
+              break;
+            case "clear":
+              bc.postMessage({
+                type: "clear",
+              });
+              break;
+            case "remove":
+              bc.postMessage({
+                type: "item-remove",
+                itemId: e.detail.itemId,
+              });
+              break;
+            case "set":
+              // Full-state change (e.g. undo/redo): sync the whole board.
+              bc.postMessage({
+                type: "sync",
+                items: e.detail.items,
+              });
+              break;
+            case "reorder":
+              // Stacking-order change: share the new order of item ids.
+              bc.postMessage({
+                type: "reorder",
+                order: e.detail.order,
+              });
+              break;
+          }
+        });
+
+        const bc = new BroadcastChannel("whiteboard-channel");
+        bc.onmessage = (e) => {
+          if (!e.data.type) {
+            return;
+          }
+
+          switch (e.data.type) {
+            case "item-add":
+              app.importItem(e.data.item);
+              break;
+            case "item-update":
+              app.updateItem(e.data.itemId, e.data.item);
+              break;
+            case "item-partial-update":
+              app.partialItemUpdateById(e.data.itemId, e.data.updates, false);
+              break;
+            case "item-remove":
+              app.removeItemById(e.data.itemId);
+              break;
+            case "join":
+              bc.postMessage({
+                type: "sync",
+                items: app.exportItems(),
+              });
+              break;
+            case "sync":
+              app.importItems(e.data.items);
+              break;
+            case "reorder":
+              app.applyItemsOrder(e.data.order, false);
+              break;
+            case "clear":
+              app.clear();
+              break;
+          }
+        };
+
+        bc.postMessage({
+          type: "join",
+          id,
+        });
+        console.log("Client ID:", id);
+      })();
+    </script>
+  </body>
+</html>
