@@ -80,6 +80,61 @@ export const rectsIntersect = (a: Rect, b: Rect): boolean =>
   a.y + a.height >= b.y;
 
 /**
+ * Compute the shortest distance from a point to a line segment.
+ *
+ * The point is projected onto the segment's supporting line, clamped to the
+ * segment's extremities, and the distance to that closest point is returned.
+ *
+ * @param p The point.
+ * @param a The first endpoint of the segment.
+ * @param b The second endpoint of the segment.
+ * @returns The distance from `p` to the closest point on segment `[a, b]`.
+ */
+export const distanceToSegment = (p: Point, a: Point, b: Point): number => {
+  const abx = b.x - a.x;
+  const aby = b.y - a.y;
+  const lengthSquared = abx * abx + aby * aby;
+
+  // Degenerate segment (a == b): fall back to a point-to-point distance.
+  if (lengthSquared === 0) {
+    return distance(p, a);
+  }
+
+  // Projection of `p` onto the line, clamped to the `[a, b]` segment.
+  const t = clamp(
+    ((p.x - a.x) * abx + (p.y - a.y) * aby) / lengthSquared,
+    0,
+    1
+  );
+  const closest = { x: a.x + t * abx, y: a.y + t * aby };
+  return distance(p, closest);
+};
+
+/**
+ * Determine whether a circle overlaps an axis-aligned rectangle.
+ * A circle that merely touches the rectangle counts as overlapping.
+ *
+ * @param cx The x-coordinate of the circle center.
+ * @param cy The y-coordinate of the circle center.
+ * @param radius The radius of the circle.
+ * @param rect The rectangle.
+ * @returns `true` if the circle and rectangle overlap, `false` otherwise.
+ */
+export const circleIntersectsRect = (
+  cx: number,
+  cy: number,
+  radius: number,
+  rect: Rect
+): boolean => {
+  // Closest point of the rectangle to the circle center.
+  const closestX = clamp(cx, rect.x, rect.x + rect.width);
+  const closestY = clamp(cy, rect.y, rect.y + rect.height);
+  const dx = cx - closestX;
+  const dy = cy - closestY;
+  return dx * dx + dy * dy <= radius * radius;
+};
+
+/**
  * Options describing the dotted background grid to compute.
  */
 export interface DotGridOptions {

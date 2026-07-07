@@ -329,6 +329,11 @@ export class SimpleWhiteboard extends LitElement {
       const isResizable = selectedItem.isResizable();
       this.drawItemBox(context, selectedItem, "#135aa0", isResizable);
     }
+
+    // Let the active tool draw a transient overlay on top (e.g. the eraser
+    // cursor). This is never part of the items and is not exported.
+    const activeTool = this.registeredTools.get(this.currentTool);
+    activeTool?.drawOverlay(drawingContext);
   }
 
   /**
@@ -1381,8 +1386,13 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
       this.dispatchEvent(itemsUpdatedEvent);
 
       // A local removal is an undoable action (remote ones, with
-      // `sendEvent = false`, are not recorded locally).
-      this.commitHistory();
+      // `sendEvent = false`, are not recorded locally). Removals that happen
+      // during a pointer interaction (e.g. dragging the eraser across several
+      // items) are committed once at the end of the interaction, so the whole
+      // stroke is a single undo step.
+      if (!this.isInteracting) {
+        this.commitHistory();
+      }
     }
 
     this.requestUpdate();

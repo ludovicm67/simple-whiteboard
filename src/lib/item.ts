@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import { DrawingContext, ResizeHandle } from "./types";
+import { circleIntersectsRect } from "./geometry";
 
 /**
  * Interface for the type of a whiteboard item.
@@ -34,6 +35,7 @@ export interface WhiteboardItemInterface<T extends WhiteboardItemType> {
     height: number;
   } | null;
   relativeMoveOperation(_dx: number, _dy: number): Partial<T> | null;
+  isHitByEraser(_x: number, _y: number, _radius: number): boolean;
   isRemovableWithBackspace(): boolean;
   isResizable(): boolean;
   relativeResizeOperation(
@@ -151,6 +153,28 @@ export abstract class WhiteboardItem<T extends WhiteboardItemType>
   public relativeMoveOperation(_dx: number, _dy: number): Partial<T> | null {
     // To be implemented by the subclass
     return null;
+  }
+
+  /**
+   * Whether the item is touched by an eraser stroke centered at (`x`, `y`) in
+   * world coordinates, with the given world-space `radius`.
+   *
+   * The default implementation tests the eraser circle against the item's
+   * bounding box, which is what users expect for area-like shapes (rectangles,
+   * text, pictures, …). Thin shapes (lines, arrows, freehand strokes) override
+   * this to test their actual geometry, so you only erase what you touch.
+   *
+   * @param x The x-coordinate of the eraser center, in world coordinates.
+   * @param y The y-coordinate of the eraser center, in world coordinates.
+   * @param radius The eraser radius, in world coordinates.
+   * @returns `true` if the eraser touches the item, `false` otherwise.
+   */
+  public isHitByEraser(x: number, y: number, radius: number): boolean {
+    const box = this.getBoundingBox();
+    if (!box) {
+      return false;
+    }
+    return circleIntersectsRect(x, y, radius, box);
   }
 
   /**

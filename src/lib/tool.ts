@@ -5,6 +5,7 @@ import {
   WhiteboardItem,
   WhiteboardItemType,
 } from "./item";
+import { DrawingContext } from "./types";
 
 export type WhiteboardToolBuilder<
   ToolType extends WhiteboardTool<WhiteboardItem<WhiteboardItemType>>
@@ -18,6 +19,7 @@ export interface WhiteboardToolInterface<
   getName: () => string;
   import(item: ExportedWhiteboardItem<WhiteboardItemType>): ItemType;
   renderToolOptions(_item: ItemType | null): TemplateResult | null;
+  drawOverlay(_context: DrawingContext): void;
 
   handleMouseMove(e: MouseEvent): void;
 
@@ -96,6 +98,19 @@ export abstract class WhiteboardTool<
    */
   public renderToolOptions(_item: ItemType | null): TemplateResult | null {
     return null;
+  }
+
+  /**
+   * Draw a transient overlay on top of the items on the canvas.
+   * This is called on every render, but only for the tool that is currently
+   * selected. It is meant for non-persistent visual helpers that follow the
+   * interaction (e.g. the eraser cursor circle) and are never part of the
+   * exported items. Does nothing by default.
+   *
+   * @param _context The drawing context.
+   */
+  public drawOverlay(_context: DrawingContext): void {
+    // Implement this method in the tool class if needed.
   }
 
   /**
