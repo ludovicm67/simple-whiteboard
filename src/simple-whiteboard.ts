@@ -57,6 +57,17 @@ export class SimpleWhiteboard extends LitElement {
   })
   dottedBackground = true;
 
+  /**
+   * Whether to hide the floating tool-options panel.
+   *
+   * The panel is drawn over the top-left of the canvas, which is fine for a
+   * full-size board but gets in the way of a small, embedded one. Set
+   * `hide-tool-options` to hide it; the tools themselves keep working (you just
+   * lose the per-tool controls such as color and size).
+   */
+  @property({ type: Boolean, attribute: "hide-tool-options" })
+  hideToolOptions = false;
+
   @state()
   isReady: boolean = false;
 
@@ -736,6 +747,12 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   renderToolsOptions(): TemplateResult | null {
+    // The whole options panel can be hidden (e.g. for a compact embedded board
+    // where it would otherwise cover the canvas).
+    if (this.hideToolOptions) {
+      return null;
+    }
+
     const selectedItem = this.getSelectedItem();
     const currentTool = this.registeredTools.get(this.currentTool);
     const selectedItemTool = selectedItem

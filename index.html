@@ -3,7 +3,9 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Simple Whiteboard — a tiny, embeddable whiteboard web component</title>
+    <title>
+      Simple Whiteboard — a tiny, embeddable whiteboard web component
+    </title>
     <meta
       name="description"
       content="A lightweight, framework-agnostic whiteboard you can drop into any web app. Draw, pan, zoom, undo, export to PNG — built as a single Web Component."
@@ -19,7 +21,17 @@
       <div class="container nav-inner">
         <a class="brand" href="/">
           <span class="brand-mark">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+            </svg>
           </span>
           Simple Whiteboard
         </a>
@@ -28,11 +40,27 @@
             <a class="nav-hide-sm" href="#features">Features</a>
             <a class="nav-hide-sm" href="#usage">Usage</a>
             <a href="/api.html">Docs</a>
-            <a class="nav-hide-sm" href="https://github.com/ludovicm67/simple-whiteboard" target="_blank" rel="noopener">GitHub</a>
+            <a
+              class="nav-hide-sm"
+              href="https://github.com/ludovicm67/simple-whiteboard"
+              target="_blank"
+              rel="noopener"
+              >GitHub</a
+            >
           </div>
           <a class="btn btn-primary" href="/app.html">
             Try it
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
           </a>
         </nav>
       </div>
@@ -43,13 +71,34 @@
       <div class="container hero-inner">
         <div class="hero-copy">
           <span class="eyebrow">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3Z"/></svg>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              width="16"
+              height="16"
+            >
+              <path
+                d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3Z"
+              />
+            </svg>
             One Web Component · zero framework lock-in
           </span>
           <h1>
             A whiteboard you can drop into
             <span class="hero-highlight"
-              >anything<svg viewBox="0 0 300 12" preserveAspectRatio="none" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"><path d="M4 8c46-7 96-7 150-3s96 4 146-3"/></svg
+              >anything<svg
+                viewBox="0 0 300 12"
+                preserveAspectRatio="none"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="5"
+                stroke-linecap="round"
+              >
+                <path d="M4 8c46-7 96-7 150-3s96 4 146-3" /></svg
             ></span>
           </h1>
           <p class="hero-sub">
@@ -60,30 +109,87 @@
           <div class="hero-actions">
             <a class="btn btn-primary btn-lg" href="/app.html">
               Try the whiteboard
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
             </a>
-            <a class="btn btn-secondary btn-lg" href="/api.html">Read the docs</a>
+            <a class="btn btn-secondary btn-lg" href="/api.html"
+              >Read the docs</a
+            >
           </div>
           <div class="hero-install">
             <span class="prompt">$</span>
             <code id="install-cmd">npm i @ludovicm67/simple-whiteboard</code>
-            <button class="code-copy" data-copy="#install-cmd" type="button">Copy</button>
+            <button class="code-copy" data-copy="#install-cmd" type="button">
+              Copy
+            </button>
           </div>
         </div>
 
         <div class="hero-visual">
           <div class="board-frame">
             <div class="board-chrome">
-              <div class="board-dots"><span></span><span></span><span></span></div>
+              <div class="board-dots">
+                <span></span><span></span><span></span>
+              </div>
               <div class="board-url">simple-whiteboard.app</div>
             </div>
             <div class="board-embed">
-              <simple-whiteboard id="hero-board" locale="en" hide-locale-picker>
-                <simple-whiteboard--tool-defaults slot="tools"></simple-whiteboard--tool-defaults>
+              <simple-whiteboard
+                id="hero-board"
+                locale="en"
+                hide-locale-picker
+                hide-tool-options
+              >
+                <!-- A curated subset of tools for the hero, so the toolbar
+                     stays comfortable and never needs a scrollbar. The full set
+                     is available on the demo page. -->
+                <simple-whiteboard--tool-pointer
+                  slot="tools"
+                ></simple-whiteboard--tool-pointer>
+                <simple-whiteboard--tool-pen
+                  slot="tools"
+                ></simple-whiteboard--tool-pen>
+                <simple-whiteboard--tool-rect
+                  slot="tools"
+                ></simple-whiteboard--tool-rect>
+                <simple-whiteboard--tool-circle
+                  slot="tools"
+                ></simple-whiteboard--tool-circle>
+                <simple-whiteboard--tool-arrow
+                  slot="tools"
+                ></simple-whiteboard--tool-arrow>
+                <simple-whiteboard--tool-text
+                  slot="tools"
+                ></simple-whiteboard--tool-text>
+                <simple-whiteboard--tool-eraser
+                  slot="tools"
+                ></simple-whiteboard--tool-eraser>
+                <simple-whiteboard--tool-clear
+                  slot="tools"
+                ></simple-whiteboard--tool-clear>
               </simple-whiteboard>
               <div class="board-gate" data-gate>
                 <span class="board-gate-badge">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M12 20h9" />
+                    <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                  </svg>
                   Click to doodle — it&rsquo;s live
                 </span>
               </div>
@@ -132,64 +238,247 @@
 
         <div class="features reveal">
           <div class="feature">
-            <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+            <span class="feature-icon"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M12 20h9" />
+                <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" /></svg
+            ></span>
             <h3>A dozen tools</h3>
-            <p>Rectangle, circle, line, arrow, freehand pen, text, sticky notes and images — plus select, move and a real object eraser.</p>
+            <p>
+              Rectangle, circle, line, arrow, freehand pen, text, sticky notes
+              and images — plus select, move and a real object eraser.
+            </p>
           </div>
           <div class="feature">
-            <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l-3 3 3 3"/><path d="M9 5l3-3 3 3"/><path d="M15 19l-3 3-3-3"/><path d="M19 9l3 3-3 3"/><path d="M2 12h20"/><path d="M12 2v20"/></svg></span>
+            <span class="feature-icon"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M5 9l-3 3 3 3" />
+                <path d="M9 5l3-3 3 3" />
+                <path d="M15 19l-3 3-3-3" />
+                <path d="M19 9l3 3-3 3" />
+                <path d="M2 12h20" />
+                <path d="M12 2v20" /></svg
+            ></span>
             <h3>Infinite canvas</h3>
-            <p>Pan with the mouse, middle-click or trackpad, and pinch-to-zoom that follows your cursor so it always feels natural.</p>
+            <p>
+              Pan with the mouse, middle-click or trackpad, and pinch-to-zoom
+              that follows your cursor so it always feels natural.
+            </p>
           </div>
           <div class="feature">
-            <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg></span>
+            <span class="feature-icon"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M3 7v6h6" />
+                <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" /></svg
+            ></span>
             <h3>Undo &amp; redo</h3>
-            <p>A full history with <code>Ctrl</code>/<code>Cmd</code>+Z, a redo stack, and a <code>history-changed</code> event to drive your own buttons.</p>
+            <p>
+              A full history with <code>Ctrl</code>/<code>Cmd</code>+Z, a redo
+              stack, and a <code>history-changed</code> event to drive your own
+              buttons.
+            </p>
           </div>
           <div class="feature">
-            <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2 2 7l10 5 10-5-10-5Z"/><path d="m2 12 10 5 10-5"/><path d="m2 17 10 5 10-5"/></svg></span>
+            <span class="feature-icon"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M12 2 2 7l10 5 10-5-10-5Z" />
+                <path d="m2 12 10 5 10-5" />
+                <path d="m2 17 10 5 10-5" /></svg
+            ></span>
             <h3>Layers &amp; arrange</h3>
-            <p>Bring items forward or send them backward, all the way to the front or the back — every change stays in sync.</p>
+            <p>
+              Bring items forward or send them backward, all the way to the
+              front or the back — every change stays in sync.
+            </p>
           </div>
           <div class="feature">
-            <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg></span>
+            <span class="feature-icon"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <path d="M7 10l5 5 5-5" />
+                <path d="M12 15V3" /></svg
+            ></span>
             <h3>Export to PNG</h3>
-            <p>Download the current view as a crisp PNG in a single call — with your own background color if you like.</p>
+            <p>
+              Download the current view as a crisp PNG in a single call — with
+              your own background color if you like.
+            </p>
           </div>
           <div class="feature">
-            <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg></span>
+            <span class="feature-icon"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="5" y="2" width="14" height="20" rx="2" />
+                <path d="M12 18h.01" /></svg
+            ></span>
             <h3>Touch &amp; mouse</h3>
-            <p>First-class pointer and multi-touch support, so drawing and pinch-zoom feel right on a laptop, tablet or phone.</p>
+            <p>
+              First-class pointer and multi-touch support, so drawing and
+              pinch-zoom feel right on a laptop, tablet or phone.
+            </p>
           </div>
           <div class="feature">
-            <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20Z"/></svg></span>
+            <span class="feature-icon"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M2 12h20" />
+                <path d="M12 2a15 15 0 0 1 0 20 15 15 0 0 1 0-20Z" /></svg
+            ></span>
             <h3>24 languages</h3>
-            <p>The entire UI is translated out of the box, with an optional built-in language picker you can hide with one attribute.</p>
+            <p>
+              The entire UI is translated out of the box, with an optional
+              built-in language picker you can hide with one attribute.
+            </p>
           </div>
           <div class="feature">
-            <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5S5 9 5 14a7 7 0 0 0 14 0c0-5-7-11.5-7-11.5Z"/></svg></span>
+            <span class="feature-icon"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M12 2.5S5 9 5 14a7 7 0 0 0 14 0c0-5-7-11.5-7-11.5Z"
+                /></svg
+            ></span>
             <h3>Fully themeable</h3>
-            <p>Restyle every surface with a handful of CSS custom properties. One line changes the accent across the whole UI.</p>
+            <p>
+              Restyle every surface with a handful of CSS custom properties. One
+              line changes the accent across the whole UI.
+            </p>
           </div>
           <div class="feature">
-            <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/></svg></span>
+            <span class="feature-icon"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <circle cx="18" cy="5" r="3" />
+                <circle cx="6" cy="12" r="3" />
+                <circle cx="18" cy="19" r="3" />
+                <path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4" /></svg
+            ></span>
             <h3>Events &amp; collaboration</h3>
-            <p>Every change emits a structured event. The demo syncs two tabs live over a <code>BroadcastChannel</code> — swap in your own transport.</p>
+            <p>
+              Every change emits a structured event. The demo syncs two tabs
+              live over a <code>BroadcastChannel</code> — swap in your own
+              transport.
+            </p>
           </div>
           <div class="feature">
-            <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z"/></svg></span>
+            <span class="feature-icon"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z" /></svg
+            ></span>
             <h3>Tiny &amp; fast</h3>
-            <p>Redraws are coalesced per animation frame and off-screen items are culled, so it stays smooth even on a busy board.</p>
+            <p>
+              Redraws are coalesced per animation frame and off-screen items are
+              culled, so it stays smooth even on a busy board.
+            </p>
           </div>
           <div class="feature">
-            <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></svg></span>
+            <span class="feature-icon"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="m16 18 6-6-6-6" />
+                <path d="m8 6-6 6 6 6" /></svg
+            ></span>
             <h3>Just a Web Component</h3>
-            <p>Framework-agnostic and standards-based. No wrapper, no adapter — it&rsquo;s a custom element that works everywhere.</p>
+            <p>
+              Framework-agnostic and standards-based. No wrapper, no adapter —
+              it&rsquo;s a custom element that works everywhere.
+            </p>
           </div>
           <div class="feature">
-            <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3Z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z"/></svg></span>
+            <span class="feature-icon"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3Z"
+                />
+                <path
+                  d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z"
+                /></svg
+            ></span>
             <h3>Hand-drawn charm</h3>
-            <p>A friendly, sketchy Rough.js look with an optional dotted grid that makes diagrams feel approachable, not corporate.</p>
+            <p>
+              A friendly, sketchy Rough.js look with an optional dotted grid
+              that makes diagrams feel approachable, not corporate.
+            </p>
           </div>
         </div>
       </div>
@@ -208,22 +497,59 @@
           </p>
           <ul class="usage-list">
             <li>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
               No build step required — it&rsquo;s standard ESM.
             </li>
             <li>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
               Ships its own TypeScript types.
             </li>
             <li>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
               Pick the default tools, or include only the ones you need.
             </li>
           </ul>
           <div class="hero-actions">
             <a class="btn btn-primary" href="/api.html">
               Full API reference
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M5 12h14" />
+                <path d="m12 5 7 7-7 7" />
+              </svg>
             </a>
           </div>
         </div>
@@ -232,9 +558,13 @@
           <div class="code">
             <div class="code-head">
               <span class="code-file">index.html</span>
-              <button class="code-copy" data-copy="#usage-code" type="button">Copy</button>
+              <button class="code-copy" data-copy="#usage-code" type="button">
+                Copy
+              </button>
             </div>
-            <pre id="usage-code"><span class="c-com">&lt;!-- 1. import once, anywhere in your JS --&gt;</span>
+            <pre
+              id="usage-code"
+            ><span class="c-com">&lt;!-- 1. import once, anywhere in your JS --&gt;</span>
 <span class="c-key">import</span> <span class="c-str">"@ludovicm67/simple-whiteboard"</span>;
 
 <span class="c-com">&lt;!-- 2. use the element in your markup --&gt;</span>
@@ -263,7 +593,9 @@
           <span class="tech-chip"><span class="dot"></span>LitElement</span>
           <span class="tech-chip"><span class="dot"></span>TypeScript</span>
           <span class="tech-chip"><span class="dot"></span>Rough.js</span>
-          <span class="tech-chip"><span class="dot"></span>Perfect Freehand</span>
+          <span class="tech-chip"
+            ><span class="dot"></span>Perfect Freehand</span
+          >
           <span class="tech-chip"><span class="dot"></span>Lucide Icons</span>
           <span class="tech-chip"><span class="dot"></span>Web Components</span>
         </div>
@@ -274,14 +606,43 @@
     <section class="cta">
       <div class="container">
         <h2>Ready to draw?</h2>
-        <p>Open the full whiteboard and try every tool — no sign-up, nothing to install.</p>
+        <p>
+          Open the full whiteboard and try every tool — no sign-up, nothing to
+          install.
+        </p>
         <div class="cta-actions">
           <a class="btn btn-primary btn-lg" href="/app.html">
             Launch the whiteboard
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
           </a>
-          <a class="btn btn-secondary btn-lg" href="https://github.com/ludovicm67/simple-whiteboard" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+          <a
+            class="btn btn-secondary btn-lg"
+            href="https://github.com/ludovicm67/simple-whiteboard"
+            target="_blank"
+            rel="noopener"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path
+                d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"
+              />
+            </svg>
             Star on GitHub
           </a>
         </div>
@@ -295,11 +656,24 @@
           <div class="footer-brand">
             <a class="brand" href="/">
               <span class="brand-mark">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z" />
+                </svg>
               </span>
               Simple Whiteboard
             </a>
-            <p>A simple, lightweight whiteboard web component that embeds anywhere.</p>
+            <p>
+              A simple, lightweight whiteboard web component that embeds
+              anywhere.
+            </p>
           </div>
           <div class="footer-col">
             <h4>Product</h4>
@@ -309,9 +683,21 @@
           </div>
           <div class="footer-col">
             <h4>Resources</h4>
-            <a href="https://github.com/ludovicm67/simple-whiteboard" target="_blank" rel="noopener">GitHub</a>
-            <a href="https://npm.im/@ludovicm67/simple-whiteboard" target="_blank" rel="noopener">npm</a>
-            <a href="https://ludovic-muller.fr/" target="_blank" rel="noopener">Author</a>
+            <a
+              href="https://github.com/ludovicm67/simple-whiteboard"
+              target="_blank"
+              rel="noopener"
+              >GitHub</a
+            >
+            <a
+              href="https://npm.im/@ludovicm67/simple-whiteboard"
+              target="_blank"
+              rel="noopener"
+              >npm</a
+            >
+            <a href="https://ludovic-muller.fr/" target="_blank" rel="noopener"
+              >Author</a
+            >
           </div>
         </div>
         <div class="footer-bottom">
@@ -344,11 +730,9 @@
       // The hero board is gated: the overlay keeps the page scrollable until the
       // visitor explicitly clicks to start drawing.
       document.querySelectorAll("[data-gate]").forEach((gate) => {
-        gate.addEventListener(
-          "click",
-          () => gate.classList.add("hidden"),
-          { once: true }
-        );
+        gate.addEventListener("click", () => gate.classList.add("hidden"), {
+          once: true,
+        });
       });
 
       // Gentle reveal-on-scroll for the sections.
@@ -361,7 +745,7 @@
             }
           });
         },
-        { threshold: 0.12 }
+        { threshold: 0.12 },
       );
       document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
     </script>

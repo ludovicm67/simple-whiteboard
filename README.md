@@ -49,6 +49,7 @@ its `tools` slot:
 | `locale`             | `string`  | `en`    | The UI language.                                                 |
 | `dotted-background`  | `boolean` | `true`  | Render a dotted grid behind the content. Use `="false"` to hide. |
 | `hide-locale-picker` | `boolean` | `false` | Hide the language picker from the menu.                          |
+| `hide-tool-options`  | `boolean` | `false` | Hide the floating tool-options panel (useful for a compact/embedded board). |
 | `debug`              | `boolean` | `false` | Log debug information and show the pointer coordinates.          |
 
 ### Undo / redo
