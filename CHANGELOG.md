@@ -1,5 +1,14 @@
 # @ludovicm67/whiteboard
 
+## 0.5.1
+
+### Patch Changes
+
+- d79729f: Add a `hide-tool-options` attribute to hide the floating tool-options panel.
+  This is useful for a compact or embedded board where the panel would otherwise
+  cover the canvas. The tools themselves keep working; only the per-tool controls
+  (color, size, …) are hidden.
+
 ## 0.5.0
 
 ### Minor Changes
