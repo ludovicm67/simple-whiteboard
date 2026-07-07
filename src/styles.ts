@@ -9,6 +9,12 @@ export const styles = css`
   :host {
     --sw-board: #fcfcff;
     --sw-surface: #ffffff;
+    /* Frosted, semi-transparent surface used by every floating panel. */
+    --sw-surface-translucent: color-mix(
+      in srgb,
+      var(--sw-surface) 88%,
+      transparent
+    );
     --sw-surface-muted: #f2f3f5;
     --sw-border: rgba(15, 23, 42, 0.08);
     --sw-text: #1f2933;
@@ -82,7 +88,7 @@ export const styles = css`
     gap: 2px;
     padding: 4px;
     border-radius: var(--sw-radius);
-    background-color: color-mix(in srgb, var(--sw-surface) 88%, transparent);
+    background-color: var(--sw-surface-translucent);
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
     border: 1px solid var(--sw-border);
@@ -152,7 +158,9 @@ export const styles = css`
     top: 88px;
     width: 200px;
     left: 16px;
-    background-color: var(--sw-surface);
+    background-color: var(--sw-surface-translucent);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
     border-radius: var(--sw-radius);
     padding: 12px 14px;
   }
@@ -178,7 +186,7 @@ export const styles = css`
     z-index: 1;
     bottom: 0;
     left: 0;
-    background-color: color-mix(in srgb, var(--sw-surface) 90%, transparent);
+    background-color: var(--sw-surface-translucent);
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
     padding: 4px 10px;

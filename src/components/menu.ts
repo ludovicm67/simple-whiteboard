@@ -10,6 +10,11 @@ export class SimpleWhiteboardMenu extends LitElement {
     :host {
       /* Fallbacks in case the component is used outside a simple-whiteboard. */
       --sw-surface: #ffffff;
+      --sw-surface-translucent: color-mix(
+        in srgb,
+        var(--sw-surface) 88%,
+        transparent
+      );
       --sw-border: rgba(15, 23, 42, 0.08);
       --sw-text-muted: rgba(31, 41, 51, 0.55);
       --sw-accent: #135aa0;
@@ -31,7 +36,9 @@ export class SimpleWhiteboardMenu extends LitElement {
 
     .btn-container {
       box-shadow: var(--sw-shadow);
-      background-color: var(--sw-surface);
+      background-color: var(--sw-surface-translucent);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
       border: 1px solid var(--sw-border);
       user-select: none;
       padding: 4px;
@@ -70,7 +77,9 @@ export class SimpleWhiteboardMenu extends LitElement {
       list-style-type: none;
       margin: 0;
       padding: 4px;
-      background-color: var(--sw-surface);
+      background-color: var(--sw-surface-translucent);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
       box-shadow: var(--sw-shadow);
       border: 1px solid var(--sw-border);
       border-radius: var(--sw-radius);
