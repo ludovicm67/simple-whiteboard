@@ -5,28 +5,11 @@ import {
 } from "../../lib/item";
 import { DrawingContext } from "../../lib/types";
 import { SimpleWhiteboard } from "../../simple-whiteboard";
+import { findParentWhiteboard } from "../../lib/dom";
 
 export const TEXT_ITEM_TYPE = "text";
 
 const TEXTAREA_EDIT_ID = "simple-whiteboard-text-tool-edit-zone";
-
-const findSimpleWhiteboardElementFromElement = (element: HTMLElement) => {
-  let current: Node | null = element;
-
-  while (current) {
-    if (
-      current instanceof HTMLElement &&
-      current.tagName?.toLowerCase() === "simple-whiteboard"
-    ) {
-      return current;
-    }
-
-    const root = current.getRootNode();
-    current = root instanceof ShadowRoot ? root.host : current.parentNode;
-  }
-
-  return null; // Not found
-};
 
 export const itemBuilder = (item: TextItemType, id?: string) =>
   new TextItem(item, id);
@@ -141,9 +124,9 @@ export class TextItem extends WhiteboardItem<TextItemType> {
     const parentOfCanvasElement = context.canvas.canvas.parentElement;
     const whiteboard =
       this.whiteboard === null
-        ? ((parentOfCanvasElement
-            ? findSimpleWhiteboardElementFromElement(parentOfCanvasElement)
-            : null) as SimpleWhiteboard | null)
+        ? parentOfCanvasElement
+          ? findParentWhiteboard(parentOfCanvasElement)
+          : null
         : this.whiteboard;
 
     const selectedItemId = whiteboard?.getSelectedItemId();

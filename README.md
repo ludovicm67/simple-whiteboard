@@ -16,6 +16,7 @@ This allows the whiteboard to be easily embedded in any web application regardle
   - Line
   - Pen
   - Text
+  - Sticky note
   - Picture
 - Move the canvas using the Move tool, the middle mouse button, or scrolling
 - Reorder items in the stacking order (bring forward / send backward / to front / to back)

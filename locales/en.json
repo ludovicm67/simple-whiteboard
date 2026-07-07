@@ -20,6 +20,7 @@
   "tool-options-stroke-width": "Stroke width",
   "tool-options-width": "Width",
   "tool-pointer-no-item-selected": "Select an item by clicking on it.",
+  "tool-sticky-edit": "Edit note",
   "tool-text-edit": "Edit your text",
   "tool-tooltip-move": "Move (view)",
   "tool-tooltip-pointer": "Selection",
@@ -28,6 +29,7 @@
   "tool-tooltip-line": "Line",
   "tool-tooltip-pen": "Draw",
   "tool-tooltip-text": "Text",
+  "tool-tooltip-sticky": "Sticky note",
   "tool-tooltip-picture": "Insert image",
   "tool-tooltip-eraser": "Eraser",
   "tool-tooltip-clear": "Clear whiteboard"

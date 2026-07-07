@@ -6,6 +6,7 @@ import { LineElement } from "./tools/line/element";
 import { MoveElement } from "./tools/move/element";
 import { PenElement } from "./tools/pen/element";
 import { TextElement } from "./tools/text/element";
+import { StickyElement } from "./tools/sticky/element";
 import { PictureElement } from "./tools/picture/element";
 import { PointerElement } from "./tools/pointer/element";
 import { RectElement } from "./tools/rect/element";
@@ -25,6 +26,7 @@ declare global {
     "simple-whiteboard--tool-move": MoveElement;
     "simple-whiteboard--tool-pen": PenElement;
     "simple-whiteboard--tool-text": TextElement;
+    "simple-whiteboard--tool-sticky": StickyElement;
     "simple-whiteboard--tool-picture": PictureElement;
     "simple-whiteboard--tool-pointer": PointerElement;
     "simple-whiteboard--tool-rect": RectElement;
@@ -41,6 +43,7 @@ export {
   MoveElement,
   PenElement,
   TextElement,
+  StickyElement,
   PictureElement,
   PointerElement,
   RectElement,

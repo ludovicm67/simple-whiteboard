@@ -9,6 +9,7 @@ import "./circle/element";
 import "./line/element";
 import "./pen/element";
 import "./text/element";
+import "./sticky/element";
 import "./picture/element";
 import "./eraser/element";
 import "./clear/element";
@@ -33,6 +34,9 @@ export class DefaultTools extends LitElement {
       <simple-whiteboard--tool-line slot="tools"></simple-whiteboard--tool-line>
       <simple-whiteboard--tool-pen slot="tools"></simple-whiteboard--tool-pen>
       <simple-whiteboard--tool-text slot="tools"></simple-whiteboard--tool-text>
+      <simple-whiteboard--tool-sticky
+        slot="tools"
+      ></simple-whiteboard--tool-sticky>
       <simple-whiteboard--tool-picture
         slot="tools"
         maxWidth="1200"
