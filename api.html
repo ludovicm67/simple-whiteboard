@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Reference — Simple Whiteboard</title>
+    <meta
+      name="description"
+      content="API reference for the Simple Whiteboard web component: attributes, methods, events, tools and theming."
+    />
+    <link rel="stylesheet" href="./src/site.css" />
+  </head>
+  <body>
+    <!-- ============================================================== nav -->
+    <header class="nav">
+      <div class="container nav-inner">
+        <a class="brand" href="/">
+          <span class="brand-mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </span>
+          Simple Whiteboard
+        </a>
+        <nav class="nav-cta">
+          <div class="nav-links">
+            <a class="nav-hide-sm" href="/#features">Features</a>
+            <a href="/api.html">Docs</a>
+            <a class="nav-hide-sm" href="https://github.com/ludovicm67/simple-whiteboard" target="_blank" rel="noopener">GitHub</a>
+          </div>
+          <a class="btn btn-primary" href="/app.html">
+            Try it
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- ======================================================== docs head -->
+    <div class="container docs-hero">
+      <span class="eyebrow">API Reference</span>
+      <h1>Simple Whiteboard API</h1>
+      <p>
+        Everything you can configure, call and listen to. The whiteboard is a
+        single custom element, <code>&lt;simple-whiteboard&gt;</code>, plus a set
+        of tool elements you place in its <code>tools</code> slot.
+      </p>
+    </div>
+
+    <!-- ============================================================= docs -->
+    <div class="container docs">
+      <!-- sidebar -->
+      <aside class="docs-nav">
+        <h4>On this page</h4>
+        <a href="#install">Installation</a>
+        <a href="#quick-start">Quick start</a>
+        <a href="#attributes">Attributes</a>
+        <a href="#tools">Tools</a>
+        <a href="#methods">Methods</a>
+        <a href="#events">Events</a>
+        <a href="#theming">Theming</a>
+        <a href="#frameworks">Framework usage</a>
+        <a href="#collab">Collaboration</a>
+      </aside>
+
+      <!-- content -->
+      <main class="docs-main">
+        <!-- ---------------------------------------------- installation -->
+        <section id="install">
+          <h2>Installation</h2>
+          <p>Install from npm:</p>
+          <div class="code">
+            <div class="code-head">
+              <span class="code-file">terminal</span>
+              <button class="code-copy" data-copy="#code-install" type="button">Copy</button>
+            </div>
+            <pre id="code-install"><span class="c-fn">npm</span> install @ludovicm67/simple-whiteboard</pre>
+          </div>
+          <p>
+            Then import it once anywhere in your JavaScript. The import has the
+            side effect of registering the <code>&lt;simple-whiteboard&gt;</code>
+            custom element and its tools:
+          </p>
+          <div class="code">
+            <div class="code-head">
+              <span class="code-file">main.js</span>
+              <button class="code-copy" data-copy="#code-import" type="button">Copy</button>
+            </div>
+            <pre id="code-import"><span class="c-key">import</span> <span class="c-str">"@ludovicm67/simple-whiteboard"</span>;</pre>
+          </div>
+        </section>
+
+        <!-- ------------------------------------------------ quick start -->
+        <section id="quick-start">
+          <h2>Quick start</h2>
+          <p>
+            Drop the element into your markup and add the
+            <code>tool-defaults</code> element to its <code>tools</code> slot to
+            register every built-in tool at once:
+          </p>
+          <div class="code">
+            <div class="code-head">
+              <span class="code-file">index.html</span>
+              <button class="code-copy" data-copy="#code-quick" type="button">Copy</button>
+            </div>
+            <pre id="code-quick"><span class="c-tag">&lt;simple-whiteboard</span> <span class="c-attr">locale</span>=<span class="c-str">"en"</span> <span class="c-attr">dotted-background</span><span class="c-tag">&gt;</span>
+  <span class="c-tag">&lt;simple-whiteboard--tool-defaults</span> <span class="c-attr">slot</span>=<span class="c-str">"tools"</span><span class="c-tag">&gt;</span>
+  <span class="c-tag">&lt;/simple-whiteboard--tool-defaults&gt;</span>
+<span class="c-tag">&lt;/simple-whiteboard&gt;</span></pre>
+          </div>
+          <p>
+            The element sizes itself to its container, so give it a width and a
+            height (for example a full-height <code>&lt;main&gt;</code>).
+          </p>
+        </section>
+
+        <!-- ------------------------------------------------- attributes -->
+        <section id="attributes">
+          <h2>Attributes</h2>
+          <p>All attributes are optional and can also be set as properties.</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Attribute</th><th>Type</th><th>Default</th><th>Description</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>locale</code></td>
+                  <td><span class="badge">string</span></td>
+                  <td><code>"en"</code></td>
+                  <td>The UI language. One of the 24 bundled locales.</td>
+                </tr>
+                <tr>
+                  <td><code>dotted-background</code></td>
+                  <td><span class="badge">boolean</span></td>
+                  <td><code>true</code></td>
+                  <td>Render a dotted grid behind the content. Use <code>="false"</code> to hide it.</td>
+                </tr>
+                <tr>
+                  <td><code>hide-locale-picker</code></td>
+                  <td><span class="badge">boolean</span></td>
+                  <td><code>false</code></td>
+                  <td>Hide the language picker from the menu.</td>
+                </tr>
+                <tr>
+                  <td><code>debug</code></td>
+                  <td><span class="badge">boolean</span></td>
+                  <td><code>false</code></td>
+                  <td>Log debug information and show the live pointer coordinates.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ------------------------------------------------------ tools -->
+        <section id="tools">
+          <h2>Tools</h2>
+          <p>
+            Tools are individual custom elements placed in the
+            <code>tools</code> slot. Use <code>tool-defaults</code> for the full
+            set, or cherry-pick only the ones you need to keep the toolbar (and
+            your bundle) lean:
+          </p>
+          <div class="code">
+            <div class="code-head">
+              <span class="code-file">index.html</span>
+              <button class="code-copy" data-copy="#code-tools" type="button">Copy</button>
+            </div>
+            <pre id="code-tools"><span class="c-tag">&lt;simple-whiteboard&gt;</span>
+  <span class="c-tag">&lt;simple-whiteboard--tool-pointer</span> <span class="c-attr">slot</span>=<span class="c-str">"tools"</span><span class="c-tag">&gt;&lt;/simple-whiteboard--tool-pointer&gt;</span>
+  <span class="c-tag">&lt;simple-whiteboard--tool-pen</span> <span class="c-attr">slot</span>=<span class="c-str">"tools"</span><span class="c-tag">&gt;&lt;/simple-whiteboard--tool-pen&gt;</span>
+  <span class="c-tag">&lt;simple-whiteboard--tool-eraser</span> <span class="c-attr">slot</span>=<span class="c-str">"tools"</span><span class="c-tag">&gt;&lt;/simple-whiteboard--tool-eraser&gt;</span>
+<span class="c-tag">&lt;/simple-whiteboard&gt;</span></pre>
+          </div>
+          <p>The built-in tool elements:</p>
+          <ul>
+            <li><code>simple-whiteboard--tool-pointer</code> — select, move and resize items</li>
+            <li><code>simple-whiteboard--tool-move</code> — pan the canvas</li>
+            <li><code>simple-whiteboard--tool-rect</code> — rectangle</li>
+            <li><code>simple-whiteboard--tool-circle</code> — circle</li>
+            <li><code>simple-whiteboard--tool-line</code> — line</li>
+            <li><code>simple-whiteboard--tool-arrow</code> — arrow</li>
+            <li><code>simple-whiteboard--tool-pen</code> — freehand pen</li>
+            <li><code>simple-whiteboard--tool-text</code> — text</li>
+            <li><code>simple-whiteboard--tool-sticky</code> — sticky note</li>
+            <li><code>simple-whiteboard--tool-picture</code> — image</li>
+            <li><code>simple-whiteboard--tool-eraser</code> — object eraser</li>
+            <li><code>simple-whiteboard--tool-clear</code> — clear the canvas</li>
+          </ul>
+        </section>
+
+        <!-- ---------------------------------------------------- methods -->
+        <section id="methods">
+          <h2>Methods</h2>
+          <p>
+            Grab the element (<code>document.querySelector("simple-whiteboard")</code>)
+            and call these directly.
+          </p>
+
+          <h3>History</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><code>undo()</code></td><td><span class="badge">void</span></td><td>Undo the last change.</td></tr>
+                <tr><td><code>redo()</code></td><td><span class="badge">void</span></td><td>Redo the last undone change.</td></tr>
+                <tr><td><code>canUndo()</code></td><td><span class="badge">boolean</span></td><td>Whether there is anything to undo.</td></tr>
+                <tr><td><code>canRedo()</code></td><td><span class="badge">boolean</span></td><td>Whether there is anything to redo.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Items</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><code>getItems()</code></td><td><span class="badge">Item[]</span></td><td>The current items, in stacking order.</td></tr>
+                <tr><td><code>getItemById(id)</code></td><td><span class="badge">Item | null</span></td><td>Look up a single item.</td></tr>
+                <tr><td><code>exportItems()</code></td><td><span class="badge">Exported[]</span></td><td>Serialize every item to plain JSON.</td></tr>
+                <tr><td><code>importItems(items)</code></td><td><span class="badge">void</span></td><td>Replace the board with the given exported items.</td></tr>
+                <tr><td><code>importItem(item)</code></td><td><span class="badge">Item | null</span></td><td>Add a single exported item.</td></tr>
+                <tr><td><code>addItem(item, sendEvent?)</code></td><td><span class="badge">void</span></td><td>Append an item. Emits <code>add</code> unless <code>sendEvent</code> is <code>false</code>.</td></tr>
+                <tr><td><code>removeItemById(id, sendEvent?)</code></td><td><span class="badge">void</span></td><td>Remove an item by id.</td></tr>
+                <tr><td><code>partialItemUpdateById(id, updates, sendEvent?)</code></td><td><span class="badge">void</span></td><td>Patch some fields of an item.</td></tr>
+                <tr><td><code>clearWhiteboard()</code></td><td><span class="badge">void</span></td><td>Remove everything and reset the view.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>Stacking order</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><code>bringItemToFront(id)</code></td><td><span class="badge">void</span></td><td>Move an item on top of everything.</td></tr>
+                <tr><td><code>sendItemToBack(id)</code></td><td><span class="badge">void</span></td><td>Move an item behind everything.</td></tr>
+                <tr><td><code>moveItemForward(id)</code></td><td><span class="badge">void</span></td><td>Move an item one step towards the front.</td></tr>
+                <tr><td><code>moveItemBackward(id)</code></td><td><span class="badge">void</span></td><td>Move an item one step towards the back.</td></tr>
+                <tr><td><code>applyItemsOrder(orderIds)</code></td><td><span class="badge">void</span></td><td>Reorder every item to match a list of ids.</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3>View &amp; tools</h3>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Method</th><th>Returns</th><th>Description</th></tr></thead>
+              <tbody>
+                <tr><td><code>setZoom(zoom)</code></td><td><span class="badge">void</span></td><td>Set the zoom level (0.25–4), anchored on the canvas center.</td></tr>
+                <tr><td><code>downloadCurrentCanvasAsPng(options?)</code></td><td><span class="badge">void</span></td><td>Download the current view as a PNG. Options: <code>fileName</code>, <code>backgroundColor</code>.</td></tr>
+                <tr><td><code>setCurrentTool(name)</code></td><td><span class="badge">void</span></td><td>Activate a tool by its name (e.g. <code>"pen"</code>).</td></tr>
+                <tr><td><code>getCurrentTool()</code></td><td><span class="badge">string</span></td><td>The name of the active tool.</td></tr>
+                <tr><td><code>getCanvasElement()</code></td><td><span class="badge">HTMLCanvasElement?</span></td><td>The underlying canvas, if you need it.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ----------------------------------------------------- events -->
+        <section id="events">
+          <h2>Events</h2>
+          <p>
+            All events are <code>CustomEvent</code>s dispatched on the element.
+            Listen with <code>board.addEventListener(name, handler)</code>.
+          </p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Event</th><th>detail</th><th>Fired when</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><code>ready</code></td>
+                  <td><code>{ status }</code></td>
+                  <td>The element is initialized and ready.</td>
+                </tr>
+                <tr>
+                  <td><code>tool-registered</code></td>
+                  <td><code>{ name }</code></td>
+                  <td>A tool element has registered itself.</td>
+                </tr>
+                <tr>
+                  <td><code>tool-updated</code></td>
+                  <td><code>{ type, name }</code></td>
+                  <td>The active tool changed.</td>
+                </tr>
+                <tr>
+                  <td><code>items-updated</code></td>
+                  <td><code>{ type, … }</code></td>
+                  <td>The items changed. See the <code>type</code> values below.</td>
+                </tr>
+                <tr>
+                  <td><code>history-changed</code></td>
+                  <td><code>{ canUndo, canRedo }</code></td>
+                  <td>Undo/redo availability changed.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <h3><code>items-updated</code> types</h3>
+          <p>The <code>detail.type</code> tells you what happened, so you can mirror the change to a store or a remote peer:</p>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>type</th><th>Extra detail</th><th>Meaning</th></tr></thead>
+              <tbody>
+                <tr><td><code>"add"</code></td><td><code>item</code></td><td>An item was added.</td></tr>
+                <tr><td><code>"update"</code></td><td><code>itemId, item</code></td><td>An item was fully replaced.</td></tr>
+                <tr><td><code>"partial-update"</code></td><td><code>itemId, updates</code></td><td>Some fields of an item changed.</td></tr>
+                <tr><td><code>"remove"</code></td><td><code>itemId</code></td><td>An item was removed.</td></tr>
+                <tr><td><code>"reorder"</code></td><td><code>order</code></td><td>The stacking order changed.</td></tr>
+                <tr><td><code>"set"</code></td><td><code>items</code></td><td>The whole board changed (e.g. undo/redo).</td></tr>
+                <tr><td><code>"clear"</code></td><td>—</td><td>The board was cleared.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ---------------------------------------------------- theming -->
+        <section id="theming">
+          <h2>Theming</h2>
+          <p>
+            Every surface is driven by CSS custom properties. Override them on
+            the element (or any ancestor) to restyle the whole UI:
+          </p>
+          <div class="code">
+            <div class="code-head">
+              <span class="code-file">styles.css</span>
+              <button class="code-copy" data-copy="#code-theme" type="button">Copy</button>
+            </div>
+            <pre id="code-theme"><span class="c-tag">simple-whiteboard</span> {
+  <span class="c-attr">--sw-accent</span>: <span class="c-str">#7c3aed</span>;
+  <span class="c-attr">--sw-board</span>: <span class="c-str">#fbfaff</span>;
+  <span class="c-attr">--sw-radius</span>: <span class="c-str">14px</span>;
+}</pre>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Property</th><th>Default</th><th>Role</th></tr></thead>
+              <tbody>
+                <tr><td><code>--sw-board</code></td><td><code>#fcfcff</code></td><td>Canvas background.</td></tr>
+                <tr><td><code>--sw-surface</code></td><td><code>#ffffff</code></td><td>Base panel surface.</td></tr>
+                <tr><td><code>--sw-surface-muted</code></td><td><code>#f2f3f5</code></td><td>Secondary surface (buttons).</td></tr>
+                <tr><td><code>--sw-accent</code></td><td><code>#135aa0</code></td><td>Accent for the active tool, focus rings, sliders.</td></tr>
+                <tr><td><code>--sw-accent-soft</code></td><td><code>rgba(19,90,160,.12)</code></td><td>Soft accent fill (active/hover).</td></tr>
+                <tr><td><code>--sw-text</code></td><td><code>#1f2933</code></td><td>Primary text.</td></tr>
+                <tr><td><code>--sw-text-muted</code></td><td><code>rgba(31,41,51,.55)</code></td><td>Secondary text.</td></tr>
+                <tr><td><code>--sw-border</code></td><td><code>rgba(15,23,42,.08)</code></td><td>Panel borders.</td></tr>
+                <tr><td><code>--sw-radius</code> / <code>--sw-radius-sm</code></td><td><code>10px</code> / <code>6px</code></td><td>Corner rounding.</td></tr>
+                <tr><td><code>--sw-shadow</code></td><td><span class="badge">shadow</span></td><td>Floating-panel shadow.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- -------------------------------------------------- frameworks -->
+        <section id="frameworks">
+          <h2>Framework usage</h2>
+          <p>
+            Because it&rsquo;s a standard custom element, it works in any
+            framework. Import once at your entry point, then use the tag in your
+            templates.
+          </p>
+          <h3>React</h3>
+          <p>
+            Use the tag directly (React 19+ handles custom elements natively).
+            Set boolean attributes as you would any DOM attribute, and attach a
+            <code>ref</code> to call methods or listen to events.
+          </p>
+          <div class="code">
+            <div class="code-head">
+              <span class="code-file">Board.jsx</span>
+              <button class="code-copy" data-copy="#code-react" type="button">Copy</button>
+            </div>
+            <pre id="code-react"><span class="c-key">import</span> <span class="c-str">"@ludovicm67/simple-whiteboard"</span>;
+<span class="c-key">import</span> { useEffect, useRef } <span class="c-key">from</span> <span class="c-str">"react"</span>;
+
+<span class="c-key">export function</span> <span class="c-fn">Board</span>() {
+  <span class="c-key">const</span> ref = <span class="c-fn">useRef</span>(<span class="c-key">null</span>);
+  <span class="c-fn">useEffect</span>(() =&gt; {
+    <span class="c-key">const</span> el = ref.current;
+    <span class="c-key">const</span> onChange = (e) =&gt; <span class="c-fn">console</span>.<span class="c-fn">log</span>(e.detail);
+    el.<span class="c-fn">addEventListener</span>(<span class="c-str">"items-updated"</span>, onChange);
+    <span class="c-key">return</span> () =&gt; el.<span class="c-fn">removeEventListener</span>(<span class="c-str">"items-updated"</span>, onChange);
+  }, []);
+
+  <span class="c-key">return</span> (
+    &lt;<span class="c-tag">simple-whiteboard</span> <span class="c-attr">ref</span>={ref} <span class="c-attr">locale</span>=<span class="c-str">"en"</span>&gt;
+      &lt;<span class="c-tag">simple-whiteboard--tool-defaults</span> <span class="c-attr">slot</span>=<span class="c-str">"tools"</span> /&gt;
+    &lt;/<span class="c-tag">simple-whiteboard</span>&gt;
+  );
+}</pre>
+          </div>
+        </section>
+
+        <!-- ----------------------------------------------- collaboration -->
+        <section id="collab">
+          <h2>Collaboration</h2>
+          <p>
+            The whiteboard doesn&rsquo;t ship a transport — instead, every change
+            emits an <code>items-updated</code> event, and every method takes an
+            optional <code>sendEvent</code> flag so you can apply a remote change
+            without echoing it back. That&rsquo;s all you need to build real-time
+            sync over any channel (WebSocket, WebRTC, or, as in the demo, a
+            <code>BroadcastChannel</code> between tabs):
+          </p>
+          <div class="code">
+            <div class="code-head">
+              <span class="code-file">collab.js</span>
+              <button class="code-copy" data-copy="#code-collab" type="button">Copy</button>
+            </div>
+            <pre id="code-collab"><span class="c-key">const</span> channel = <span class="c-key">new</span> <span class="c-fn">BroadcastChannel</span>(<span class="c-str">"whiteboard"</span>);
+
+<span class="c-com">// Broadcast local changes to peers.</span>
+board.<span class="c-fn">addEventListener</span>(<span class="c-str">"items-updated"</span>, (e) =&gt; {
+  <span class="c-key">if</span> (e.detail.type === <span class="c-str">"add"</span>) {
+    channel.<span class="c-fn">postMessage</span>({ type: <span class="c-str">"add"</span>, item: e.detail.item });
+  }
+});
+
+<span class="c-com">// Apply remote changes without re-broadcasting (sendEvent = false).</span>
+channel.<span class="c-fn">onmessage</span> = (e) =&gt; {
+  <span class="c-key">if</span> (e.data.type === <span class="c-str">"add"</span>) board.<span class="c-fn">importItem</span>(e.data.item);
+};</pre>
+          </div>
+          <p style="margin-top: 20px">
+            See it working: open the <a href="/app.html">live demo</a> in two
+            browser tabs and draw — the boards stay in sync.
+          </p>
+        </section>
+      </main>
+    </div>
+
+    <!-- =========================================================== footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <a class="brand" href="/">
+              <span class="brand-mark">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+              </span>
+              Simple Whiteboard
+            </a>
+            <p>A simple, lightweight whiteboard web component that embeds anywhere.</p>
+          </div>
+          <div class="footer-col">
+            <h4>Product</h4>
+            <a href="/app.html">Live demo</a>
+            <a href="/#features">Features</a>
+            <a href="/api.html">API docs</a>
+          </div>
+          <div class="footer-col">
+            <h4>Resources</h4>
+            <a href="https://github.com/ludovicm67/simple-whiteboard" target="_blank" rel="noopener">GitHub</a>
+            <a href="https://npm.im/@ludovicm67/simple-whiteboard" target="_blank" rel="noopener">npm</a>
+            <a href="https://ludovic-muller.fr/" target="_blank" rel="noopener">Author</a>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>© <span id="year"></span> Ludovic Muller · MIT License</span>
+          <span>Built with LitElement &amp; Rough.js</span>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+      document.querySelectorAll("[data-copy]").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+          const target = document.querySelector(btn.getAttribute("data-copy"));
+          if (!target) return;
+          try {
+            await navigator.clipboard.writeText(target.innerText.trim());
+            const original = btn.textContent;
+            btn.textContent = "Copied!";
+            setTimeout(() => (btn.textContent = original), 1500);
+          } catch (_) {
+            /* clipboard unavailable — ignore */
+          }
+        });
+      });
+    </script>
+  </body>
+</html>

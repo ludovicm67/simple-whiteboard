@@ -3,6 +3,8 @@
 [![NPM](https://badge.fury.io/js/@ludovicm67%2Fsimple-whiteboard.svg)](https://npm.im/@ludovicm67/simple-whiteboard)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fludovicm67%2Fsimple-whiteboard.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fludovicm67%2Fsimple-whiteboard?ref=badge_shield)
 
+**[Home](https://simple-whiteboard.ludovicm67.fr/)** · **[Docs](https://simple-whiteboard.ludovicm67.fr/api.html)** · **[Demo](https://simple-whiteboard.ludovicm67.fr/app.html)**
+
 Simple Whiteboard is a simple web-based whiteboard application that allows users to draw on a canvas.
 
 The application is built as a Web Component using [LitElement](https://lit.dev/).
@@ -87,11 +89,28 @@ The whiteboard is designed to stay light on the CPU:
 ## Development
 
 ```sh
-npm install   # install the dependencies
-npm run dev   # start the dev server
-npm test      # run the unit tests (Node's built-in test runner)
-npm run build # type-check and build the library
+npm install        # install the dependencies
+npm run dev        # start the dev server
+npm test           # run the unit tests (Node's built-in test runner)
+npm run build      # type-check and build the library -> dist/
+npm run build:site # build the marketing site      -> dist-site/
 ```
+
+The dev server serves three pages:
+
+| Page        | Description                                     |
+| ----------- | ----------------------------------------------- |
+| `/`         | Landing page (`index.html`)                     |
+| `/app.html` | The interactive whiteboard demo                 |
+| `/api.html` | API reference (attributes, methods, events, …)  |
+
+There are two separate build outputs:
+
+- `npm run build` produces **`dist/`** — the library only (JS bundle, source
+  map and TypeScript declarations). This is what gets published to npm
+  (`files: ["dist"]`); it contains no HTML.
+- `npm run build:site` produces **`dist-site/`** — the three pages above,
+  bundled for hosting (this is what the GitHub Pages workflow deploys).
 
 ## Used Technologies
 
