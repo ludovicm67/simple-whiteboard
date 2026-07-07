@@ -17,11 +17,11 @@ This allows the whiteboard to be easily embedded in any web application regardle
   - Pen
   - Text
   - Picture
-- Move the canvas using the Move tool
+- Move the canvas using the Move tool, the middle mouse button, or scrolling
 - Clear the canvas
 - Support mouse and touch input
 - Optional dotted grid background
-- Pan & pinch-to-zoom
+- Pan & pinch-to-zoom (zoom follows the cursor / pinch center)
 - Export the current view as a PNG image
 
 ## Usage

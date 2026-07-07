@@ -60,6 +60,13 @@ export class SimpleWhiteboard extends LitElement {
   private lastDistance = 0;
   private lastOrigin: Point = { x: 0, y: 0 };
 
+  // State for the middle-click "pan the canvas" gesture. It works with any tool
+  // selected. While panning, we listen on the window so the gesture keeps going
+  // (and ends reliably) even when the pointer leaves the canvas.
+  private isPanning = false;
+  private panLast: Point = { x: 0, y: 0 };
+  private cursorBeforePan = "default";
+
   // Manages the little tooltip shown under the toolbar buttons.
   private toolbarTooltip = new ToolbarTooltip(() => this.shadowRoot);
 
@@ -73,6 +80,8 @@ export class SimpleWhiteboard extends LitElement {
   private readonly onKeyDown = (e: KeyboardEvent) => this.handleKeyDown(e);
   private readonly onResize = () => this.handleResize();
   private readonly onVisibilityChange = () => this.handleVisibilityChange();
+  private readonly onPanMove = (e: MouseEvent) => this.handlePanMove(e);
+  private readonly onPanEnd = (e: MouseEvent) => this.handlePanEnd(e);
 
   @state() private registeredTools: Map<
     string,
@@ -329,6 +338,9 @@ export class SimpleWhiteboard extends LitElement {
     window.removeEventListener("resize", this.onResize);
     window.removeEventListener("keydown", this.onKeyDown);
 
+    // Make sure no pan gesture keeps window listeners alive after detaching.
+    this.endPan();
+
     // Cancel any pending redraw so we do not run after being detached.
     if (this.drawScheduled) {
       cancelAnimationFrame(this.rafId);
@@ -367,10 +379,21 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   handleMouseDown(e: MouseEvent) {
+    // Middle-click pans the canvas, regardless of the currently selected tool.
+    if (e.button === 1) {
+      e.preventDefault();
+      this.startPan(e);
+      return;
+    }
     this.handleDrawingStart(e.offsetX, e.offsetY);
   }
 
   handleMouseMove(e: MouseEvent) {
+    // While panning, the gesture is driven by the window listeners.
+    if (this.isPanning) {
+      return;
+    }
+
     this.requestUpdate();
     this.handleDrawingMove(e.offsetX, e.offsetY);
 
@@ -383,7 +406,77 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   handleMouseUp() {
+    if (this.isPanning) {
+      return;
+    }
     this.handleDrawingEnd();
+  }
+
+  /**
+   * Start a middle-click pan gesture. The move/end of the gesture is tracked on
+   * the window so it keeps working (and ends reliably) even if the pointer
+   * leaves the canvas.
+   *
+   * @param e The triggering `mousedown` event.
+   */
+  private startPan(e: MouseEvent): void {
+    this.isPanning = true;
+    this.panLast = { x: e.clientX, y: e.clientY };
+    this.cursorBeforePan = this.cursor;
+    this.setCursor("grabbing");
+
+    window.addEventListener("mousemove", this.onPanMove);
+    window.addEventListener("mouseup", this.onPanEnd);
+  }
+
+  /**
+   * Handle a pointer move during a middle-click pan: translate the canvas by
+   * however much the pointer moved.
+   *
+   * @param e The `mousemove` event.
+   */
+  private handlePanMove(e: MouseEvent): void {
+    if (!this.isPanning) {
+      return;
+    }
+
+    // Safety net: if the middle button is no longer pressed, stop panning.
+    if ((e.buttons & 4) === 0) {
+      this.endPan();
+      return;
+    }
+
+    const dx = e.clientX - this.panLast.x;
+    const dy = e.clientY - this.panLast.y;
+    this.panLast = { x: e.clientX, y: e.clientY };
+
+    const { x, y } = this.coordsContext.getCoords();
+    this.coordsContext.setCoords(x + dx, y + dy);
+    this.draw();
+  }
+
+  /**
+   * End the middle-click pan gesture when the middle button is released.
+   *
+   * @param e The `mouseup` event.
+   */
+  private handlePanEnd(e: MouseEvent): void {
+    if (e.button === 1) {
+      this.endPan();
+    }
+  }
+
+  /**
+   * Stop the middle-click pan gesture and restore the previous cursor.
+   */
+  private endPan(): void {
+    if (!this.isPanning) {
+      return;
+    }
+    this.isPanning = false;
+    window.removeEventListener("mousemove", this.onPanMove);
+    window.removeEventListener("mouseup", this.onPanEnd);
+    this.setCursor(this.cursorBeforePan);
   }
 
   handleTouchStart(e: TouchEvent) {
