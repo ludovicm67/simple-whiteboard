@@ -20,6 +20,7 @@
   "tool-options-stroke-width": "Largeur de trait",
   "tool-options-width": "Largeur",
   "tool-pointer-no-item-selected": "Sélectionnez un élément en cliquant dessus.",
+  "tool-sticky-edit": "Modifier la note",
   "tool-text-edit": "Modifiez votre texte",
   "tool-tooltip-move": "Déplacement (vue)",
   "tool-tooltip-pointer": "Sélection",
@@ -28,6 +29,7 @@
   "tool-tooltip-line": "Ligne",
   "tool-tooltip-pen": "Dessiner",
   "tool-tooltip-text": "Texte",
+  "tool-tooltip-sticky": "Note autocollante",
   "tool-tooltip-picture": "Insérer une image",
   "tool-tooltip-eraser": "Gomme",
   "tool-tooltip-clear": "Réinitialiser"

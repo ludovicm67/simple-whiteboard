@@ -20,6 +20,7 @@
   "tool-options-stroke-width": "Ancho de borde",
   "tool-options-width": "Ancho",
   "tool-pointer-no-item-selected": "Haz clic en un objeto para seleccionarlo",
+  "tool-sticky-edit": "Editar nota",
   "tool-text-edit": "Editar texto",
   "tool-tooltip-move": "Mover (vista)",
   "tool-tooltip-pointer": "Selección",
@@ -28,6 +29,7 @@
   "tool-tooltip-line": "Línea",
   "tool-tooltip-pen": "Dibujar",
   "tool-tooltip-text": "Texto",
+  "tool-tooltip-sticky": "Nota adhesiva",
   "tool-tooltip-picture": "Insertar imagen",
   "tool-tooltip-eraser": "Borrador",
   "tool-tooltip-clear": "Borrar pizarra"

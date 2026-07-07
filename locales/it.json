@@ -20,6 +20,7 @@
   "tool-options-stroke-width": "Larghezza del tratto",
   "tool-options-width": "Larghezza",
   "tool-pointer-no-item-selected": "Seleziona un elemento cliccandoci sopra.",
+  "tool-sticky-edit": "Modifica nota",
   "tool-text-edit": "Modifica il testo",
   "tool-tooltip-move": "Sposta (vista)",
   "tool-tooltip-pointer": "Selezione",
@@ -28,6 +29,7 @@
   "tool-tooltip-line": "Linea",
   "tool-tooltip-pen": "Disegna",
   "tool-tooltip-text": "Testo",
+  "tool-tooltip-sticky": "Nota adesiva",
   "tool-tooltip-picture": "Inserisci immagine",
   "tool-tooltip-eraser": "Gomma",
   "tool-tooltip-clear": "Cancella lavagna"

@@ -20,6 +20,7 @@
   "tool-options-stroke-width": "Šírka obrysu",
   "tool-options-width": "Šířka",
   "tool-pointer-no-item-selected": "Kliknutím vyberte položku.",
+  "tool-sticky-edit": "Upravit poznámku",
   "tool-text-edit": "Upravit text",
   "tool-tooltip-move": "Posun (zobrazení)",
   "tool-tooltip-pointer": "Výběr",
@@ -28,6 +29,7 @@
   "tool-tooltip-line": "Čára",
   "tool-tooltip-pen": "Kreslit",
   "tool-tooltip-text": "Text",
+  "tool-tooltip-sticky": "Lepicí poznámka",
   "tool-tooltip-picture": "Vložit obrázek",
   "tool-tooltip-eraser": "Guma",
   "tool-tooltip-clear": "Vymazat tabuli"
