@@ -8,6 +8,7 @@ import {
   ResizeHandle,
   RoughCanvasOptions,
 } from "../../lib/types";
+import { distanceToSegment } from "../../lib/geometry";
 
 export const LINE_ITEM_TYPE = "line";
 
@@ -166,6 +167,24 @@ export class LineItem extends WhiteboardItem<LineItemType> {
       width: Math.abs(this.x2 - this.x1),
       height: Math.abs(this.y2 - this.y1),
     };
+  }
+
+  /**
+   * A line is only "touched" when the eraser gets close to the segment itself,
+   * not merely to its (possibly large and mostly empty) bounding box.
+   */
+  public override isHitByEraser(
+    x: number,
+    y: number,
+    radius: number
+  ): boolean {
+    const halfStroke = (this.options.strokeWidth ?? 1) / 2;
+    const dist = distanceToSegment(
+      { x, y },
+      { x: this.x1, y: this.y1 },
+      { x: this.x2, y: this.y2 }
+    );
+    return dist <= radius + halfStroke;
   }
 
   /**

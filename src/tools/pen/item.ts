@@ -6,6 +6,7 @@ import {
 } from "../../lib/item";
 import { DrawingContext, ResizeHandle } from "../../lib/types";
 import { getSvgPathFromStroke } from "../../lib/svg";
+import { distance, distanceToSegment } from "../../lib/geometry";
 
 export const PEN_ITEM_TYPE = "pen";
 
@@ -174,6 +175,32 @@ export class PenItem extends WhiteboardItem<PenItemType> {
       width: maxX - minX,
       height: maxY - minY,
     };
+  }
+
+  /**
+   * A freehand stroke is only "touched" when the eraser gets close to the drawn
+   * path, not merely to its bounding box. We test the eraser circle against
+   * each segment of the path.
+   */
+  public override isHitByEraser(
+    x: number,
+    y: number,
+    radius: number
+  ): boolean {
+    const threshold = radius + (this.options.size ?? 1) / 2;
+    const point = { x, y };
+
+    // A single-point stroke has no segment: test the point itself.
+    if (this.path.length === 1) {
+      return distance(point, this.path[0]) <= threshold;
+    }
+
+    for (let i = 0; i < this.path.length - 1; i++) {
+      if (distanceToSegment(point, this.path[i], this.path[i + 1]) <= threshold) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

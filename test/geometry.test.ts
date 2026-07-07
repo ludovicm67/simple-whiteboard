@@ -5,6 +5,8 @@ import {
   distance,
   midpoint,
   rectsIntersect,
+  distanceToSegment,
+  circleIntersectsRect,
   dotGridPositions,
 } from "../src/lib/geometry.ts";
 
@@ -47,6 +49,51 @@ test("rectsIntersect detects overlapping rectangles", () => {
     rectsIntersect(a, { x: 20, y: 20, width: 5, height: 5 }),
     false,
     "disjoint"
+  );
+});
+
+test("distanceToSegment measures the distance to the closest point", () => {
+  const a = { x: 0, y: 0 };
+  const b = { x: 10, y: 0 };
+
+  // Perpendicular distance to the middle of the segment.
+  assert.equal(distanceToSegment({ x: 5, y: 3 }, a, b), 3);
+  // On the segment -> distance is zero.
+  assert.equal(distanceToSegment({ x: 5, y: 0 }, a, b), 0);
+  // Beyond an endpoint -> clamps to that endpoint.
+  assert.equal(distanceToSegment({ x: -4, y: 0 }, a, b), 4);
+  assert.equal(distanceToSegment({ x: 13, y: 4 }, a, b), 5);
+  // Degenerate segment (a == b) -> point-to-point distance.
+  assert.equal(distanceToSegment({ x: 3, y: 4 }, a, a), 5);
+});
+
+test("circleIntersectsRect detects circle/rectangle overlap", () => {
+  const rect = { x: 0, y: 0, width: 10, height: 10 };
+
+  assert.equal(
+    circleIntersectsRect(5, 5, 1, rect),
+    true,
+    "center inside the rectangle"
+  );
+  assert.equal(
+    circleIntersectsRect(-3, 5, 4, rect),
+    true,
+    "circle reaches the left edge"
+  );
+  assert.equal(
+    circleIntersectsRect(10, 0, 0.001, rect),
+    true,
+    "touching a corner counts as overlapping"
+  );
+  assert.equal(
+    circleIntersectsRect(-5, 5, 4, rect),
+    false,
+    "circle stops short of the rectangle"
+  );
+  assert.equal(
+    circleIntersectsRect(-3, -3, 4, rect),
+    false,
+    "near a corner but outside the radius"
   );
 });
 

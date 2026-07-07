@@ -8,6 +8,7 @@ import {
   ResizeHandle,
   RoughCanvasOptions,
 } from "../../lib/types";
+import { distanceToSegment } from "../../lib/geometry";
 
 export const ARROW_ITEM_TYPE = "arrow";
 
@@ -186,6 +187,25 @@ export class ArrowItem extends WhiteboardItem<ArrowItemType> {
       width: Math.abs(this.x2 - this.x1),
       height: Math.abs(this.y2 - this.y1),
     };
+  }
+
+  /**
+   * An arrow is only "touched" when the eraser gets close to the shaft itself
+   * (the arrowhead sits at the end point, which the segment already covers),
+   * not merely to its bounding box.
+   */
+  public override isHitByEraser(
+    x: number,
+    y: number,
+    radius: number
+  ): boolean {
+    const halfStroke = (this.options.strokeWidth ?? 1) / 2;
+    const dist = distanceToSegment(
+      { x, y },
+      { x: this.x1, y: this.y1 },
+      { x: this.x2, y: this.y2 }
+    );
+    return dist <= radius + halfStroke;
   }
 
   /**
