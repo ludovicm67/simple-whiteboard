@@ -737,14 +737,78 @@ export class SimpleWhiteboard extends LitElement {
       ? this.registeredTools.get(selectedItem.getType())
       : null;
     const tool = selectedItemTool || currentTool;
-    if (!tool) {
+
+    const options = tool ? tool.renderToolOptions(selectedItem) : null;
+    // Stacking-order controls are shared by every item type, so they are
+    // rendered here rather than in each tool.
+    const layerControls = selectedItem
+      ? this.renderLayerControls(selectedItem)
+      : null;
+
+    if (!options && !layerControls) {
       return null;
     }
-    const options = tool.renderToolOptions(selectedItem);
-    if (!options) {
-      return null;
-    }
-    return html`<div class="tools-options">${options}</div>`;
+    return html`<div class="tools-options">${options}${layerControls}</div>`;
+  }
+
+  /**
+   * Render the stacking-order ("Arrange") controls for the selected item.
+   *
+   * @param item The currently selected item.
+   */
+  private renderLayerControls(
+    item: WhiteboardItem<WhiteboardItemType>
+  ): TemplateResult {
+    const i18n = this.i18nContext;
+    const id = item.getId();
+    const index = this.getItemIndexById(id) ?? 0;
+    const isAtBack = index <= 0;
+    const isAtFront = index >= this.items.length - 1;
+
+    const button = (
+      icon: string,
+      labelKey: string,
+      action: () => void,
+      disabled: boolean
+    ) => html`<button
+      class="layer-button"
+      title=${i18n.t(labelKey)}
+      aria-label=${i18n.t(labelKey)}
+      ?disabled=${disabled}
+      @click=${action}
+    >
+      ${unsafeHTML(getIconSvg(icon))}
+    </button>`;
+
+    return html`
+      <p>${i18n.t("tool-options-arrange")}</p>
+      <div class="layer-tools">
+        ${button(
+          "ArrowDownToLine",
+          "tool-options-send-to-back",
+          () => this.sendItemToBack(id, true),
+          isAtBack
+        )}
+        ${button(
+          "ArrowDown",
+          "tool-options-send-backward",
+          () => this.moveItemBackward(id, true),
+          isAtBack
+        )}
+        ${button(
+          "ArrowUp",
+          "tool-options-bring-forward",
+          () => this.moveItemForward(id, true),
+          isAtFront
+        )}
+        ${button(
+          "ArrowUpToLine",
+          "tool-options-bring-to-front",
+          () => this.bringItemToFront(id, true),
+          isAtFront
+        )}
+      </div>
+    `;
   }
 
   /**
@@ -1322,6 +1386,134 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
     }
 
     this.requestUpdate();
+  }
+
+  // --- Item stacking order (z-order) -----------------------------------------
+  //
+  // Items are drawn in array order: the first item is at the back, the last one
+  // is on top. Reordering the array therefore changes which item is drawn over
+  // which.
+
+  /**
+   * Move an item to a specific position in the stacking order.
+   *
+   * @param itemId The ID of the item to move.
+   * @param toIndex The target index (clamped to the valid range).
+   * @param sendEvent Whether to notify listeners (and record an undo step).
+   */
+  public moveItemToIndex(
+    itemId: string,
+    toIndex: number,
+    sendEvent = true
+  ): void {
+    const fromIndex = this.getItemIndexById(itemId);
+    if (fromIndex === null) {
+      return;
+    }
+
+    const target = clamp(toIndex, 0, this.items.length - 1);
+    if (target === fromIndex) {
+      return;
+    }
+
+    const [item] = this.items.splice(fromIndex, 1);
+    this.items.splice(target, 0, item);
+    this.draw();
+    this.requestUpdate();
+
+    if (sendEvent) {
+      this.dispatchEvent(
+        new CustomEvent("items-updated", {
+          detail: {
+            type: "reorder",
+            itemId,
+            toIndex: target,
+            // Full resulting order, so remote clients can reproduce it robustly.
+            order: this.items.map((current) => current.getId()),
+          },
+        })
+      );
+      this.commitHistory();
+    }
+  }
+
+  /**
+   * Move an item one step towards the front (drawn on top).
+   */
+  public moveItemForward(itemId: string, sendEvent = true): void {
+    const index = this.getItemIndexById(itemId);
+    if (index === null) {
+      return;
+    }
+    this.moveItemToIndex(itemId, index + 1, sendEvent);
+  }
+
+  /**
+   * Move an item one step towards the back (drawn behind).
+   */
+  public moveItemBackward(itemId: string, sendEvent = true): void {
+    const index = this.getItemIndexById(itemId);
+    if (index === null) {
+      return;
+    }
+    this.moveItemToIndex(itemId, index - 1, sendEvent);
+  }
+
+  /**
+   * Move an item all the way to the front.
+   */
+  public bringItemToFront(itemId: string, sendEvent = true): void {
+    this.moveItemToIndex(itemId, this.items.length - 1, sendEvent);
+  }
+
+  /**
+   * Move an item all the way to the back.
+   */
+  public sendItemToBack(itemId: string, sendEvent = true): void {
+    this.moveItemToIndex(itemId, 0, sendEvent);
+  }
+
+  /**
+   * Reorder every item to match the given list of IDs. Items whose ID is not in
+   * the list keep their relative order and are appended at the end. This is
+   * used to apply a stacking-order change coming from another client.
+   *
+   * @param orderIds The desired order, as a list of item IDs.
+   * @param sendEvent Whether to notify listeners (and record an undo step).
+   */
+  public applyItemsOrder(orderIds: string[], sendEvent = false): void {
+    const byId = new Map(this.items.map((item) => [item.getId(), item]));
+    const reordered: WhiteboardItem<WhiteboardItemType>[] = [];
+
+    for (const id of orderIds) {
+      const item = byId.get(id);
+      if (item) {
+        reordered.push(item);
+        byId.delete(id);
+      }
+    }
+    // Keep any items that were not referenced in the order.
+    for (const item of this.items) {
+      if (byId.has(item.getId())) {
+        reordered.push(item);
+      }
+    }
+
+    this.items = reordered;
+    this.draw();
+    this.requestUpdate();
+
+    if (sendEvent) {
+      this.dispatchEvent(
+        new CustomEvent("items-updated", {
+          detail: {
+            type: "reorder",
+            order: this.items.map((item) => item.getId()),
+          },
+        })
+      );
+      this.commitHistory();
+    }
   }
 
   /**

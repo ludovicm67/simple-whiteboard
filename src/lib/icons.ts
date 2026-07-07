@@ -1,4 +1,8 @@
 import {
+  ArrowDown,
+  ArrowDownToLine,
+  ArrowUp,
+  ArrowUpToLine,
   Check,
   ChevronRight,
   Circle,
@@ -34,6 +38,12 @@ const icons = {
   // History
   Undo2,
   Redo2,
+
+  // Layer / z-order
+  ArrowUp,
+  ArrowDown,
+  ArrowUpToLine,
+  ArrowDownToLine,
 
   // Tools
   Move,
