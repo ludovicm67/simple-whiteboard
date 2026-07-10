@@ -93,9 +93,17 @@ The whiteboard is designed to stay light on the CPU:
 npm install        # install the dependencies
 npm run dev        # start the dev server
 npm test           # run the unit tests (Node's built-in test runner)
+npm run test:e2e   # run the Playwright end-to-end tests
 npm run build      # type-check and build the library -> dist/
 npm run build:site # build the marketing site      -> dist-site/
 ```
+
+There are two layers of tests: fast **unit tests** for the pure `lib`/controller
+modules (`npm test`), and **end-to-end tests** under `e2e/` that drive the real
+component in a browser — drawing, editing, undo/redo, export, the menu, i18n,
+cross-tab sync and the site pages (`npm run test:e2e`, which starts the dev
+server automatically). The first run needs the browser: `npx playwright install
+chromium`.
 
 The dev server serves three pages:
 

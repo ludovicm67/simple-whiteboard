@@ -13,6 +13,7 @@
     "build:site": "tsc && vite build --mode site",
     "preview": "vite preview --outDir dist-site",
     "test": "node --test",
+    "test:e2e": "playwright test",
     "i18n:extract": "lit-localize extract",
     "i18n:build": "lit-localize build",
     "i18n": "true",
@@ -37,6 +38,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.31.0",
+    "@playwright/test": "^1.61.1",
     "typescript": "^6.0.3",
     "unplugin-dts": "^1.0.3",
     "vite": "^8.1.3",
