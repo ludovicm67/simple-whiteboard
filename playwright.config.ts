@@ -14,7 +14,11 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: process.env.CI ? "line" : "list",
+  // On CI, also emit the HTML report so the workflow can upload it as an
+  // artifact (the `line` reporter alone writes no `playwright-report/` folder).
+  reporter: process.env.CI
+    ? [["line"], ["html", { open: "never" }]]
+    : "list",
   use: {
     baseURL: "http://localhost:5173",
     trace: "on-first-retry",
