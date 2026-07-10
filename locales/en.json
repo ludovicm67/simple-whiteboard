@@ -3,6 +3,8 @@
   "history-undo": "Undo",
   "menu-export": "Export",
   "menu-export-current-view-png": "Current view as PNG",
+  "menu-export-full-view-png": "Full view as PNG",
+  "menu-export-selected-area-png": "Selected area as PNG",
   "menu-language": "Language",
   "tool-options-arrange": "Arrange",
   "tool-options-bring-forward": "Bring forward",

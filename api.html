@@ -254,6 +254,9 @@
               <tbody>
                 <tr><td><code>setZoom(zoom)</code></td><td><span class="badge">void</span></td><td>Set the zoom level (0.25–4), anchored on the canvas center.</td></tr>
                 <tr><td><code>downloadCurrentCanvasAsPng(options?)</code></td><td><span class="badge">void</span></td><td>Download the current view as a PNG. Options: <code>fileName</code>, <code>backgroundColor</code>.</td></tr>
+                <tr><td><code>downloadFullViewAsPng(options?)</code></td><td><span class="badge">void</span></td><td>Download the whole board (framed to every item) as a PNG, ignoring the current pan/zoom.</td></tr>
+                <tr><td><code>startAreaExport(options?)</code></td><td><span class="badge">void</span></td><td>Enter area-select mode: drag a rectangle on the canvas to export just that region (Escape to cancel).</td></tr>
+                <tr><td><code>downloadRegionAsPng(rect, options?)</code></td><td><span class="badge">void</span></td><td>Download an arbitrary world-space <code>{x, y, width, height}</code> region as a PNG.</td></tr>
                 <tr><td><code>setCurrentTool(name)</code></td><td><span class="badge">void</span></td><td>Activate a tool by its name (e.g. <code>"pen"</code>).</td></tr>
                 <tr><td><code>getCurrentTool()</code></td><td><span class="badge">string</span></td><td>The name of the active tool.</td></tr>
                 <tr><td><code>getCanvasElement()</code></td><td><span class="badge">HTMLCanvasElement?</span></td><td>The underlying canvas, if you need it.</td></tr>

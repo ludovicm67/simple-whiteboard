@@ -3,6 +3,8 @@
   "history-undo": "Rückgängig",
   "menu-export": "Exportieren",
   "menu-export-current-view-png": "Aktuelle Ansicht als PNG",
+  "menu-export-full-view-png": "Gesamtansicht als PNG",
+  "menu-export-selected-area-png": "Ausgewählter Bereich als PNG",
   "menu-language": "Sprache",
   "tool-options-arrange": "Anordnen",
   "tool-options-bring-forward": "Nach vorne",
