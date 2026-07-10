@@ -3,6 +3,8 @@
   "history-undo": "Geri Al",
   "menu-export": "Dışarı aktar",
   "menu-export-current-view-png": "Mevcut görünümü PNG olarak",
+  "menu-export-full-view-png": "Tüm görünümü PNG olarak",
+  "menu-export-selected-area-png": "Seçili alanı PNG olarak",
   "menu-language": "Dil",
   "tool-options-arrange": "Düzen",
   "tool-options-bring-forward": "Öne getir",

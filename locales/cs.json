@@ -3,6 +3,8 @@
   "history-undo": "Zpět",
   "menu-export": "Exportovat",
   "menu-export-current-view-png": "Aktuální zobrazení v PNG",
+  "menu-export-full-view-png": "Celé zobrazení v PNG",
+  "menu-export-selected-area-png": "Vybraná oblast v PNG",
   "menu-language": "Jazyk",
   "tool-options-arrange": "Uspořádat",
   "tool-options-bring-forward": "Přenést blíž",

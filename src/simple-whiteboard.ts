@@ -15,11 +15,11 @@ import {
   WhiteboardItem,
   WhiteboardItemType,
 } from "./lib/item";
-import { DrawingContext, Point } from "./lib/types";
+import { DrawingContext, Point, BoundingRect } from "./lib/types";
 import { CoordsContext } from "./lib/coords";
 import { clamp, distance, midpoint, rectsIntersect } from "./lib/geometry";
 import { drawDottedBackground } from "./lib/background";
-import { downloadCanvasAsPng } from "./lib/canvasExport";
+import { downloadCanvasAsPng, CanvasPngExportOptions } from "./lib/canvasExport";
 import { ToolbarTooltip } from "./lib/toolbarTooltip";
 import { HistoryStack } from "./lib/history";
 import { getIconSvg } from "./lib/icons";
@@ -92,6 +92,14 @@ export class SimpleWhiteboard extends LitElement {
   private isPanning = false;
   private panLast: Point = { x: 0, y: 0 };
   private cursorBeforePan = "default";
+
+  // State for the "export a selected area" gesture. When active, a pointer drag
+  // draws a marquee (in canvas pixels) instead of drawing/panning, and releasing
+  // exports that region. See `startAreaExport`.
+  private isSelectingExportArea = false;
+  private exportAreaStart: Point | null = null;
+  private exportAreaCurrent: Point | null = null;
+  private exportAreaOptions: CanvasPngExportOptions = {};
 
   // Undo/redo history. Each entry is a JSON snapshot of the exported items.
   private history = new HistoryStack<string>({ limit: 50 });
@@ -345,6 +353,56 @@ export class SimpleWhiteboard extends LitElement {
     // cursor). This is never part of the items and is not exported.
     const activeTool = this.registeredTools.get(this.currentTool);
     activeTool?.drawOverlay(drawingContext);
+
+    // While picking an area to export, draw the marquee on top of everything.
+    this.drawExportAreaMarquee(context, width, height);
+  }
+
+  /**
+   * Draw the "export a selected area" marquee: everything outside the picked
+   * rectangle is dimmed, and the rectangle itself gets a dashed accent border.
+   */
+  private drawExportAreaMarquee(
+    context: CanvasRenderingContext2D,
+    width: number,
+    height: number
+  ): void {
+    if (!this.isSelectingExportArea) {
+      return;
+    }
+    const start = this.exportAreaStart;
+    const current = this.exportAreaCurrent;
+
+    context.save();
+
+    // Before the first drag, dim the whole canvas as a hint that a region is
+    // expected.
+    if (!start || !current) {
+      context.fillStyle = "rgba(15, 23, 42, 0.18)";
+      context.fillRect(0, 0, width, height);
+      context.restore();
+      return;
+    }
+
+    const rx = Math.min(start.x, current.x);
+    const ry = Math.min(start.y, current.y);
+    const rw = Math.abs(current.x - start.x);
+    const rh = Math.abs(current.y - start.y);
+
+    // Dim everything around the selection (four bands), leaving it clear.
+    context.fillStyle = "rgba(15, 23, 42, 0.28)";
+    context.fillRect(0, 0, width, ry);
+    context.fillRect(0, ry + rh, width, height - (ry + rh));
+    context.fillRect(0, ry, rx, rh);
+    context.fillRect(rx + rw, ry, width - (rx + rw), rh);
+
+    // Dashed accent border around the selection.
+    context.strokeStyle = "#135aa0";
+    context.lineWidth = 1.5;
+    context.setLineDash([6, 4]);
+    context.strokeRect(rx + 0.5, ry + 0.5, rw, rh);
+
+    context.restore();
   }
 
   /**
@@ -364,6 +422,13 @@ export class SimpleWhiteboard extends LitElement {
   handleKeyDown(e: KeyboardEvent) {
     const isModifier = e.metaKey || e.ctrlKey;
     const key = e.key.toLowerCase();
+
+    // Escape cancels an in-progress "export selected area" gesture.
+    if (e.key === "Escape" && this.isSelectingExportArea) {
+      e.preventDefault();
+      this.cancelAreaExport();
+      return;
+    }
 
     // Undo / redo shortcuts (Cmd/Ctrl+Z, Cmd/Ctrl+Shift+Z, Ctrl+Y).
     // Skipped while typing in a text field so the field's own undo keeps working.
@@ -462,6 +527,17 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   handleMouseDown(e: MouseEvent) {
+    // While picking an area to export, a left-drag draws the marquee and
+    // nothing else happens (no drawing, no panning).
+    if (this.isSelectingExportArea) {
+      if (e.button === 0) {
+        this.exportAreaStart = { x: e.offsetX, y: e.offsetY };
+        this.exportAreaCurrent = { x: e.offsetX, y: e.offsetY };
+        this.draw();
+      }
+      return;
+    }
+
     // Middle-click pans the canvas, regardless of the currently selected tool.
     if (e.button === 1) {
       e.preventDefault();
@@ -472,6 +548,15 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   handleMouseMove(e: MouseEvent) {
+    // Update the export-area marquee while dragging it.
+    if (this.isSelectingExportArea) {
+      if (this.exportAreaStart) {
+        this.exportAreaCurrent = { x: e.offsetX, y: e.offsetY };
+        this.draw();
+      }
+      return;
+    }
+
     // While panning, the gesture is driven by the window listeners.
     if (this.isPanning) {
       return;
@@ -489,6 +574,11 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   handleMouseUp() {
+    // Releasing the mouse finishes the export-area selection.
+    if (this.isSelectingExportArea) {
+      this.finishAreaExport();
+      return;
+    }
     if (this.isPanning) {
       return;
     }
@@ -573,6 +663,15 @@ export class SimpleWhiteboard extends LitElement {
     // Position of the touches relative to the canvas.
     const rect = this.canvas.getBoundingClientRect();
 
+    // While picking an export area, a one-finger drag draws the marquee.
+    if (this.isSelectingExportArea) {
+      const t = e.touches[0];
+      this.exportAreaStart = { x: t.clientX - rect.left, y: t.clientY - rect.top };
+      this.exportAreaCurrent = { ...this.exportAreaStart };
+      this.draw();
+      return;
+    }
+
     // Handle zooming
     if (e.touches.length === 2) {
       const touchA = { x: e.touches[0].clientX, y: e.touches[0].clientY };
@@ -603,6 +702,19 @@ export class SimpleWhiteboard extends LitElement {
 
     // Position of the touches relative to the canvas.
     const rect = this.canvas.getBoundingClientRect();
+
+    // Update the export-area marquee while dragging it with one finger.
+    if (this.isSelectingExportArea) {
+      if (this.exportAreaStart) {
+        const t = e.touches[0];
+        this.exportAreaCurrent = {
+          x: t.clientX - rect.left,
+          y: t.clientY - rect.top,
+        };
+        this.draw();
+      }
+      return;
+    }
 
     // Handle panning + pinch-to-zoom
     if (e.touches.length === 2) {
@@ -663,6 +775,10 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   handleTouchEnd() {
+    if (this.isSelectingExportArea) {
+      this.finishAreaExport();
+      return;
+    }
     this.handleDrawingEnd();
   }
 
@@ -1560,6 +1676,230 @@ ${Math.round(this.mouseCoords.x * 100) / 100}x${Math.round(
     // redraws are otherwise deferred to the next animation frame.
     this.flushDraw();
     downloadCanvasAsPng(this.canvas, options);
+  }
+
+  // --- Full-view and selected-area export ------------------------------------
+
+  /**
+   * Compute the world-space bounding box that encloses every item, or `null`
+   * when the board is empty.
+   */
+  private getItemsBoundingBox(): BoundingRect | null {
+    let minX = Infinity;
+    let minY = Infinity;
+    let maxX = -Infinity;
+    let maxY = -Infinity;
+
+    for (const item of this.items) {
+      const box = item.getBoundingBox();
+      if (!box) {
+        continue;
+      }
+      minX = Math.min(minX, box.x);
+      minY = Math.min(minY, box.y);
+      maxX = Math.max(maxX, box.x + box.width);
+      maxY = Math.max(maxY, box.y + box.height);
+    }
+
+    if (!Number.isFinite(minX)) {
+      return null;
+    }
+    return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+  }
+
+  /**
+   * Render a world-space region onto a fresh, detached canvas and return it.
+   *
+   * This re-renders the items (and the dotted background, if enabled) through a
+   * dedicated coordinate system that maps the region onto the output canvas, so
+   * the result is independent of the current pan/zoom. The selection and hover
+   * boxes and the tool overlays are never included. Used by the export helpers.
+   *
+   * @param worldRect The region to render, in world coordinates.
+   * @param options `scale` = output pixels per world unit; `padding` = margin
+   *   around the region, in world units.
+   */
+  private renderRegionToCanvas(
+    worldRect: BoundingRect,
+    options: { scale?: number; padding?: number } = {}
+  ): HTMLCanvasElement {
+    const scale = options.scale ?? 2;
+    const padding = options.padding ?? 0;
+
+    // Expand the region by the padding (in world units).
+    const region: BoundingRect = {
+      x: worldRect.x - padding,
+      y: worldRect.y - padding,
+      width: worldRect.width + padding * 2,
+      height: worldRect.height + padding * 2,
+    };
+
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.max(1, Math.round(region.width * scale));
+    canvas.height = Math.max(1, Math.round(region.height * scale));
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      return canvas;
+    }
+
+    // A temporary coordinate system that maps the region onto the output
+    // canvas: the region's top-left world point maps to (0, 0), and one world
+    // unit is `scale` output pixels.
+    const coords = new CoordsContext();
+    coords.setOffset(0, 0);
+    coords.setZoom(scale);
+    coords.setCoords(-region.x * scale, -region.y * scale);
+
+    // Dotted background (if enabled), then every item that intersects the
+    // region, in stacking order.
+    if (this.dottedBackground) {
+      drawDottedBackground(ctx, coords.toCamera(), canvas.width, canvas.height);
+    }
+
+    const roughCanvas = rough.canvas(canvas, { options: { seed: 42 } });
+    const drawingContext: DrawingContext = { canvas: ctx, roughCanvas, coords };
+    this.items.forEach((item) => {
+      const box = item.getBoundingBox();
+      if (box && !rectsIntersect(box, region)) {
+        return;
+      }
+      item.draw(drawingContext);
+    });
+
+    return canvas;
+  }
+
+  /**
+   * Pick an output scale (pixels per world unit) for exporting a region: 2x for
+   * crispness, but reduced so the largest side never exceeds a sane limit — an
+   * enormous board therefore never produces a gigantic image. Zoom-independent,
+   * so the same content always exports at the same resolution.
+   */
+  private exportScaleFor(rect: BoundingRect): number {
+    const MAX_DIMENSION = 4096;
+    const longestSide = Math.max(rect.width, rect.height) || 1;
+    return Math.min(2, MAX_DIMENSION / longestSide);
+  }
+
+  /**
+   * Download every item on the board as a single PNG, framed to their combined
+   * bounding box — regardless of the current pan and zoom. Falls back to the
+   * current view when the board is empty.
+   *
+   * @param options Options for the download.
+   */
+  public downloadFullViewAsPng(options?: CanvasPngExportOptions): void {
+    const bbox = this.getItemsBoundingBox();
+    if (!bbox) {
+      this.downloadCurrentCanvasAsPng(options);
+      return;
+    }
+
+    const canvas = this.renderRegionToCanvas(bbox, {
+      scale: this.exportScaleFor(bbox),
+      padding: 24,
+    });
+    downloadCanvasAsPng(canvas, options);
+    canvas.remove();
+    // Re-render on-screen: the off-screen pass may have touched transient item
+    // state (e.g. a text item's editing flag).
+    this.draw();
+  }
+
+  /**
+   * Download an arbitrary world-space region as a PNG.
+   *
+   * @param worldRect The region to export, in world coordinates.
+   * @param options Options for the download.
+   */
+  public downloadRegionAsPng(
+    worldRect: BoundingRect,
+    options?: CanvasPngExportOptions
+  ): void {
+    if (worldRect.width <= 0 || worldRect.height <= 0) {
+      return;
+    }
+
+    const canvas = this.renderRegionToCanvas(worldRect, {
+      scale: this.exportScaleFor(worldRect),
+      padding: 0,
+    });
+    downloadCanvasAsPng(canvas, options);
+    canvas.remove();
+    this.draw();
+  }
+
+  /**
+   * Enter "export a selected area" mode: the next pointer drag on the canvas
+   * draws a rectangle, and releasing exports that region as a PNG. Press Escape
+   * to cancel.
+   *
+   * @param options Options for the resulting download.
+   */
+  public startAreaExport(options?: CanvasPngExportOptions): void {
+    this.exportAreaOptions = options ?? {};
+    this.isSelectingExportArea = true;
+    this.exportAreaStart = null;
+    this.exportAreaCurrent = null;
+    this.setCursor("crosshair");
+    this.draw();
+    this.requestUpdate();
+  }
+
+  /**
+   * Cancel an in-progress "export selected area" gesture without exporting.
+   */
+  public cancelAreaExport(): void {
+    this.exitAreaExport();
+  }
+
+  /**
+   * Finish the "export selected area" gesture: export the picked region (unless
+   * it is too small to be intentional) and leave the mode.
+   */
+  private finishAreaExport(): void {
+    const start = this.exportAreaStart;
+    const current = this.exportAreaCurrent;
+    const options = this.exportAreaOptions;
+    this.exitAreaExport();
+
+    if (!start || !current) {
+      return;
+    }
+
+    const x1 = Math.min(start.x, current.x);
+    const y1 = Math.min(start.y, current.y);
+    const x2 = Math.max(start.x, current.x);
+    const y2 = Math.max(start.y, current.y);
+
+    // Ignore an accidental click or a tiny selection.
+    if (x2 - x1 < 4 || y2 - y1 < 4) {
+      return;
+    }
+
+    const topLeft = this.coordsContext.convertFromCanvas(x1, y1);
+    const bottomRight = this.coordsContext.convertFromCanvas(x2, y2);
+    this.downloadRegionAsPng(
+      {
+        x: topLeft.x,
+        y: topLeft.y,
+        width: bottomRight.x - topLeft.x,
+        height: bottomRight.y - topLeft.y,
+      },
+      options
+    );
+  }
+
+  /**
+   * Leave "export selected area" mode and reset its state.
+   */
+  private exitAreaExport(): void {
+    this.isSelectingExportArea = false;
+    this.exportAreaStart = null;
+    this.exportAreaCurrent = null;
+    this.setCursor("default");
+    this.draw();
+    this.requestUpdate();
   }
 
   /**

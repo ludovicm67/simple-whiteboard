@@ -289,11 +289,35 @@ export class SimpleWhiteboardMenu extends LitElement {
     `;
   }
 
+  private exportFileName(suffix = ""): string {
+    const dateTime = new Date().toISOString().replace(/:/g, "-");
+    return `whiteboard${suffix}-${dateTime}.png`;
+  }
+
   exportCurrentCanvasAsPng() {
     if (this.instance) {
-      const dateTime = new Date().toISOString().replace(/:/g, "-");
       this.instance.downloadCurrentCanvasAsPng({
-        fileName: `whiteboard-${dateTime}.png`,
+        fileName: this.exportFileName(),
+      });
+    }
+    this.isMenuOpen = false;
+  }
+
+  exportFullViewAsPng() {
+    if (this.instance) {
+      this.instance.downloadFullViewAsPng({
+        fileName: this.exportFileName("-full"),
+      });
+    }
+    this.isMenuOpen = false;
+  }
+
+  exportSelectedAreaAsPng() {
+    if (this.instance) {
+      // Enters area-selection mode; the export happens once the user drags a
+      // rectangle on the canvas.
+      this.instance.startAreaExport({
+        fileName: this.exportFileName("-area"),
       });
     }
     this.isMenuOpen = false;
@@ -334,6 +358,26 @@ export class SimpleWhiteboardMenu extends LitElement {
                 <span class="menu-item-icon">${this.icon("ImageDown")}</span>
                 <span class="menu-item-label"
                   >${i18nContext.t("menu-export-current-view-png")}</span
+                >
+              </li>
+              <li
+                class="submenu-item"
+                role="menuitem"
+                @click=${() => this.exportFullViewAsPng()}
+              >
+                <span class="menu-item-icon">${this.icon("Maximize")}</span>
+                <span class="menu-item-label"
+                  >${i18nContext.t("menu-export-full-view-png")}</span
+                >
+              </li>
+              <li
+                class="submenu-item"
+                role="menuitem"
+                @click=${() => this.exportSelectedAreaAsPng()}
+              >
+                <span class="menu-item-icon">${this.icon("Crop")}</span>
+                <span class="menu-item-label"
+                  >${i18nContext.t("menu-export-selected-area-png")}</span
                 >
               </li>
             </ul>

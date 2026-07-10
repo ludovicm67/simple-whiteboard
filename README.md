@@ -29,7 +29,7 @@ This allows the whiteboard to be easily embedded in any web application regardle
 - Support mouse and touch input
 - Optional dotted grid background
 - Pan & pinch-to-zoom (zoom follows the cursor / pinch center)
-- Export the current view as a PNG image
+- Export as a PNG image: the current view, the full board, or a selected area
 
 ## Usage
 
