@@ -1,5 +1,23 @@
 # @ludovicm67/whiteboard
 
+## 0.6.0
+
+### Minor Changes
+
+- c36d97f: Rename the `hideLocalePicker` property to `hide-locale-picker`.
+
+### Patch Changes
+
+- 86ae5c1: Add two more PNG export options next to "current view": "full view" (frames
+  every item on the board, regardless of pan/zoom) and "selected area" (drag a
+  rectangle on the canvas to export just that region). Exposed programmatically as
+  `downloadFullViewAsPng()`, `startAreaExport()` and `downloadRegionAsPng()`.
+- c36d97f: Internal refactor: split the large `SimpleWhiteboard` element into focused
+  pieces — `HistoryController`, `ExportController`, `CanvasRenderer`,
+  `PointerInputController` and `ItemStore` controllers, plus footer/tool-options
+  render helpers. The public API and behavior are unchanged; the element now just
+  coordinates these collaborators, which are each far easier to read and test.
+
 ## 0.5.1
 
 ### Patch Changes
