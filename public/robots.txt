@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://simple-whiteboard.ludovicm67.fr/sitemap.xml

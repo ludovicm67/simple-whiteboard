@@ -790,6 +790,75 @@ a:hover {
   color: #fff;
 }
 
+/* ---------------------------------------------------------------------- 404 */
+
+.notfound {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--board);
+  border-bottom: 1px solid var(--border);
+  min-height: calc(100svh - 64px);
+  display: grid;
+  place-items: center;
+  text-align: center;
+  padding-block: 72px;
+}
+/* The same dotted grid as the hero, so it still feels like the whiteboard. */
+.notfound::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(
+    rgba(15, 23, 42, 0.14) 1.1px,
+    transparent 1.1px
+  );
+  background-size: 22px 22px;
+  -webkit-mask-image: radial-gradient(
+    ellipse 70% 60% at 50% 45%,
+    #000 55%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 70% 60% at 50% 45%,
+    #000 55%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+.notfound .container {
+  position: relative;
+  z-index: 1;
+}
+.notfound-code {
+  font-size: clamp(4.5rem, 15vw, 9rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.notfound h1 {
+  font-size: clamp(1.5rem, 3.4vw, 2.3rem);
+  font-weight: 800;
+  margin-top: 6px;
+}
+.notfound p {
+  margin: 16px auto 0;
+  max-width: 46ch;
+  font-size: 1.1rem;
+  color: var(--muted);
+}
+.notfound .hero-actions {
+  justify-content: center;
+}
+.notfound-hint {
+  margin-top: 30px;
+  font-size: 0.95rem;
+  color: var(--muted);
+}
+
 /* ------------------------------------------------------------------- footer */
 
 .footer {

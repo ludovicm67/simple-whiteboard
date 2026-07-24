@@ -112,6 +112,11 @@ The dev server serves three pages:
 | `/`         | Landing page (`index.html`)                     |
 | `/app.html` | The interactive whiteboard demo                 |
 | `/api.html` | API reference (attributes, methods, events, …)  |
+| `/404.html` | Not-found page (served by GitHub Pages)         |
+
+Site assets live in `public/` (favicons, `robots.txt`); `sitemap.xml` is
+generated at build time, taking each page's `lastmod` from its last git commit.
+None of them are copied into the published package.
 
 There are two separate build outputs:
 

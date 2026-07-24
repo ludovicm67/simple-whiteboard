@@ -57,6 +57,51 @@ test.describe("landing page (index.html)", () => {
   });
 });
 
+test.describe("404 page", () => {
+  test("renders in the landing-page style with working links", async ({ page }) => {
+    const errors = trackErrors(page);
+    await page.goto("/404.html");
+
+    await expect(page).toHaveTitle(/Page not found/);
+    await expect(page.locator(".notfound-code")).toHaveText("404");
+    await expect(page.locator("h1")).toContainText("off the canvas");
+
+    // Shares the site chrome, so it looks like the rest of the site.
+    await expect(page.locator("header.nav .brand")).toBeVisible();
+    await expect(page.locator("footer.footer")).toBeVisible();
+
+    // Escape routes.
+    await expect(page.getByRole("link", { name: /Back to home/i })).toHaveAttribute(
+      "href",
+      "/"
+    );
+    await expect(
+      page.getByRole("link", { name: /Try the whiteboard/i })
+    ).toHaveAttribute("href", "/app.html");
+
+    expect(errors).toEqual([]);
+  });
+
+  test("is excluded from search indexing", async ({ page }) => {
+    await page.goto("/404.html");
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+      "content",
+      "noindex"
+    );
+  });
+
+  test("does not overflow horizontally on mobile", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await page.goto("/404.html");
+    const overflows = await page.evaluate(
+      () =>
+        document.documentElement.scrollWidth >
+        document.documentElement.clientWidth + 1
+    );
+    expect(overflows).toBe(false);
+  });
+});
+
 test.describe("API docs (api.html)", () => {
   test("loads without errors and renders the reference tables", async ({ page }) => {
     const errors = trackErrors(page);

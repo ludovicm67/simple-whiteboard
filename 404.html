@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Page not found — Simple Whiteboard</title>
+    <meta name="robots" content="noindex" />
+    <meta
+      name="description"
+      content="This page doesn't exist. Head back to the Simple Whiteboard home page, the live demo or the API reference."
+    />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="stylesheet" href="./src/site.css" />
+  </head>
+  <body>
+    <!-- ============================================================== nav -->
+    <header class="nav">
+      <div class="container nav-inner">
+        <a class="brand" href="/">
+          <span class="brand-mark">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          </span>
+          Simple Whiteboard
+        </a>
+        <nav class="nav-cta">
+          <div class="nav-links">
+            <a class="nav-hide-sm" href="/#features">Features</a>
+            <a href="/api.html">Docs</a>
+            <a class="nav-hide-sm" href="https://github.com/ludovicm67/simple-whiteboard" target="_blank" rel="noopener">GitHub</a>
+          </div>
+          <a class="btn btn-primary" href="/app.html">
+            Try it
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <!-- ============================================================== 404 -->
+    <section class="notfound">
+      <div class="container">
+        <span class="eyebrow">Error 404</span>
+        <div class="notfound-code">404</div>
+        <h1>This page went off the canvas</h1>
+        <p>
+          The page you&rsquo;re looking for doesn&rsquo;t exist &mdash; it may
+          have been moved, renamed, or erased.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary btn-lg" href="/">
+            Back to home
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          </a>
+          <a class="btn btn-secondary btn-lg" href="/app.html">Try the whiteboard</a>
+        </div>
+        <p class="notfound-hint">
+          Or read the <a href="/api.html">API reference</a>.
+        </p>
+      </div>
+    </section>
+
+    <!-- =========================================================== footer -->
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <a class="brand" href="/">
+              <span class="brand-mark">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+              </span>
+              Simple Whiteboard
+            </a>
+            <p>A simple, lightweight whiteboard web component that embeds anywhere.</p>
+          </div>
+          <div class="footer-col">
+            <h4>Product</h4>
+            <a href="/app.html">Live demo</a>
+            <a href="/#features">Features</a>
+            <a href="/api.html">API docs</a>
+          </div>
+          <div class="footer-col">
+            <h4>Resources</h4>
+            <a href="https://github.com/ludovicm67/simple-whiteboard" target="_blank" rel="noopener">GitHub</a>
+            <a href="https://npm.im/@ludovicm67/simple-whiteboard" target="_blank" rel="noopener">npm</a>
+            <a href="https://ludovic-muller.fr/" target="_blank" rel="noopener">Author</a>
+          </div>
+        </div>
+        <div class="footer-bottom">
+          <span>© <span id="year"></span> Ludovic Muller · MIT License</span>
+          <span>Built with LitElement &amp; Rough.js</span>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      document.getElementById("year").textContent = new Date().getFullYear();
+    </script>
+  </body>
+</html>
