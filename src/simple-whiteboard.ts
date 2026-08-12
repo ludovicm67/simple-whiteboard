@@ -78,6 +78,9 @@ export class SimpleWhiteboard extends LitElement {
 
   private mouseCoords: Point = { x: 0, y: 0 };
 
+  // Resize handle currently under the pointer, highlighted by the renderer.
+  private hoveredResizeHandle: string | null = null;
+
   private canvas?: HTMLCanvasElement;
 
   // Pointer input: mouse/touch/wheel/pan/pinch. See `controllers/input.ts`.
@@ -180,7 +183,7 @@ export class SimpleWhiteboard extends LitElement {
   drawItemBox(
     context: CanvasRenderingContext2D,
     item: WhiteboardItem<WhiteboardItemType>,
-    boxColor = "#135aa0",
+    boxColor?: string,
     isResizable = false,
   ): void {
     this.renderer.drawItemBox(context, item, boxColor, isResizable);
@@ -774,6 +777,27 @@ export class SimpleWhiteboard extends LitElement {
 
   public setHoveredItemId(itemId: string | null) {
     this.store.setHoveredItemId(itemId);
+  }
+
+  /**
+   * Set (or clear) the resize handle the pointer is currently over, so that it
+   * can be highlighted. Redraws only when the hovered handle actually changes.
+   *
+   * @param name The name of the hovered resize handle, `null` when none is.
+   */
+  public setHoveredResizeHandle(name: string | null) {
+    if (name === this.hoveredResizeHandle) {
+      return;
+    }
+    this.hoveredResizeHandle = name;
+    this.draw();
+  }
+
+  /**
+   * Get the name of the resize handle the pointer is currently over, if any.
+   */
+  public getHoveredResizeHandle(): string | null {
+    return this.hoveredResizeHandle;
   }
 
   public getHoveredItemId(): string | null {

@@ -61,8 +61,7 @@ export const styles = css`
   }
 
   /* Keyboard focus should always be clearly visible for accessibility. */
-  button:focus-visible,
-  select:focus-visible {
+  button:focus-visible {
     outline: 2px solid var(--sw-accent);
     outline-offset: 2px;
   }
@@ -229,16 +228,6 @@ export const styles = css`
     align-items: center;
     gap: 8px;
     color: var(--sw-text-muted);
-  }
-
-  .footer-tools select {
-    color: var(--sw-text-muted);
-    background: transparent;
-    border: 1px solid var(--sw-border);
-    border-radius: var(--sw-radius-sm);
-    padding: 3px 6px;
-    font: inherit;
-    cursor: pointer;
   }
 
   .history-tools {

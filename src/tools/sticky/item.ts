@@ -6,6 +6,7 @@ import {
 import { DrawingContext, ResizeHandle } from "../../lib/types";
 import { SimpleWhiteboard } from "../../simple-whiteboard";
 import { findParentWhiteboard } from "../../lib/dom";
+import { roundedRectPath } from "../../lib/canvas";
 
 export const STICKY_ITEM_TYPE = "sticky";
 
@@ -30,33 +31,6 @@ export interface StickyItemType extends WhiteboardItemType {
   color: string;
   fontSize: number;
 }
-
-/**
- * Draw a rounded rectangle path on the given context.
- */
-const roundedRectPath = (
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  width: number,
-  height: number,
-  radius: number
-): void => {
-  const r = Math.max(0, Math.min(radius, width / 2, height / 2));
-  // `roundRect` is available in every evergreen browser; fall back just in case.
-  if (typeof ctx.roundRect === "function") {
-    ctx.beginPath();
-    ctx.roundRect(x, y, width, height, r);
-    return;
-  }
-  ctx.beginPath();
-  ctx.moveTo(x + r, y);
-  ctx.arcTo(x + width, y, x + width, y + height, r);
-  ctx.arcTo(x + width, y + height, x, y + height, r);
-  ctx.arcTo(x, y + height, x, y, r);
-  ctx.arcTo(x, y, x + width, y, r);
-  ctx.closePath();
-};
 
 /**
  * Split text into lines that fit within `maxWidth`, honoring explicit line

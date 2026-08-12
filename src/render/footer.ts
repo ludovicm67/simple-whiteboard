@@ -2,6 +2,7 @@ import { html, TemplateResult } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { getIconSvg } from "../lib/icons";
 import type { SimpleWhiteboard } from "../simple-whiteboard";
+import "../components/zoomSelect";
 
 /**
  * The bottom-left footer: undo/redo buttons, the zoom selector, and (in debug
@@ -43,35 +44,10 @@ function renderHistoryControls(board: SimpleWhiteboard): TemplateResult {
 }
 
 function renderZoomSelect(board: SimpleWhiteboard): TemplateResult {
-  const options = [
-    { value: 0.25, label: "25%" },
-    { value: 0.5, label: "50%" },
-    { value: 0.75, label: "75%" },
-    { value: 1, label: "100%" },
-    { value: 1.5, label: "150%" },
-    { value: 2, label: "200%" },
-    { value: 4, label: "400%" },
-  ];
-  const zoom = board.getCoordsContext().getZoom();
-  const closestValue = options.reduce((prev, curr) =>
-    Math.abs(curr.value - zoom) < Math.abs(prev.value - zoom) ? curr : prev
-  ).value;
-
-  return html`<select
-    @change=${(e: Event) => {
-      const target = e.target as HTMLSelectElement;
-      board.setZoom(parseFloat(target.value));
-    }}
-  >
-    ${options.map(
-      (option) => html`<option
-        value=${option.value}
-        ?selected=${option.value === closestValue}
-      >
-        ${option.label}
-      </option>`
-    )}
-  </select>`;
+  return html`<simple-whiteboard-zoom-select
+    .instance=${board}
+    .zoom=${board.getCoordsContext().getZoom()}
+  ></simple-whiteboard-zoom-select>`;
 }
 
 function renderDebug(board: SimpleWhiteboard): TemplateResult | null {

@@ -4,6 +4,7 @@ import {
   ArrowUp,
   ArrowUpToLine,
   Check,
+  ChevronDown,
   ChevronRight,
   Circle,
   createElement,
@@ -39,6 +40,7 @@ const icons = {
   Crop,
   Languages,
   ChevronRight,
+  ChevronDown,
   Check,
 
   // History
