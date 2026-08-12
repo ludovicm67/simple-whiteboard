@@ -5,12 +5,22 @@ import {
 } from "../../lib/item";
 import {
   DrawingContext,
+  Point,
   ResizeHandle,
   RoughCanvasOptions,
 } from "../../lib/types";
 import { distanceToSegment } from "../../lib/geometry";
 
 export const ARROW_ITEM_TYPE = "arrow";
+
+/** Base length of the arrowhead barbs, in world units. */
+const HEAD_BASE_LENGTH = 12;
+
+/** How much each unit of stroke width lengthens the arrowhead barbs. */
+const HEAD_STROKE_FACTOR = 2;
+
+/** Angle between the shaft and each arrowhead barb, in radians. */
+const HEAD_ANGLE = Math.PI / 7;
 
 export const itemBuilder = (item: ArrowItemType, id?: string) =>
   new ArrowItem(item, id);
@@ -103,6 +113,37 @@ export class ArrowItem extends WhiteboardItem<ArrowItemType> {
   }
 
   /**
+   * The two arrowhead barb tips, in world coordinates.
+   *
+   * The head sits at the end point and points along the shaft direction. Its
+   * size grows a bit with the stroke width, but it does not depend on the zoom
+   * level, so it can be expressed in world units. Returns an empty list when
+   * the arrow is too short to have a meaningful direction.
+   */
+  private getHeadPoints(): Point[] {
+    const dx = this.x2 - this.x1;
+    const dy = this.y2 - this.y1;
+    if (dx === 0 && dy === 0) {
+      return [];
+    }
+
+    const strokeWidth = this.options.strokeWidth ?? 1;
+    const headLength = HEAD_BASE_LENGTH + strokeWidth * HEAD_STROKE_FACTOR;
+    const angle = Math.atan2(dy, dx);
+
+    return [
+      {
+        x: this.x2 - headLength * Math.cos(angle - HEAD_ANGLE),
+        y: this.y2 - headLength * Math.sin(angle - HEAD_ANGLE),
+      },
+      {
+        x: this.x2 - headLength * Math.cos(angle + HEAD_ANGLE),
+        y: this.y2 - headLength * Math.sin(angle + HEAD_ANGLE),
+      },
+    ];
+  }
+
+  /**
    * Draw the arrow item: a straight shaft and an arrowhead at the end.
    *
    * @param context The context to draw on.
@@ -124,26 +165,10 @@ export class ArrowItem extends WhiteboardItem<ArrowItemType> {
     context.roughCanvas.line(x1, y1, x2, y2, drawOptions);
 
     // Draw the arrowhead at the end point, pointing along the shaft direction.
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-    const length = Math.hypot(dx, dy);
-    if (length < 1) {
-      // Too short to have a meaningful direction yet.
-      return;
-    }
-
-    const angle = Math.atan2(dy, dx);
-    // Head size grows a bit with the stroke width, and scales with zoom.
-    const headLength = (12 + strokeWidth * 2) * zoom;
-    const headAngle = Math.PI / 7;
-
-    const leftX = x2 - headLength * Math.cos(angle - headAngle);
-    const leftY = y2 - headLength * Math.sin(angle - headAngle);
-    const rightX = x2 - headLength * Math.cos(angle + headAngle);
-    const rightY = y2 - headLength * Math.sin(angle + headAngle);
-
-    context.roughCanvas.line(x2, y2, leftX, leftY, drawOptions);
-    context.roughCanvas.line(x2, y2, rightX, rightY, drawOptions);
+    this.getHeadPoints().forEach((point) => {
+      const { x, y } = context.coords.convertToCanvas(point.x, point.y);
+      context.roughCanvas.line(x2, y2, x, y, drawOptions);
+    });
   }
 
   /**
@@ -174,6 +199,10 @@ export class ArrowItem extends WhiteboardItem<ArrowItemType> {
 
   /**
    * Get the bounding box of the item.
+   *
+   * It covers everything that gets drawn: the shaft, the arrowhead (which can
+   * stick out well beyond the shaft, e.g. on both sides of a horizontal arrow)
+   * and half of the stroke width, which straddles the geometry on each side.
    */
   public override getBoundingBox(): {
     x: number;
@@ -181,11 +210,23 @@ export class ArrowItem extends WhiteboardItem<ArrowItemType> {
     width: number;
     height: number;
   } | null {
+    const halfStrokeWidth = (this.options.strokeWidth ?? 1) / 2;
+    const points: Point[] = [
+      { x: this.x1, y: this.y1 },
+      { x: this.x2, y: this.y2 },
+      ...this.getHeadPoints(),
+    ];
+
+    const minX = Math.min(...points.map(({ x }) => x)) - halfStrokeWidth;
+    const minY = Math.min(...points.map(({ y }) => y)) - halfStrokeWidth;
+    const maxX = Math.max(...points.map(({ x }) => x)) + halfStrokeWidth;
+    const maxY = Math.max(...points.map(({ y }) => y)) + halfStrokeWidth;
+
     return {
-      x: Math.min(this.x1, this.x2),
-      y: Math.min(this.y1, this.y2),
-      width: Math.abs(this.x2 - this.x1),
-      height: Math.abs(this.y2 - this.y1),
+      x: minX,
+      y: minY,
+      width: maxX - minX,
+      height: maxY - minY,
     };
   }
 
