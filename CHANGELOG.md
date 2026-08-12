@@ -1,5 +1,31 @@
 # @ludovicm67/whiteboard
 
+## 0.6.1
+
+### Patch Changes
+
+- 3480f9d: Replace the native `<select>` of the zoom picker with a dropdown built like the
+  rest of the app (frosted panel, accent highlight, check mark on the active
+  level, closes on Escape or on an outside click). It also displays the exact
+  zoom level, including the in-between values that wheel and pinch zooming
+  produce, which a fixed list of options could not.
+
+  Polish the selection: boxes and resize handles are now rounded, sit slightly
+  away from the item, and follow the `--sw-accent` token, so theming the
+  whiteboard also themes what is drawn on the canvas. Hovering an item shows a
+  quieter version of the same box, and resize handles light up under the pointer
+  with a cursor showing which way they resize. Their grab area is sized in screen
+  pixels too, so handles stay easy to catch when zoomed out — previously it was
+  measured in world units and shrank with the zoom level.
+
+- 6d504ff: Fix selection and hover boxes that some items were overflowing: arrowheads now
+  count towards the arrow bounding box (they used to fall entirely outside it on a
+  horizontal or vertical arrow), thick lines account for their stroke width, and
+  text boxes are derived from the real glyph metrics so tall accents and
+  descenders stay inside them at any font size. The boxes are also drawn with a
+  small padding, which covers the few pixels by which the sketchy (Rough.js)
+  strokes wobble around the shapes they are drawn from.
+
 ## 0.6.0
 
 ### Minor Changes
