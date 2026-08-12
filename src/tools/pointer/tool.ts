@@ -6,6 +6,7 @@ import { PointerItem } from "./item";
 import { throttle } from "../../lib/time";
 import { WhiteboardItem, WhiteboardItemType } from "../../lib/item";
 import { ResizeHandle } from "../../lib/types";
+import { RESIZE_HANDLE_HIT_SIZE } from "../../lib/canvas";
 
 export const POINTER_TOOL_NAME = "pointer";
 
@@ -14,6 +15,36 @@ enum PointerAction {
   DRAG = "drag",
   RESIZE = "resize",
 }
+
+/**
+ * The cursor to show over a resize handle, derived from where the handle sits
+ * relative to the center of the item. This works for any item without having
+ * to know what its handles are called.
+ *
+ * @param handle The hovered resize handle.
+ * @param box The bounding box of the item the handle belongs to.
+ * @returns The name of the CSS cursor to use.
+ */
+const resizeCursor = (
+  handle: ResizeHandle,
+  box: { x: number; y: number; width: number; height: number } | null
+): string => {
+  if (!box) {
+    return "pointer";
+  }
+
+  const dx = handle.x - (box.x + box.width / 2);
+  const dy = handle.y - (box.y + box.height / 2);
+
+  // A handle roughly on an axis only resizes along that axis.
+  if (Math.abs(dy) < Math.abs(dx) / 4) {
+    return "ew-resize";
+  }
+  if (Math.abs(dx) < Math.abs(dy) / 4) {
+    return "ns-resize";
+  }
+  return dx * dy > 0 ? "nwse-resize" : "nesw-resize";
+};
 
 export class PointerTool extends WhiteboardTool<PointerItem> {
   private clickedItemId: string | null = null;
@@ -70,6 +101,17 @@ export class PointerTool extends WhiteboardTool<PointerItem> {
     return null;
   }
 
+  /**
+   * Set the whiteboard cursor, but only when it actually changes: every change
+   * triggers a re-render of the component.
+   */
+  private setCursor(cursor: string): void {
+    const whiteboard = this.getSimpleWhiteboardInstance();
+    if (whiteboard.getCursor() !== cursor) {
+      whiteboard.setCursor(cursor);
+    }
+  }
+
   private handleMouseMoveThrottled(e: MouseEvent): void {
     const whiteboard = this.getSimpleWhiteboardInstance();
     const coordsContext = whiteboard.getCoordsContext();
@@ -84,6 +126,27 @@ export class PointerTool extends WhiteboardTool<PointerItem> {
       if (hoveredItemId) {
         whiteboard.setHoveredItemId(null);
       }
+      whiteboard.setHoveredResizeHandle(null);
+      return;
+    }
+
+    // A resize handle of the selected item wins over whatever is underneath:
+    // it is what a click would grab. Highlight it and show which way it
+    // resizes, so the handles feel grabbable before being pressed.
+    const selectedItem = whiteboard.getSelectedItem();
+    const handle =
+      selectedItem && selectedItem.isResizable()
+        ? this.resizeHandleMatch(
+            selectedItem.getResizeHandles(),
+            whiteboardX,
+            whiteboardY
+          )
+        : null;
+    whiteboard.setHoveredResizeHandle(handle ? handle.name : null);
+
+    if (handle && selectedItem) {
+      whiteboard.setHoveredItemId(null);
+      this.setCursor(resizeCursor(handle, selectedItem.getBoundingBox()));
       return;
     }
 
@@ -93,6 +156,7 @@ export class PointerTool extends WhiteboardTool<PointerItem> {
     );
     const hoveredItemId = hoveredItem?.getId() || null;
     whiteboard.setHoveredItemId(hoveredItemId);
+    this.setCursor(hoveredItem ? "move" : "default");
   }
 
   public override handleMouseMove(e: MouseEvent): void {
@@ -153,15 +217,24 @@ export class PointerTool extends WhiteboardTool<PointerItem> {
     }
   }
 
+  /**
+   * The resize handle at the given world coordinates, if any.
+   *
+   * Handles are drawn at a fixed on-screen size, so their grab area is sized in
+   * canvas pixels too and converted back to world units: otherwise it would
+   * shrink to nothing when zoomed out and cover half the item when zoomed in.
+   */
   private resizeHandleMatch(
     resizeHandles: ResizeHandle[],
     x: number,
     y: number
   ): ResizeHandle | null {
+    const whiteboard = this.getSimpleWhiteboardInstance();
+    const zoom = whiteboard.getCoordsContext().getZoom();
+    const halfHandleSize = RESIZE_HANDLE_HIT_SIZE / 2 / zoom;
+
     for (const handle of resizeHandles) {
       const { x: handleX, y: handleY } = handle;
-      const handleSize = 10;
-      const halfHandleSize = handleSize / 2;
       if (
         x >= handleX - halfHandleSize &&
         x <= handleX + halfHandleSize &&
@@ -240,5 +313,13 @@ export class PointerTool extends WhiteboardTool<PointerItem> {
     }
 
     return null;
+  }
+
+  public override onToolUnselected(): void {
+    super.onToolUnselected();
+    // Leave no hover state behind for the next tool.
+    const whiteboard = this.getSimpleWhiteboardInstance();
+    whiteboard.setHoveredResizeHandle(null);
+    whiteboard.setCursor("default");
   }
 }

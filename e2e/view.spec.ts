@@ -16,23 +16,60 @@ const canvasCenter = (page: import("@playwright/test").Page) =>
     return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
   });
 
+/** Pick a zoom level from the footer dropdown, e.g. `"200%"`. */
+const pickZoom = async (
+  page: import("@playwright/test").Page,
+  label: string
+) => {
+  const board = page.locator("simple-whiteboard");
+  await board.locator(".footer-tools .zoom-button").click();
+  // Anchored on word boundaries so that "50%" does not also match "150%"
+  // (regex `hasText` runs against the raw text, spacing included).
+  await board
+    .locator(".footer-tools .zoom-item")
+    .filter({ hasText: new RegExp(`(^|\\s)${label}(\\s|$)`) })
+    .click();
+};
+
 test.beforeEach(async ({ page }) => {
   await openApp(page);
 });
 
 test("the footer zoom selector changes the zoom level", async ({ page }) => {
+  const board = page.locator("simple-whiteboard");
   expect(await zoom(page)).toBe(1);
-  await page
-    .locator("simple-whiteboard")
-    .locator(".footer-tools select")
-    .selectOption("2");
-  expect(await zoom(page)).toBe(2);
 
-  await page
-    .locator("simple-whiteboard")
-    .locator(".footer-tools select")
-    .selectOption("0.5");
+  await pickZoom(page, "200%");
+  expect(await zoom(page)).toBe(2);
+  // The button reflects the new level, and the list closed again.
+  await expect(board.locator(".footer-tools .zoom-button")).toHaveText("200%");
+  await expect(board.locator(".footer-tools .dropdown")).not.toBeVisible();
+
+  await pickZoom(page, "50%");
   expect(await zoom(page)).toBe(0.5);
+});
+
+test("the zoom dropdown shows the exact level and closes on Escape", async ({
+  page,
+}) => {
+  const board = page.locator("simple-whiteboard");
+
+  // Wheel zooming lands between two presets: the button shows the real value.
+  const c = await canvasCenter(page);
+  await page.mouse.move(c.x, c.y);
+  await page.keyboard.down("Control");
+  await page.mouse.wheel(0, -120);
+  await page.keyboard.up("Control");
+  await expect
+    .poll(async () =>
+      (await board.locator(".footer-tools .zoom-button").textContent())?.trim()
+    )
+    .not.toBe("100%");
+
+  await board.locator(".footer-tools .zoom-button").click();
+  await expect(board.locator(".footer-tools .dropdown")).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(board.locator(".footer-tools .dropdown")).not.toBeVisible();
 });
 
 test("scrolling the wheel over the canvas pans it", async ({ page }) => {
@@ -76,10 +113,7 @@ test("zooming keeps the world point under the cursor stable", async ({ page }) =
     const r = app.shadowRoot.querySelector("canvas").getBoundingClientRect();
     return app.getCoordsContext().convertFromCanvas(r.width / 2, r.height / 2);
   });
-  await page
-    .locator("simple-whiteboard")
-    .locator(".footer-tools select")
-    .selectOption("2");
+  await pickZoom(page, "200%");
   const centerWorldAfter = await page.evaluate(() => {
     const app = document.getElementById("app") as any;
     const r = app.shadowRoot.querySelector("canvas").getBoundingClientRect();
