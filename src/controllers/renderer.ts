@@ -6,6 +6,15 @@ import { rectsIntersect } from "../lib/geometry";
 import { drawDottedBackground } from "../lib/background";
 
 /**
+ * Padding (in canvas pixels) added around an item's bounding box when drawing
+ * its hover/selection box. It gives the box a bit of breathing room, and covers
+ * the few pixels by which the sketchy (Rough.js) strokes wobble outside of the
+ * exact geometry they are drawn from. Being expressed in canvas pixels, it
+ * stays visually constant at any zoom level — just like that wobble.
+ */
+const BOX_PADDING = 4;
+
+/**
  * The slice of the whiteboard that the renderer needs.
  */
 export interface RendererHost {
@@ -119,7 +128,12 @@ export class CanvasRenderer {
     context.strokeStyle = boxColor;
     context.lineWidth = 2;
     context.beginPath();
-    context.rect(coordX, coordY, width * zoom, height * zoom);
+    context.rect(
+      coordX - BOX_PADDING,
+      coordY - BOX_PADDING,
+      width * zoom + BOX_PADDING * 2,
+      height * zoom + BOX_PADDING * 2
+    );
     context.stroke();
 
     if (!isResizable) {

@@ -11,6 +11,22 @@ export const TEXT_ITEM_TYPE = "text";
 
 const TEXTAREA_EDIT_ID = "simple-whiteboard-text-tool-edit-zone";
 
+/** Horizontal padding kept around the measured text, in world units. */
+const PADDING_X = 10;
+
+/** Vertical padding kept around the measured text, in world units. */
+const PADDING_Y = 5;
+
+/**
+ * Ratios used to approximate the text extents when no real font metrics are
+ * available (no measuring context, or a browser not reporting glyph bounds).
+ * They are also used as a floor, so the box never gets tighter than the em box
+ * of the font, even for content without any ascender/descender.
+ */
+const FALLBACK_CHAR_WIDTH_RATIO = 0.6;
+const FALLBACK_ASCENT_RATIO = 1;
+const FALLBACK_DESCENT_RATIO = 0.25;
+
 export const itemBuilder = (item: TextItemType, id?: string) =>
   new TextItem(item, id);
 
@@ -260,6 +276,11 @@ export class TextItem extends WhiteboardItem<TextItemType> {
 
   /**
    * Get the bounding box of the item.
+   *
+   * The lines are drawn on successive baselines, the first one at
+   * `y + fontSize`. The box is therefore derived from the real glyph extents
+   * around those baselines (when the browser reports them), so that tall
+   * accents and descenders — which grow with the font size — stay inside it.
    */
   public override getBoundingBox(): {
     x: number;
@@ -267,37 +288,46 @@ export class TextItem extends WhiteboardItem<TextItemType> {
     width: number;
     height: number;
   } | null {
-    const splittedText = this.content.split("\n");
-    const height = splittedText.length * this.options.fontSize;
+    const lines = this.content.split("\n");
+    const { fontSize, fontFamily } = this.options;
+    const firstBaseline = this.y + fontSize;
+    const lastBaseline = this.y + lines.length * fontSize;
 
-    // If there is no context, return a rough estimate of width
-    if (!this.ctx) {
-      const textWidth = splittedText.reduce((maxWidth, line) => {
-        const width = line.length || 0;
-        return Math.max(maxWidth, width);
-      }, 0);
-      return {
-        x: this.x - 10,
-        y: this.y - 5,
-        width: textWidth + 20,
-        height: height + 20,
-      };
+    let textWidth = 0;
+    let ascent = fontSize * FALLBACK_ASCENT_RATIO;
+    let descent = fontSize * FALLBACK_DESCENT_RATIO;
+
+    const ctx = this.ctx;
+    if (ctx) {
+      ctx.font = `${fontSize}px ${fontFamily}`;
+      lines.forEach((line) => {
+        const metrics = ctx.measureText(line);
+        // `width` is the advance width: glyphs overflowing it (italics, script
+        // fonts, …) are only covered by the actual ink bounds.
+        textWidth = Math.max(
+          textWidth,
+          metrics.width || 0,
+          metrics.actualBoundingBoxRight || 0
+        );
+        ascent = Math.max(ascent, metrics.actualBoundingBoxAscent || 0);
+        descent = Math.max(descent, metrics.actualBoundingBoxDescent || 0);
+      });
+    } else {
+      textWidth = lines.reduce(
+        (maxWidth, line) =>
+          Math.max(maxWidth, line.length * fontSize * FALLBACK_CHAR_WIDTH_RATIO),
+        0
+      );
     }
 
-    const textWidth = splittedText.reduce((maxWidth, line) => {
-      if (!this.ctx) {
-        return maxWidth;
-      }
-      this.ctx.font = `${this.options.fontSize}px ${this.options.fontFamily}`;
-      const width = this.ctx.measureText(line).width || 0;
-      return Math.max(maxWidth, width);
-    }, 0);
+    const top = firstBaseline - ascent - PADDING_Y;
+    const bottom = lastBaseline + descent + PADDING_Y;
 
     return {
-      x: this.x - 10,
-      y: this.y - 5,
-      width: textWidth + 20,
-      height: height + 20,
+      x: this.x - PADDING_X,
+      y: top,
+      width: textWidth + PADDING_X * 2,
+      height: bottom - top,
     };
   }
 

@@ -154,6 +154,10 @@ export class LineItem extends WhiteboardItem<LineItemType> {
 
   /**
    * Get the bounding box of the item.
+   *
+   * The stroke straddles the segment, so half of its width is added on every
+   * side: without it a thick horizontal (or vertical) line would get a
+   * zero-height (or zero-width) box that the stroke overflows.
    */
   public override getBoundingBox(): {
     x: number;
@@ -161,11 +165,17 @@ export class LineItem extends WhiteboardItem<LineItemType> {
     width: number;
     height: number;
   } | null {
+    const halfStrokeWidth = (this.options.strokeWidth ?? 1) / 2;
+    const minX = Math.min(this.x1, this.x2) - halfStrokeWidth;
+    const minY = Math.min(this.y1, this.y2) - halfStrokeWidth;
+    const maxX = Math.max(this.x1, this.x2) + halfStrokeWidth;
+    const maxY = Math.max(this.y1, this.y2) + halfStrokeWidth;
+
     return {
-      x: Math.min(this.x1, this.x2),
-      y: Math.min(this.y1, this.y2),
-      width: Math.abs(this.x2 - this.x1),
-      height: Math.abs(this.y2 - this.y1),
+      x: minX,
+      y: minY,
+      width: maxX - minX,
+      height: maxY - minY,
     };
   }
 
