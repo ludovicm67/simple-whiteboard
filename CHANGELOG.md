@@ -1,5 +1,14 @@
 # @ludovicm67/whiteboard
 
+## 0.6.2
+
+### Patch Changes
+
+- 41965e0: Upgrade dependencies: `lucide` to 1.33, `uuid` to 14.0.2, `vite` to 8.2.2, and
+  TypeScript to 7 — whose native compiler no longer ships the JavaScript compiler
+  API, so `@typescript/typescript6` comes along with it to keep `unplugin-dts`
+  able to generate the type declarations.
+
 ## 0.6.1
 
 ### Patch Changes
