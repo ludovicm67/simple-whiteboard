@@ -42,6 +42,4 @@ jobs:
           publish-script: npm run release
           commit-message: "chore: release"
           pr-title: "Merge to release"
-          # Since v2, the token is an input: the GITHUB_TOKEN environment
-          # variable and the credentials set up by actions/checkout are ignored.
           github-token: ${{ secrets.GITHUB_TOKEN }}
