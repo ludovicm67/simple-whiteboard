@@ -780,9 +780,28 @@
       // The hero board is gated: the overlay keeps the page scrollable until the
       // visitor explicitly clicks to start drawing.
       document.querySelectorAll("[data-gate]").forEach((gate) => {
-        gate.addEventListener("click", () => gate.classList.add("hidden"), {
-          once: true,
-        });
+        gate.addEventListener(
+          "click",
+          () => {
+            gate.classList.add("hidden");
+
+            const board = gate
+              .closest(".board-embed")
+              ?.querySelector("simple-whiteboard");
+            if (!board) return;
+
+            // The gate promises a doodle, so hand over a pen rather than
+            // leaving the visitor on the selection tool.
+            board.setCurrentTool?.("pen");
+
+            // The button that had focus is gone now: move it onto the board,
+            // so whoever dismissed the gate with the keyboard can draw on.
+            board.shadowRoot
+              ?.querySelector("canvas")
+              ?.focus({ preventScroll: true });
+          },
+          { once: true }
+        );
       });
 
       // Gentle reveal-on-scroll for the sections.

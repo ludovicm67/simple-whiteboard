@@ -29,6 +29,28 @@ test.describe("landing page (index.html)", () => {
     await gate.click();
     // The gate fades out (opacity + pointer-events) via the `hidden` class.
     await expect(gate).toHaveClass(/\bhidden\b/);
+
+    // "Click to doodle" hands over a pen, so the next stroke just works.
+    await expect
+      .poll(() =>
+        page.evaluate(() =>
+          (document.getElementById("hero-board") as any).getCurrentTool()
+        )
+      )
+      .toBe("pen");
+
+    const board = (await page.locator("#hero-board").boundingBox())!;
+    await page.mouse.move(board.x + 200, board.y + 200);
+    await page.mouse.down();
+    await page.mouse.move(board.x + 300, board.y + 260, { steps: 6 });
+    await page.mouse.up();
+    expect(
+      await page.evaluate(() =>
+        (document.getElementById("hero-board") as any)
+          .getItems()
+          .map((item: any) => item.getType())
+      )
+    ).toEqual(["pen"]);
   });
 
   test("the primary CTAs point to the app and the docs", async ({ page }) => {

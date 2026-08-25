@@ -99,6 +99,30 @@ test.describe("accessibility", () => {
     expect(new URL(page.url()).hash).toBe("#main");
   });
 
+  test("dismissing the hero gate hands focus to the board", async ({ page }) => {
+    await page.goto("/index.html");
+    await page.waitForFunction(() => {
+      const board = document.getElementById("hero-board") as any;
+      return board?.shadowRoot?.querySelectorAll(".tools button").length === 8;
+    });
+
+    await page.locator(".board-gate").focus();
+    await page.keyboard.press("Enter");
+
+    // The button that had focus is gone, so focus moves onto the board itself
+    // instead of being dropped back to the top of the page.
+    expect(await focused(page)).toBe("Whiteboard drawing area");
+    // And the dismissed gate leaves the tab order rather than lingering
+    // invisible but focusable.
+    await expect
+      .poll(() =>
+        page
+          .locator(".board-gate")
+          .evaluate((el) => getComputedStyle(el as HTMLElement).visibility)
+      )
+      .toBe("hidden");
+  });
+
   test("the toolbar is one tab stop, walked with the arrows", async ({
     page,
   }) => {

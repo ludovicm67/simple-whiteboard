@@ -592,11 +592,14 @@ a:hover {
     rgba(252, 252, 255, 0.15),
     rgba(252, 252, 255, 0.45)
   );
-  transition: opacity 0.25s ease;
+  /* `visibility` is delayed by the fade so the gate still fades out. */
+  transition: opacity 0.25s ease, visibility 0s linear 0.25s;
 }
 .board-gate.hidden {
   opacity: 0;
   pointer-events: none;
+  /* Out of the tab order too, once it has finished fading out. */
+  visibility: hidden;
 }
 .board-gate-badge {
   display: inline-flex;
