@@ -1,4 +1,8 @@
 {
+  "clear-confirm-accept": "Svuota",
+  "clear-confirm-cancel": "Annulla",
+  "clear-confirm-message": "Tutti gli elementi verranno rimossi. Potrai annullare in seguito.",
+  "clear-confirm-title": "Svuotare la lavagna?",
   "footer-zoom": "Zoom",
   "history-redo": "Ripeti",
   "history-undo": "Annulla",

@@ -149,12 +149,132 @@ test("undo / redo via the footer buttons", async ({ page }) => {
   expect(await itemCount(page)).toBe(1);
 });
 
-test("the clear tool empties the board", async ({ page }) => {
+const clearButton = (page: import("@playwright/test").Page) =>
+  // The clear tool is the last toolbar button.
+  page.locator("simple-whiteboard").locator(".tools button").last();
+const confirmDialog = (page: import("@playwright/test").Page) =>
+  page.locator("simple-whiteboard").locator("dialog.confirm");
+
+test("the clear tool empties the board once confirmed", async ({ page }) => {
   await drawShape(page, "rect", -120, -40, -20, 40);
   await drawShape(page, "circle", 40, -40, 140, 40);
   expect(await itemCount(page)).toBe(2);
 
-  // The clear tool is the last toolbar button.
-  await page.locator("simple-whiteboard").locator(".tools button").last().click();
+  await clearButton(page).click();
+  await expect(confirmDialog(page)).toBeVisible();
+  await confirmDialog(page).getByRole("button", { name: "Clear" }).click();
+
+  await expect(confirmDialog(page)).toBeHidden();
   expect(await itemTypes(page)).toEqual([]);
+});
+
+test("cancelling the clear dialog keeps the board", async ({ page }) => {
+  await drawShape(page, "rect", -120, -40, -20, 40);
+  expect(await itemCount(page)).toBe(1);
+
+  await clearButton(page).click();
+  await confirmDialog(page).getByRole("button", { name: "Cancel" }).click();
+  await expect(confirmDialog(page)).toBeHidden();
+  expect(await itemCount(page)).toBe(1);
+
+  // Escape dismisses it too, and still keeps everything.
+  await clearButton(page).click();
+  await expect(confirmDialog(page)).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(confirmDialog(page)).toBeHidden();
+  expect(await itemCount(page)).toBe(1);
+
+  // The clear tool is a one-off action: the board goes back to the previous
+  // tool. The dialog's close event lands in a later task, so poll for it.
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        (document.getElementById("app") as any).getCurrentTool()
+      )
+    )
+    .not.toBe("clear");
+});
+
+test("clicking outside the clear dialog cancels it", async ({ page }) => {
+  await drawShape(page, "rect", -120, -40, -20, 40);
+  await clearButton(page).click();
+  await expect(confirmDialog(page)).toBeVisible();
+
+  // Well away from the panel, i.e. on the backdrop.
+  await page.mouse.click(60, 60);
+  await expect(confirmDialog(page)).toBeHidden();
+  expect(await itemCount(page)).toBe(1);
+});
+
+test("clicks and drags inside the clear dialog keep it open", async ({
+  page,
+}) => {
+  await drawShape(page, "rect", -120, -40, -20, 40);
+  await clearButton(page).click();
+  const box = (await confirmDialog(page).boundingBox())!;
+
+  // The panel's own padding is not the backdrop.
+  await page.mouse.click(box.x + 6, box.y + 6);
+  await expect(confirmDialog(page)).toBeVisible();
+
+  // Selecting the message and releasing outside must not dismiss it either.
+  await page.mouse.move(box.x + 30, box.y + 60);
+  await page.mouse.down();
+  await page.mouse.move(box.x - 120, box.y + 60, { steps: 6 });
+  await page.mouse.up();
+  await expect(confirmDialog(page)).toBeVisible();
+});
+
+test("clearing an empty board does not ask", async ({ page }) => {
+  expect(await itemCount(page)).toBe(0);
+  await clearButton(page).click();
+  await expect(confirmDialog(page)).toBeHidden();
+});
+
+test("skip-clear-confirmation clears without asking", async ({ page }) => {
+  await drawShape(page, "rect", -120, -40, -20, 40);
+  await drawShape(page, "circle", 40, -40, 140, 40);
+  expect(await itemCount(page)).toBe(2);
+
+  await page.evaluate(() =>
+    document
+      .getElementById("app")!
+      .setAttribute("skip-clear-confirmation", "")
+  );
+  await clearButton(page).click();
+
+  await expect(confirmDialog(page)).toBeHidden();
+  expect(await itemCount(page)).toBe(0);
+
+  // Removing the attribute brings the confirmation back.
+  await drawShape(page, "rect", -60, -20, 20, 40);
+  await page.evaluate(() =>
+    document.getElementById("app")!.removeAttribute("skip-clear-confirmation")
+  );
+  await clearButton(page).click();
+  await expect(confirmDialog(page)).toBeVisible();
+  await confirmDialog(page).getByRole("button", { name: "Cancel" }).click();
+  expect(await itemCount(page)).toBe(1);
+});
+
+test("the clear dialog is operable with the keyboard alone", async ({
+  page,
+}) => {
+  await drawShape(page, "rect", -120, -40, -20, 40);
+  await clearButton(page).focus();
+  await page.keyboard.press("Enter");
+  await expect(confirmDialog(page)).toBeVisible();
+
+  // Focus starts on the safe choice, and Tab reaches the destructive one.
+  await expect(
+    confirmDialog(page).getByRole("button", { name: "Cancel" })
+  ).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(
+    confirmDialog(page).getByRole("button", { name: "Clear" })
+  ).toBeFocused();
+  await page.keyboard.press("Enter");
+
+  await expect(confirmDialog(page)).toBeHidden();
+  expect(await itemCount(page)).toBe(0);
 });

@@ -1,4 +1,8 @@
 {
+  "clear-confirm-accept": "Réinitialiser",
+  "clear-confirm-cancel": "Annuler",
+  "clear-confirm-message": "Tous les éléments seront supprimés. Vous pourrez annuler ensuite.",
+  "clear-confirm-title": "Réinitialiser le tableau ?",
   "footer-zoom": "Zoom",
   "history-redo": "Rétablir",
   "history-undo": "Annuler",

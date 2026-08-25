@@ -1,4 +1,8 @@
 {
+  "clear-confirm-accept": "Temizle",
+  "clear-confirm-cancel": "İptal",
+  "clear-confirm-message": "Tüm ögeler kaldırılacak. Daha sonra geri alabilirsiniz.",
+  "clear-confirm-title": "Tahta temizlensin mi?",
   "footer-zoom": "Yakınlaştırma",
   "history-redo": "Yinele",
   "history-undo": "Geri Al",

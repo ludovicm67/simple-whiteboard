@@ -60,6 +60,37 @@ test.describe("accessibility", () => {
     expect(await violations(page), "zoom open").toEqual([]);
   });
 
+  test("the confirmation dialog is modal and clean", async ({ page }) => {
+    await openApp(page);
+    // Something to lose, so the clear tool asks first.
+    await page.evaluate(() => {
+      const app = document.getElementById("app") as any;
+      app.setCurrentTool("rect");
+    });
+    const board = (await page.locator("simple-whiteboard").boundingBox())!;
+    await page.mouse.move(board.x + 300, board.y + 260);
+    await page.mouse.down();
+    await page.mouse.move(board.x + 400, board.y + 340, { steps: 4 });
+    await page.mouse.up();
+
+    await page.locator("simple-whiteboard").locator(".tools button").last().click();
+    const dialog = page.locator("simple-whiteboard").locator("dialog.confirm");
+    await expect(dialog).toBeVisible();
+
+    // Modal: the platform keeps focus inside and the board inert.
+    expect(
+      await page.evaluate(() => {
+        const app = document.getElementById("app") as any;
+        return app.shadowRoot.querySelector("dialog").matches(":modal");
+      })
+    ).toBe(true);
+    expect(await violations(page)).toEqual([]);
+
+    // Closing hands focus back to the button that opened it.
+    await page.keyboard.press("Escape");
+    expect(await focused(page)).toBe("Clear whiteboard");
+  });
+
   test("the site can be entered with a skip link", async ({ page }) => {
     await page.goto("/index.html");
     await page.keyboard.press("Tab");

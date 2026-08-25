@@ -1,4 +1,8 @@
 {
+  "clear-confirm-accept": "Wyczyść",
+  "clear-confirm-cancel": "Anuluj",
+  "clear-confirm-message": "Wszystkie elementy zostaną usunięte. Możesz to później cofnąć.",
+  "clear-confirm-title": "Wyczyścić tablicę?",
   "footer-zoom": "Powiększenie",
   "history-redo": "Ponów",
   "history-undo": "Cofnij",

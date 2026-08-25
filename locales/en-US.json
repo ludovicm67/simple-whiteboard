@@ -1,4 +1,8 @@
 {
+  "clear-confirm-accept": "Clear",
+  "clear-confirm-cancel": "Cancel",
+  "clear-confirm-message": "Every item will be removed. You can undo it afterwards.",
+  "clear-confirm-title": "Clear the whiteboard?",
   "footer-zoom": "Zoom",
   "history-redo": "Redo",
   "history-undo": "Undo",

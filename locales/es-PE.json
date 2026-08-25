@@ -1,4 +1,8 @@
 {
+  "clear-confirm-accept": "Vaciar",
+  "clear-confirm-cancel": "Cancelar",
+  "clear-confirm-message": "Se eliminarán todos los elementos. Podrás deshacerlo después.",
+  "clear-confirm-title": "¿Vaciar la pizarra?",
   "footer-zoom": "Zoom",
   "history-redo": "Rehacer",
   "history-undo": "Deshacer",

@@ -1,4 +1,8 @@
 {
+  "clear-confirm-accept": "Vymazat",
+  "clear-confirm-cancel": "Zrušit",
+  "clear-confirm-message": "Všechny objekty budou odstraněny. Poté můžete akci vrátit zpět.",
+  "clear-confirm-title": "Vymazat tabuli?",
   "footer-zoom": "Přiblížení",
   "history-redo": "Znovu",
   "history-undo": "Zpět",
