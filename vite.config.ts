@@ -119,6 +119,9 @@ export default defineConfig(({ mode, command }): UserConfig => {
     plugins: [
       dts({
         insertTypesEntry: true,
+        // `src/site-theme.ts` only ever runs on the marketing pages, so it must
+        // not end up in the published package's declarations.
+        exclude: ["node_modules/**", "src/site-theme.ts"],
       }),
       // Dev-server only: keeps `/sitemap.xml` available while developing.
       sitemap(false),

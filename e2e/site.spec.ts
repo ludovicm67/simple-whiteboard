@@ -130,3 +130,56 @@ test.describe("API docs (api.html)", () => {
     );
   });
 });
+
+test.describe("site theme", () => {
+  const bodyBackground = (page: import("@playwright/test").Page) =>
+    page
+      .locator("body")
+      .evaluate((el) => getComputedStyle(el).backgroundColor);
+
+  test("follows the OS preference by default", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.goto("/index.html");
+    const light = await bodyBackground(page);
+
+    await page.emulateMedia({ colorScheme: "dark" });
+    const dark = await bodyBackground(page);
+
+    expect(dark).not.toBe(light);
+    // No explicit choice was made, so nothing is pinned on <html>.
+    await expect(page.locator("html")).not.toHaveAttribute("data-theme", /.*/);
+  });
+
+  test("the nav toggle pins a theme and remembers it", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.goto("/index.html");
+    const light = await bodyBackground(page);
+
+    const toggle = page.locator("[data-theme-toggle]");
+    await expect(toggle).toHaveAttribute("aria-label", /dark theme/);
+    await toggle.click();
+
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    await expect(toggle).toHaveAttribute("aria-label", /light theme/);
+    const dark = await bodyBackground(page);
+    expect(dark).not.toBe(light);
+
+    // The choice survives a reload, and wins over the OS preference.
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    expect(await bodyBackground(page)).toBe(dark);
+  });
+
+  test("the embedded whiteboard keeps its light frame on the dark theme", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.goto("/index.html");
+    // The component is light-only for now, so its mock window stays light even
+    // though the page around it is dark.
+    const chrome = await page
+      .locator(".board-chrome")
+      .evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(chrome).toBe("rgb(245, 247, 250)");
+  });
+});
