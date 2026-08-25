@@ -1,4 +1,8 @@
 {
+  "clear-confirm-accept": "Leeren",
+  "clear-confirm-cancel": "Abbrechen",
+  "clear-confirm-message": "Alle Elemente werden entfernt. Sie können es danach rückgängig machen.",
+  "clear-confirm-title": "Tafel leeren?",
   "footer-zoom": "Zoom",
   "history-redo": "Wiederholen",
   "history-undo": "Rückgängig",

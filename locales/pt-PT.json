@@ -1,4 +1,8 @@
 {
+  "clear-confirm-accept": "Limpar",
+  "clear-confirm-cancel": "Cancelar",
+  "clear-confirm-message": "Todos os itens serão removidos. Você pode desfazer depois.",
+  "clear-confirm-title": "Limpar o quadro?",
   "footer-zoom": "Zoom",
   "history-redo": "Refazer",
   "history-undo": "Desfazer",

@@ -301,6 +301,61 @@ export const styles = css`
     }
   }
 
+  /* ------------------------------------------------- confirmation dialog */
+
+  .confirm {
+    margin: auto;
+    max-width: min(360px, calc(100% - 32px));
+    padding: 20px 22px;
+    border: 1px solid var(--sw-border);
+    border-radius: var(--sw-radius);
+    background-color: var(--sw-surface);
+    color: var(--sw-text);
+    box-shadow: var(--sw-shadow);
+  }
+
+  .confirm::backdrop {
+    background-color: rgba(15, 23, 42, 0.35);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+  }
+
+  .confirm-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+  }
+
+  .confirm-message {
+    margin: 8px 0 0;
+    font-size: 0.92rem;
+    color: var(--sw-text-muted);
+  }
+
+  .confirm-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .confirm-actions .button {
+    padding: 8px 14px;
+    font-weight: 600;
+  }
+
+  /* The destructive choice looks like one, and not by color alone: it is the
+     filled button, the safe one stays quiet. */
+  .button-danger {
+    background-color: #b3261e;
+    border-color: #b3261e;
+    color: #fff;
+  }
+  .button-danger:hover {
+    background-color: #8f1d17;
+    border-color: #8f1d17;
+  }
+
   canvas {
     top: 0;
     left: 0;

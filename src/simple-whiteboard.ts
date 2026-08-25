@@ -67,6 +67,17 @@ export class SimpleWhiteboard extends LitElement {
   @property({ type: Boolean, attribute: "hide-tool-options" })
   hideToolOptions = false;
 
+  /**
+   * Whether to clear the board straight away instead of asking first.
+   *
+   * Clearing throws away every item, so by default the clear tool asks for a
+   * confirmation. Set `skip-clear-confirmation` when the surrounding app has
+   * its own safeguards (or its own confirmation) and the extra dialog is only
+   * in the way. Clearing stays undoable either way.
+   */
+  @property({ type: Boolean, attribute: "skip-clear-confirmation" })
+  skipClearConfirmation = false;
+
   @state()
   isReady: boolean = false;
 
@@ -79,6 +90,16 @@ export class SimpleWhiteboard extends LitElement {
   @state()
   private status: string = "";
 
+  // The confirmation currently being asked, if any. See `confirm()`.
+  @state()
+  private pendingConfirm: {
+    title: string;
+    message: string;
+    confirmLabel: string;
+    cancelLabel: string;
+    resolve: (confirmed: boolean) => void;
+  } | null = null;
+
   private i18nContext: I18nContext = new I18nContext();
   private coordsContext: CoordsContext = new CoordsContext();
 
@@ -86,6 +107,11 @@ export class SimpleWhiteboard extends LitElement {
 
   // Resize handle currently under the pointer, highlighted by the renderer.
   private hoveredResizeHandle: string | null = null;
+
+  // Whether the press that may become a click started on the dialog backdrop.
+  // Releasing outside only dismisses when the press started outside too, so
+  // dragging a text selection out of the dialog does not cancel it.
+  private confirmPressedBackdrop = false;
 
   private canvas?: HTMLCanvasElement;
 
@@ -250,6 +276,78 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   /**
+   * Ask the user to confirm an action, in a modal dialog rendered inside the
+   * whiteboard. Tools use it before doing something destructive.
+   *
+   * @param options The wording of the dialog.
+   * @returns A promise resolving to `true` when confirmed, `false` when the
+   * user cancelled (including with Escape or by dismissing the dialog).
+   */
+  public confirm(options: {
+    title: string;
+    message: string;
+    confirmLabel: string;
+    cancelLabel: string;
+  }): Promise<boolean> {
+    // A second request would strand the first promise: settle it as cancelled.
+    this.pendingConfirm?.resolve(false);
+
+    return new Promise<boolean>((resolve) => {
+      this.pendingConfirm = { ...options, resolve };
+      // The dialog only exists once Lit has rendered it.
+      this.updateComplete.then(() => {
+        this.shadowRoot?.querySelector("dialog")?.showModal();
+      });
+    });
+  }
+
+  /**
+   * Dismiss the confirmation when the click landed on the backdrop rather than
+   * on the dialog itself.
+   *
+   * A modal dialog's backdrop is part of the dialog element, so a click on it
+   * arrives here with the dialog as its target; the dialog's own box (padding
+   * included) is what counts as inside.
+   */
+  private handleConfirmClick(e: MouseEvent): void {
+    const dialog = e.currentTarget as HTMLDialogElement;
+    const startedOutside = this.confirmPressedBackdrop;
+    this.confirmPressedBackdrop = false;
+
+    if (!startedOutside || e.target !== dialog) {
+      return;
+    }
+
+    const { left, right, top, bottom } = dialog.getBoundingClientRect();
+    const inside =
+      e.clientX >= left &&
+      e.clientX <= right &&
+      e.clientY >= top &&
+      e.clientY <= bottom;
+    if (!inside) {
+      this.settleConfirm(false);
+    }
+  }
+
+  /**
+   * Settle the pending confirmation and close its dialog. Called by the
+   * dialog's buttons and by its native `close` event, so dismissing it with
+   * Escape resolves too.
+   */
+  private settleConfirm(confirmed: boolean): void {
+    const pending = this.pendingConfirm;
+    if (!pending) {
+      return;
+    }
+    this.pendingConfirm = null;
+    const dialog = this.shadowRoot?.querySelector("dialog");
+    if (dialog?.open) {
+      dialog.close();
+    }
+    pending.resolve(confirmed);
+  }
+
+  /**
    * Announce something in the live region. The text is re-set even when it does
    * not change (with a zero-width space) so repeated actions are still spoken.
    */
@@ -363,6 +461,12 @@ export class SimpleWhiteboard extends LitElement {
   }
 
   handleKeyDown(e: KeyboardEvent) {
+    // While a confirmation is open it owns the keyboard: the dialog handles
+    // Escape itself, and the board's own shortcuts have to stay out of it.
+    if (this.pendingConfirm) {
+      return;
+    }
+
     const isModifier = e.metaKey || e.ctrlKey;
     const key = e.key.toLowerCase();
 
@@ -781,6 +885,49 @@ export class SimpleWhiteboard extends LitElement {
     return this.mouseCoords;
   }
 
+  /**
+   * The confirmation dialog. A native `<dialog>` opened with `showModal()`, so
+   * the focus trap, the Escape key, the backdrop and the dialog semantics come
+   * from the platform rather than being re-implemented here.
+   */
+  private renderConfirmDialog() {
+    const pending = this.pendingConfirm;
+    if (!pending) {
+      return null;
+    }
+
+    return html`<dialog
+      class="confirm"
+      aria-labelledby="confirm-title"
+      aria-describedby="confirm-message"
+      @mousedown=${(e: MouseEvent) => {
+        this.confirmPressedBackdrop = e.target === e.currentTarget;
+      }}
+      @click=${(e: MouseEvent) => this.handleConfirmClick(e)}
+      @close=${() => this.settleConfirm(false)}
+    >
+      <h2 id="confirm-title" class="confirm-title">${pending.title}</h2>
+      <p id="confirm-message" class="confirm-message">${pending.message}</p>
+      <div class="confirm-actions">
+        <button
+          class="button"
+          type="button"
+          autofocus
+          @click=${() => this.settleConfirm(false)}
+        >
+          ${pending.cancelLabel}
+        </button>
+        <button
+          class="button button-danger"
+          type="button"
+          @click=${() => this.settleConfirm(true)}
+        >
+          ${pending.confirmLabel}
+        </button>
+      </div>
+    </dialog>`;
+  }
+
   renderMenu() {
     return html`<simple-whiteboard-menu
       class="menu"
@@ -823,6 +970,8 @@ export class SimpleWhiteboard extends LitElement {
         <p class="visually-hidden" role="status" aria-live="polite">
           ${this.status}
         </p>
+
+        ${this.renderConfirmDialog()}
       </div>
     `;
   }

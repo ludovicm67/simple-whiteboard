@@ -31,15 +31,43 @@ export class ClearTool extends WhiteboardTool<ClearItem> {
 
   /**
    * Called when the tool is selected.
-   * This method should be implemented in the tool class if needed.
+   *
+   * Clearing throws away every item, so it asks first — unless the board is
+   * already empty (nothing to lose, the click just resets the view) or the
+   * host set `skip-clear-confirmation`.
    */
-  public override onToolSelected(): void {
+  public override async onToolSelected(): Promise<void> {
     const simpleWhiteboard = this.getSimpleWhiteboardInstance();
-    simpleWhiteboard.clearWhiteboard();
+    const i18n = simpleWhiteboard.getI18nContext();
 
-    // Select the previous tool
+    // Nothing to lose on an empty board, and the host app can opt out of the
+    // dialog entirely with `skip-clear-confirmation`.
+    const shouldAsk =
+      simpleWhiteboard.getItems().length > 0 &&
+      !simpleWhiteboard.skipClearConfirmation;
+    const confirmed =
+      !shouldAsk ||
+      (await simpleWhiteboard.confirm({
+        title: i18n.t("clear-confirm-title"),
+        message: i18n.t("clear-confirm-message"),
+        confirmLabel: i18n.t("clear-confirm-accept"),
+        cancelLabel: i18n.t("clear-confirm-cancel"),
+      }));
+
+    if (confirmed) {
+      simpleWhiteboard.clearWhiteboard();
+    }
+
+    // Clearing is a one-off action, not a mode: go back to the previous tool
+    // whether or not the user went through with it. Answering the dialog takes
+    // as long as it takes, so only step aside if this tool is still the active
+    // one — the user may have picked another in the meantime.
     const previousTool = simpleWhiteboard.getPreviousTool();
-    if (previousTool && previousTool !== this.getName()) {
+    if (
+      simpleWhiteboard.getCurrentTool() === this.getName() &&
+      previousTool &&
+      previousTool !== this.getName()
+    ) {
       simpleWhiteboard.setCurrentTool(previousTool, false);
     }
   }
