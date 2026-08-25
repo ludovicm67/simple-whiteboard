@@ -16,7 +16,7 @@ export class SimpleWhiteboardMenu extends LitElement {
         transparent
       );
       --sw-border: rgba(15, 23, 42, 0.08);
-      --sw-text-muted: rgba(31, 41, 51, 0.55);
+      --sw-text-muted: #59626d;
       --sw-accent: #135aa0;
       --sw-accent-soft: rgba(19, 90, 160, 0.12);
       --sw-radius: 10px;
@@ -98,6 +98,11 @@ export class SimpleWhiteboardMenu extends LitElement {
     /* Menu rows: [icon] [label] [chevron/spacer]. */
     .menu-item,
     .submenu-item {
+      width: 100%;
+      font: inherit;
+      text-align: left;
+      background: none;
+      border: none;
       display: flex;
       align-items: center;
       gap: 10px;
@@ -133,7 +138,11 @@ export class SimpleWhiteboardMenu extends LitElement {
       width: 16px;
     }
 
-    /* Submenus open to the right of their parent row, on hover. */
+    /*
+     * Submenus open to the right of their parent row. Opening is driven by
+     * state rather than by hover alone, so pointer and keyboard both open
+     * them and aria-expanded always tells the truth.
+     */
     .submenu {
       position: absolute;
       top: -5px;
@@ -141,7 +150,10 @@ export class SimpleWhiteboardMenu extends LitElement {
       min-width: 170px;
       display: none;
     }
-    .menu-item:hover > .submenu {
+    .menu-item-wrap {
+      position: relative;
+    }
+    .menu-item-wrap.open > .submenu {
       display: block;
       animation: menu-pop 0.13s ease;
     }
@@ -176,16 +188,29 @@ export class SimpleWhiteboardMenu extends LitElement {
   @state()
   isMenuOpen = false;
 
+  /** Which submenu is currently open, if any. */
+  @state()
+  openSubmenu: string | null = null;
+
   // Close the menu when clicking anywhere outside of it.
   private readonly onDocumentPointerDown = (e: Event) => {
     if (this.isMenuOpen && !e.composedPath().includes(this)) {
       this.isMenuOpen = false;
+      this.openSubmenu = null;
     }
   };
 
   // Close the menu when pressing Escape.
   private readonly onKeyDown = (e: KeyboardEvent) => {
-    if (e.key === "Escape" && this.isMenuOpen) {
+    if (e.key !== "Escape") {
+      return;
+    }
+    // Escape closes the open submenu first, then the menu itself.
+    if (this.openSubmenu) {
+      this.openSubmenu = null;
+      return;
+    }
+    if (this.isMenuOpen) {
       this.isMenuOpen = false;
     }
   };
@@ -216,6 +241,13 @@ export class SimpleWhiteboardMenu extends LitElement {
     document.removeEventListener("pointerdown", this.onDocumentPointerDown);
     document.removeEventListener("keydown", this.onKeyDown);
     super.disconnectedCallback();
+  }
+
+  /**
+   * Open a submenu (and close any other), or close it again.
+   */
+  private setSubmenu(id: string | null): void {
+    this.openSubmenu = id;
   }
 
   /**
@@ -262,26 +294,44 @@ export class SimpleWhiteboardMenu extends LitElement {
     const currentLocale = i18nContext.getLocale();
 
     return html`
-      <li class="menu-item" role="menuitem" aria-haspopup="true">
-        <span class="menu-item-icon">${this.icon("Languages")}</span>
-        <span class="menu-item-label">${i18nContext.t("menu-language")}</span>
-        <span class="menu-item-chevron">${this.icon("ChevronRight")}</span>
+      <li
+        role="none"
+        class="menu-item-wrap ${this.openSubmenu === "language" ? "open" : ""}"
+        @mouseenter=${() => this.setSubmenu("language")}
+        @mouseleave=${() => this.setSubmenu(null)}
+      >
+        <button
+          type="button"
+          class="menu-item"
+          role="menuitem"
+          aria-haspopup="true"
+          aria-expanded=${this.openSubmenu === "language"}
+          @click=${() => this.setSubmenu("language")}
+        >
+          <span class="menu-item-icon">${this.icon("Languages")}</span>
+          <span class="menu-item-label">${i18nContext.t("menu-language")}</span>
+          <span class="menu-item-chevron">${this.icon("ChevronRight")}</span>
+        </button>
         <ul class="submenu submenu-scroll" role="menu">
           ${locales.map((locale) => {
             const isActive = currentLocale === locale.value;
-            return html`<li
-              class="submenu-item ${isActive ? "active" : ""}"
-              role="menuitemradio"
-              aria-checked=${isActive}
-              @click=${() => {
-                i18nContext.setLocale(locale.value);
-                this.isMenuOpen = false;
-              }}
-            >
-              <span class="submenu-check"
-                >${isActive ? this.icon("Check", 15) : null}</span
+            return html`<li role="none">
+              <button
+                type="button"
+                class="submenu-item ${isActive ? "active" : ""}"
+                role="menuitemradio"
+                aria-checked=${isActive}
+                @click=${() => {
+                  i18nContext.setLocale(locale.value);
+                  this.isMenuOpen = false;
+                  this.setSubmenu(null);
+                }}
               >
-              <span class="menu-item-label">${locale.label}</span>
+                <span class="submenu-check"
+                  >${isActive ? this.icon("Check", 15) : null}</span
+                >
+                <span class="menu-item-label">${locale.label}</span>
+              </button>
             </li>`;
           })}
         </ul>
@@ -345,40 +395,65 @@ export class SimpleWhiteboardMenu extends LitElement {
         </div>
 
         <ul class="dropdown ${this.isMenuOpen ? "open" : ""}" role="menu">
-          <li class="menu-item" role="menuitem" aria-haspopup="true">
-            <span class="menu-item-icon">${this.icon("Download")}</span>
-            <span class="menu-item-label">${i18nContext.t("menu-export")}</span>
-            <span class="menu-item-chevron">${this.icon("ChevronRight")}</span>
-            <ul class="submenu" role="menu">
-              <li
-                class="submenu-item"
-                role="menuitem"
-                @click=${() => this.exportCurrentCanvasAsPng()}
+          <li
+            role="none"
+            class="menu-item-wrap ${this.openSubmenu === "export" ? "open" : ""}"
+            @mouseenter=${() => this.setSubmenu("export")}
+            @mouseleave=${() => this.setSubmenu(null)}
+          >
+            <button
+              type="button"
+              class="menu-item"
+              role="menuitem"
+              aria-haspopup="true"
+              aria-expanded=${this.openSubmenu === "export"}
+              @click=${() => this.setSubmenu("export")}
+            >
+              <span class="menu-item-icon">${this.icon("Download")}</span>
+              <span class="menu-item-label"
+                >${i18nContext.t("menu-export")}</span
               >
+              <span class="menu-item-chevron">${this.icon("ChevronRight")}</span>
+            </button>
+            <ul class="submenu" role="menu">
+              <li role="none">
+                <button
+                  type="button"
+                  class="submenu-item"
+                  role="menuitem"
+                  @click=${() => this.exportCurrentCanvasAsPng()}
+                >
                 <span class="menu-item-icon">${this.icon("ImageDown")}</span>
                 <span class="menu-item-label"
                   >${i18nContext.t("menu-export-current-view-png")}</span
                 >
+              </button>
               </li>
-              <li
-                class="submenu-item"
-                role="menuitem"
-                @click=${() => this.exportFullViewAsPng()}
-              >
+              <li role="none">
+                <button
+                  type="button"
+                  class="submenu-item"
+                  role="menuitem"
+                  @click=${() => this.exportFullViewAsPng()}
+                >
                 <span class="menu-item-icon">${this.icon("Maximize")}</span>
                 <span class="menu-item-label"
                   >${i18nContext.t("menu-export-full-view-png")}</span
                 >
+              </button>
               </li>
-              <li
-                class="submenu-item"
-                role="menuitem"
-                @click=${() => this.exportSelectedAreaAsPng()}
-              >
+              <li role="none">
+                <button
+                  type="button"
+                  class="submenu-item"
+                  role="menuitem"
+                  @click=${() => this.exportSelectedAreaAsPng()}
+                >
                 <span class="menu-item-icon">${this.icon("Crop")}</span>
                 <span class="menu-item-label"
                   >${i18nContext.t("menu-export-selected-area-png")}</span
                 >
+              </button>
               </li>
             </ul>
           </li>

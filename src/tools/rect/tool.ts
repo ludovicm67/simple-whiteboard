@@ -101,23 +101,6 @@ export class RectTool extends WhiteboardTool<RectItem> {
     };
   }
 
-  generateColorSelect(
-    colors: string[],
-    currentColor: string,
-    clickCallback: (color: string) => void
-  ) {
-    return colors.map((color) => {
-      return html`<color-select
-        color=${color}
-        .selected=${currentColor === color}
-        @color-click=${(e: CustomEvent) => {
-          clickCallback(e.detail.color);
-          this.getSimpleWhiteboardInstance().requestUpdate();
-        }}
-      ></color-select>`;
-    });
-  }
-
   public override renderToolOptions(item: RectItem | null) {
     const whiteboard = this.getSimpleWhiteboardInstance();
     const i18n = whiteboard.getI18nContext();
@@ -130,6 +113,7 @@ export class RectTool extends WhiteboardTool<RectItem> {
         <input
           class="width-100-percent"
           type="range"
+          aria-label=${i18n.t("tool-options-stroke-width")}
           min="1"
           max="50"
           step="7"
@@ -142,7 +126,8 @@ export class RectTool extends WhiteboardTool<RectItem> {
           }}
         />
         <p>${i18n.t("tool-options-stroke")}</p>
-        ${this.generateColorSelect(
+        ${this.renderColorSelect(
+          i18n.t("tool-options-stroke"),
           ["#000000", "#ff1a40", "#29b312", "#135aa0", "#fc8653"],
           currentOptions.stroke || "#000000",
           (color) => {
@@ -152,7 +137,8 @@ export class RectTool extends WhiteboardTool<RectItem> {
           }
         )}
         <p>${i18n.t("tool-options-fill")}</p>
-        ${this.generateColorSelect(
+        ${this.renderColorSelect(
+          i18n.t("tool-options-fill"),
           ["transparent", "#ff8dad", "#9bff8c", "#8fddff", "#ffc7a9"],
           currentOptions.fill || "transparent",
           (color) => {
@@ -172,6 +158,7 @@ export class RectTool extends WhiteboardTool<RectItem> {
       <input
         class="width-100-percent"
         type="range"
+        aria-label=${i18n.t("tool-options-stroke-width")}
         min="1"
         max="50"
         step="7"
@@ -190,7 +177,8 @@ export class RectTool extends WhiteboardTool<RectItem> {
         }}
       />
       <p>${i18n.t("tool-options-stroke")}</p>
-      ${this.generateColorSelect(
+      ${this.renderColorSelect(
+        i18n.t("tool-options-stroke"),
         ["#000000", "#ff1a40", "#29b312", "#135aa0", "#fc8653"],
         currentOptions.stroke || "#000000",
         (color) => {
@@ -204,7 +192,8 @@ export class RectTool extends WhiteboardTool<RectItem> {
         }
       )}
       <p>${i18n.t("tool-options-fill")}</p>
-      ${this.generateColorSelect(
+      ${this.renderColorSelect(
+        i18n.t("tool-options-fill"),
         ["transparent", "#ff8dad", "#9bff8c", "#8fddff", "#ffc7a9"],
         currentOptions.fill || "transparent",
         (color) => {

@@ -125,7 +125,7 @@ export class PictureTool extends WhiteboardTool<PictureItem> {
         </label>
         <input
           id="picture-src"
-          class="hidden"
+          class="visually-hidden"
           type="file"
           accept="image/*"
           @change=${(e: Event) => {

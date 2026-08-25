@@ -30,6 +30,7 @@
     <script type="module" src="/src/site-theme.ts"></script>
   </head>
   <body>
+    <a class="skip-link" href="#main">Skip to content</a>
     <!-- ============================================================== nav -->
     <header class="nav">
       <div class="container nav-inner">
@@ -39,7 +40,7 @@
           </span>
           <span class="brand-name">Simple Whiteboard</span>
         </a>
-        <nav class="nav-cta">
+        <nav class="nav-cta" aria-label="Main">
           <div class="nav-links">
             <a class="nav-hide-sm" href="/#features">Features</a>
             <a href="/api.html">Docs</a>
@@ -108,7 +109,7 @@
       </aside>
 
       <!-- content -->
-      <main class="docs-main">
+      <main id="main" class="docs-main">
         <!-- ---------------------------------------------- installation -->
         <section id="install">
           <h2>Installation</h2>

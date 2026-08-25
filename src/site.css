@@ -18,7 +18,7 @@
 
   --ink: light-dark(#1f2933, #e8eef6);
   --ink-soft: light-dark(#3e4c59, #bcc8d6);
-  --muted: light-dark(#6b7684, #8b98a9);
+  --muted: light-dark(#5c6675, #8b98a9);
   --board: light-dark(#fcfcff, #0b131f);
   --surface: light-dark(#ffffff, #101a27);
   --surface-muted: light-dark(#f5f7fa, #16212f);
@@ -106,6 +106,41 @@ a {
 }
 a:hover {
   color: var(--accent-hover);
+}
+
+/*
+ * Skip link: the first thing a keyboard user reaches, so they can jump past
+ * the header straight to the content. Off-screen until it takes focus.
+ */
+.skip-link {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 100;
+  transform: translateY(-200%);
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  background-color: var(--surface);
+  color: var(--accent);
+  font-weight: 600;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border-strong);
+  transition: transform 0.15s ease;
+}
+.skip-link:focus {
+  transform: none;
+}
+
+/*
+ * Focus has to be visible on every interactive element, including the ones
+ * whose own colors change on hover.
+ */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.cta :focus-visible {
+  outline-color: #fff;
 }
 
 .container {
@@ -1168,6 +1203,16 @@ td code,
   padding: 1px 6px;
   border-radius: 5px;
 }
+/* Underlined so they are distinguishable without relying on color alone. */
+.docs-main p a,
+.docs-main li a,
+.notfound p a,
+.board-caption a,
+.footer-brand p a {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .docs-main ul {
   color: var(--ink-soft);
   padding-left: 20px;

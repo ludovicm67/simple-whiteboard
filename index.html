@@ -35,6 +35,7 @@
     <script type="module" src="/src/tools/defaults.ts"></script>
   </head>
   <body>
+    <a class="skip-link" href="#main">Skip to content</a>
     <!-- ============================================================== nav -->
     <header class="nav">
       <div class="container nav-inner">
@@ -54,7 +55,7 @@
           </span>
           <span class="brand-name">Simple Whiteboard</span>
         </a>
-        <nav class="nav-cta">
+        <nav class="nav-cta" aria-label="Main">
           <div class="nav-links">
             <a class="nav-hide-sm" href="#features">Features</a>
             <a class="nav-hide-sm" href="#usage">Usage</a>
@@ -112,6 +113,7 @@
       </div>
     </header>
 
+    <main id="main">
     <!-- ============================================================= hero -->
     <section class="hero">
       <div class="container hero-inner">
@@ -223,7 +225,7 @@
                   slot="tools"
                 ></simple-whiteboard--tool-clear>
               </simple-whiteboard>
-              <div class="board-gate" data-gate>
+              <button class="board-gate" type="button" data-gate>
                 <span class="board-gate-badge">
                   <svg
                     viewBox="0 0 24 24"
@@ -238,7 +240,7 @@
                   </svg>
                   Click to doodle — it&rsquo;s live
                 </span>
-              </div>
+              </button>
             </div>
           </div>
           <p class="board-caption">
@@ -694,6 +696,8 @@
         </div>
       </div>
     </section>
+
+    </main>
 
     <!-- =========================================================== footer -->
     <footer class="footer">

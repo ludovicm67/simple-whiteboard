@@ -94,23 +94,6 @@ export class StickyTool extends WhiteboardTool<StickyItem> {
     };
   }
 
-  generateColorSelect(
-    colors: string[],
-    currentColor: string,
-    clickCallback: (color: string) => void
-  ) {
-    return colors.map((color) => {
-      return html`<color-select
-        color=${color}
-        .selected=${currentColor === color}
-        @color-click=${(e: CustomEvent) => {
-          clickCallback(e.detail.color);
-          this.getSimpleWhiteboardInstance().requestUpdate();
-        }}
-      ></color-select>`;
-    });
-  }
-
   public override renderToolOptions(item: StickyItem | null) {
     const whiteboard = this.getSimpleWhiteboardInstance();
     const i18n = whiteboard.getI18nContext();
@@ -119,7 +102,8 @@ export class StickyTool extends WhiteboardTool<StickyItem> {
     if (!item) {
       return html`
         <p>${i18n.t("tool-options-color")}</p>
-        ${this.generateColorSelect(
+        ${this.renderColorSelect(
+          i18n.t("tool-options-color"),
           NOTE_COLORS,
           this.getCurrentOptions().backgroundColor,
           (color) => {
@@ -144,7 +128,8 @@ export class StickyTool extends WhiteboardTool<StickyItem> {
         ${i18n.t("tool-sticky-edit")}
       </button>
       <p>${i18n.t("tool-options-color")}</p>
-      ${this.generateColorSelect(
+      ${this.renderColorSelect(
+        i18n.t("tool-options-color"),
         NOTE_COLORS,
         currentOptions.backgroundColor,
         (color) => {
@@ -156,6 +141,7 @@ export class StickyTool extends WhiteboardTool<StickyItem> {
       <input
         class="width-100-percent"
         type="range"
+        aria-label=${i18n.t("tool-options-size")}
         min="8"
         max="48"
         step="4"

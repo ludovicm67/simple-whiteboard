@@ -36,7 +36,7 @@ export class SimpleWhiteboardZoomSelect extends LitElement {
       );
       --sw-border: rgba(15, 23, 42, 0.08);
       --sw-text: #1f2933;
-      --sw-text-muted: rgba(31, 41, 51, 0.55);
+      --sw-text-muted: #59626d;
       --sw-accent: #135aa0;
       --sw-accent-soft: rgba(19, 90, 160, 0.12);
       --sw-radius: 10px;
@@ -114,6 +114,11 @@ export class SimpleWhiteboardZoomSelect extends LitElement {
     }
 
     .zoom-item {
+      width: 100%;
+      font: inherit;
+      text-align: left;
+      background: none;
+      border: none;
       display: flex;
       align-items: center;
       gap: 8px;
@@ -223,18 +228,21 @@ export class SimpleWhiteboardZoomSelect extends LitElement {
       <ul class="dropdown ${this.isOpen ? "open" : ""}" role="menu">
         ${ZOOM_LEVELS.map((level) => {
           const isActive = Math.abs(level - this.zoom) < ACTIVE_TOLERANCE;
-          return html`<li
-            class="zoom-item ${isActive ? "active" : ""}"
-            role="menuitemradio"
-            aria-checked=${isActive}
-            @click=${() => this.select(level)}
-          >
-            <span class="zoom-check"
-              >${isActive
-                ? unsafeHTML(getIconSvg("Check", { width: 15, height: 15 }))
-                : null}</span
+          return html`<li role="none">
+            <button
+              type="button"
+              class="zoom-item ${isActive ? "active" : ""}"
+              role="menuitemradio"
+              aria-checked=${isActive}
+              @click=${() => this.select(level)}
             >
-            <span>${this.label(level)}</span>
+              <span class="zoom-check"
+                >${isActive
+                  ? unsafeHTML(getIconSvg("Check", { width: 15, height: 15 }))
+                  : null}</span
+              >
+              <span>${this.label(level)}</span>
+            </button>
           </li>`;
         })}
       </ul>

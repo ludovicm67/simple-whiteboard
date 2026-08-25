@@ -36,5 +36,12 @@
   "tool-tooltip-sticky": "Sticky note",
   "tool-tooltip-picture": "Insert image",
   "tool-tooltip-eraser": "Eraser",
-  "tool-tooltip-clear": "Clear whiteboard"
+  "tool-tooltip-clear": "Clear whiteboard",
+  "toolbar-label": "Tools",
+  "whiteboard-empty": "The board is empty",
+  "whiteboard-hint": "Press Enter to move through the items, arrow keys to move the selected one or pan the board, Backspace to delete it, Escape to deselect.",
+  "whiteboard-label": "Whiteboard drawing area",
+  "whiteboard-removed": "{{name}} deleted",
+  "whiteboard-selected": "{{name}} selected, {{index}} of {{total}}",
+  "whiteboard-selection-cleared": "Selection cleared"
 }

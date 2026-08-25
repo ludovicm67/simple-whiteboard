@@ -1,4 +1,4 @@
-import { TemplateResult } from "lit";
+import { html, TemplateResult } from "lit";
 import { SimpleWhiteboard } from "../simple-whiteboard";
 import {
   ExportedWhiteboardItem,
@@ -84,6 +84,38 @@ export abstract class WhiteboardTool<
    */
   public import(item: ExportedWhiteboardItem<WhiteboardItemType>): ItemType {
     return this.newItem(item.data, item.id);
+  }
+
+  /**
+   * Render a labelled group of colour swatches.
+   *
+   * The swatches are radio buttons, so they are announced as one named group
+   * ("Stroke: Red, selected, 2 of 5") and can be reached and chosen with the
+   * keyboard alone.
+   *
+   * @param label Name of the group, e.g. the "Stroke" or "Fill" heading.
+   * @param colors The colours to offer.
+   * @param currentColor The colour currently in use.
+   * @param clickCallback Called with the colour the user picked.
+   */
+  protected renderColorSelect(
+    label: string,
+    colors: string[],
+    currentColor: string,
+    clickCallback: (color: string) => void
+  ): TemplateResult {
+    return html`<div role="radiogroup" aria-label=${label}>
+      ${colors.map(
+        (color) => html`<color-select
+          color=${color}
+          .selected=${currentColor === color}
+          @color-click=${(e: CustomEvent) => {
+            clickCallback(e.detail.color);
+            this.getSimpleWhiteboardInstance().requestUpdate();
+          }}
+        ></color-select>`
+      )}
+    </div>`;
   }
 
   /**

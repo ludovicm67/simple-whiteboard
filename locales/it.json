@@ -36,5 +36,12 @@
   "tool-tooltip-sticky": "Nota adesiva",
   "tool-tooltip-picture": "Inserisci immagine",
   "tool-tooltip-eraser": "Gomma",
-  "tool-tooltip-clear": "Cancella lavagna"
+  "tool-tooltip-clear": "Cancella lavagna",
+  "toolbar-label": "Strumenti",
+  "whiteboard-empty": "La lavagna è vuota",
+  "whiteboard-hint": "Premi Invio per scorrere gli elementi, le frecce per spostare l'elemento selezionato o la lavagna, Backspace per eliminarlo, Esc per deselezionare.",
+  "whiteboard-label": "Area di disegno della lavagna",
+  "whiteboard-removed": "{{name}} eliminato",
+  "whiteboard-selected": "{{name}} selezionato, {{index}} di {{total}}",
+  "whiteboard-selection-cleared": "Selezione annullata"
 }

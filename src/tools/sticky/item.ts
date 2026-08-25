@@ -208,6 +208,10 @@ export class StickyItem extends WhiteboardItem<StickyItemType> {
     let textarea = this.editElement;
     if (!textarea) {
       textarea = document.createElement("textarea");
+      textarea.setAttribute(
+        "aria-label",
+        this.whiteboard?.getI18nContext().t("tool-sticky-edit") ?? "Edit note"
+      );
       parent.appendChild(textarea);
       this.editElement = textarea;
 

@@ -36,5 +36,12 @@
   "tool-tooltip-sticky": "Yapışkan not",
   "tool-tooltip-picture": "Resim ekle",
   "tool-tooltip-eraser": "Silgi",
-  "tool-tooltip-clear": "Tahtayı temizle"
+  "tool-tooltip-clear": "Tahtayı temizle",
+  "toolbar-label": "Araçlar",
+  "whiteboard-empty": "Tahta boş",
+  "whiteboard-hint": "Ögeler arasında geçmek için Enter, seçili ögeyi veya tahtayı taşımak için ok tuşlarına, silmek için Geri Al tuşuna, seçimi kaldırmak için Escape tuşuna basın.",
+  "whiteboard-label": "Beyaz tahta çizim alanı",
+  "whiteboard-removed": "{{name}} silindi",
+  "whiteboard-selected": "{{name}} seçildi, {{index}} / {{total}}",
+  "whiteboard-selection-cleared": "Seçim temizlendi"
 }
