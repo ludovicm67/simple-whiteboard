@@ -172,6 +172,7 @@ export class EraserTool extends WhiteboardTool<EraserItem> {
       <input
         class="width-100-percent"
         type="range"
+        aria-label=${i18n.t("tool-options-size")}
         min=${MIN_ERASER_SIZE}
         max=${MAX_ERASER_SIZE}
         step="5"

@@ -181,6 +181,10 @@ export class TextItem extends WhiteboardItem<TextItemType> {
       if (!textareaElement) {
         textareaElement = document.createElement("textarea");
         textareaElement.id = TEXTAREA_EDIT_ID;
+        textareaElement.setAttribute(
+          "aria-label",
+          whiteboard?.getI18nContext().t("tool-text-edit") ?? "Edit your text"
+        );
         parentOfCanvasElement.appendChild(textareaElement);
         this.editElement = textareaElement;
 

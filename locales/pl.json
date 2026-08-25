@@ -36,5 +36,12 @@
   "tool-tooltip-sticky": "Karteczka",
   "tool-tooltip-picture": "Wstaw obraz",
   "tool-tooltip-eraser": "Gumka",
-  "tool-tooltip-clear": "Wyczyść tablicę"
+  "tool-tooltip-clear": "Wyczyść tablicę",
+  "toolbar-label": "Narzędzia",
+  "whiteboard-empty": "Tablica jest pusta",
+  "whiteboard-hint": "Naciśnij Enter, aby przechodzić między elementami, strzałki, aby przesunąć wybrany element lub tablicę, Backspace, aby go usunąć, Escape, aby anulować zaznaczenie.",
+  "whiteboard-label": "Obszar rysowania tablicy",
+  "whiteboard-removed": "{{name}} usunięto",
+  "whiteboard-selected": "{{name}} zaznaczono, {{index}} z {{total}}",
+  "whiteboard-selection-cleared": "Zaznaczenie wyczyszczone"
 }

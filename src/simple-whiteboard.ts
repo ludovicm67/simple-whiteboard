@@ -73,6 +73,12 @@ export class SimpleWhiteboard extends LitElement {
   @state()
   private cursor: string = "default";
 
+  // Text announced to assistive technology after a keyboard action (selecting,
+  // deleting, …). The canvas itself is opaque to screen readers, so what
+  // happens on it has to be said out loud.
+  @state()
+  private status: string = "";
+
   private i18nContext: I18nContext = new I18nContext();
   private coordsContext: CoordsContext = new CoordsContext();
 
@@ -243,6 +249,119 @@ export class SimpleWhiteboard extends LitElement {
     return tag === "TEXTAREA" || tag === "INPUT" || el.isContentEditable;
   }
 
+  /**
+   * Announce something in the live region. The text is re-set even when it does
+   * not change (with a zero-width space) so repeated actions are still spoken.
+   */
+  private announce(message: string): void {
+    this.status = this.status === message ? `${message}\u200b` : message;
+  }
+
+  /** The localized name of an item's kind, e.g. "Rectangle". */
+  private itemLabel(item: WhiteboardItem<WhiteboardItemType>): string {
+    return this.i18nContext.t(`tool-tooltip-${item.getType()}`);
+  }
+
+  /** Whether the keyboard event happened while the canvas had focus. */
+  private isCanvasFocused(e: Event): boolean {
+    const path = (e.composedPath && e.composedPath()) || [];
+    return !!this.canvas && path.includes(this.canvas);
+  }
+
+  /**
+   * Move the selection to the next (or previous) item and announce it.
+   * Clicking is not the only way to reach an item: this makes selecting one
+   * possible from the keyboard alone.
+   */
+  private selectAdjacentItem(direction: number): void {
+    const items = this.getItems();
+    if (items.length === 0) {
+      this.announce(this.i18nContext.t("whiteboard-empty"));
+      return;
+    }
+
+    const currentId = this.getSelectedItemId();
+    const current = items.findIndex((item) => item.getId() === currentId);
+    const next =
+      current < 0
+        ? direction > 0
+          ? 0
+          : items.length - 1
+        : (current + direction + items.length) % items.length;
+
+    const item = items[next];
+    this.setSelectedItemId(item.getId());
+    this.draw();
+    this.announce(
+      this.i18nContext.t("whiteboard-selected", {
+        name: this.itemLabel(item),
+        index: next + 1,
+        total: items.length,
+      })
+    );
+  }
+
+  /** Nudge the selected item with the arrow keys. */
+  private moveSelectedItem(dx: number, dy: number): boolean {
+    const item = this.getSelectedItem();
+    if (!item) {
+      return false;
+    }
+    const update = item.relativeMoveOperation(dx, dy);
+    if (update === null) {
+      return false;
+    }
+    this.partialItemUpdateById(item.getId(), update, true);
+    this.history.commit();
+    return true;
+  }
+
+  /**
+   * Keyboard shortcuts available while the canvas has focus. Drawing itself is
+   * a pointer gesture, but everything around it — picking an item, moving it,
+   * deleting it — has to work from the keyboard too.
+   */
+  private handleCanvasKeyDown(e: KeyboardEvent): boolean {
+    const nudge: Record<string, [number, number]> = {
+      ArrowLeft: [-1, 0],
+      ArrowRight: [1, 0],
+      ArrowUp: [0, -1],
+      ArrowDown: [0, 1],
+    };
+
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      this.selectAdjacentItem(e.shiftKey ? -1 : 1);
+      return true;
+    }
+
+    if (e.key === "Escape" && this.getSelectedItemId()) {
+      e.preventDefault();
+      this.setSelectedItemId(null);
+      this.draw();
+      this.announce(this.i18nContext.t("whiteboard-selection-cleared"));
+      return true;
+    }
+
+    if (e.key in nudge) {
+      const [dx, dy] = nudge[e.key];
+      const step = (e.shiftKey ? 10 : 1) / this.coordsContext.getZoom();
+      if (this.moveSelectedItem(dx * step, dy * step)) {
+        e.preventDefault();
+        return true;
+      }
+      // Nothing selected: pan the view instead, so the board stays explorable.
+      e.preventDefault();
+      const { x, y } = this.coordsContext.getCoords();
+      const panStep = e.shiftKey ? 100 : 20;
+      this.coordsContext.setCoords(x - dx * panStep, y - dy * panStep);
+      this.draw();
+      return true;
+    }
+
+    return false;
+  }
+
   handleKeyDown(e: KeyboardEvent) {
     const isModifier = e.metaKey || e.ctrlKey;
     const key = e.key.toLowerCase();
@@ -269,12 +388,26 @@ export class SimpleWhiteboard extends LitElement {
       return;
     }
 
-    // If it is the backspace key, we remove the selected item
-    if (e.key === "Backspace") {
+    // If it is the backspace (or delete) key, we remove the selected item
+    if (e.key === "Backspace" || e.key === "Delete") {
       const selectedItem = this.getSelectedItem();
-      if (selectedItem && selectedItem.isRemovableWithBackspace()) {
+      if (
+        selectedItem &&
+        selectedItem.isRemovableWithBackspace() &&
+        !this.isEditableTarget(e)
+      ) {
+        const name = this.itemLabel(selectedItem);
         this.removeItemById(selectedItem.getId(), true);
+        this.announce(
+          this.i18nContext.t("whiteboard-removed", { name })
+        );
+        return;
       }
+    }
+
+    // Everything else only applies while the drawing surface itself has focus.
+    if (!this.isEditableTarget(e) && this.isCanvasFocused(e)) {
+      this.handleCanvasKeyDown(e);
     }
   }
 
@@ -519,33 +652,90 @@ export class SimpleWhiteboard extends LitElement {
     return label;
   }
 
-  renderToolsList() {
-    const tools = [];
-
-    for (const [toolName, tool] of this.registeredTools) {
-      const icon = tool.getIcon();
-      if (!icon) {
-        continue;
-      }
-
-      const button = html`<button
-        class=${this.currentTool === toolName ? "tools--active" : ""}
-        @mouseover=${(e: MouseEvent) =>
-          this.toolbarTooltip.show(e.target, this.getToolTooltip(toolName))}
-        @mouseout=${() => this.toolbarTooltip.hide()}
-        @click=${(e: Event) => this.handleToolChange(toolName, e)}
-      >
-        ${icon}
-      </button>`;
-
-      tools.push(button);
+  /**
+   * Move focus between the toolbar buttons with the arrow keys, as a toolbar
+   * is expected to behave: the toolbar is a single tab stop, and the arrows
+   * (plus Home/End) walk it. Focus moves without activating, so a keyboard
+   * user can look around before committing to a tool.
+   */
+  private handleToolbarKeyDown(e: KeyboardEvent): void {
+    const steps: Record<string, number> = {
+      ArrowRight: 1,
+      ArrowDown: 1,
+      ArrowLeft: -1,
+      ArrowUp: -1,
+    };
+    const isEdge = e.key === "Home" || e.key === "End";
+    if (!(e.key in steps) && !isEdge) {
+      return;
     }
 
-    if (tools.length === 0) {
+    const toolbar = e.currentTarget as HTMLElement;
+    const buttons = Array.from(toolbar.querySelectorAll("button"));
+    if (buttons.length === 0) {
+      return;
+    }
+
+    e.preventDefault();
+    const current = buttons.indexOf(
+      (this.shadowRoot?.activeElement as HTMLButtonElement) ?? buttons[0]
+    );
+    let next: number;
+    if (e.key === "Home") {
+      next = 0;
+    } else if (e.key === "End") {
+      next = buttons.length - 1;
+    } else {
+      const from = current < 0 ? 0 : current;
+      next = (from + steps[e.key] + buttons.length) % buttons.length;
+    }
+    buttons[next].focus();
+  }
+
+  renderToolsList() {
+    const i18n = this.i18nContext;
+    const entries = [...this.registeredTools].filter(
+      ([, tool]) => tool.getIcon() !== null
+    );
+
+    if (entries.length === 0) {
       return null;
     }
 
-    return html`<div class="tools">${tools}</div>`;
+    // Roving tabindex: the toolbar is one tab stop, landing on the active tool.
+    const activeIndex = Math.max(
+      0,
+      entries.findIndex(([toolName]) => toolName === this.currentTool)
+    );
+
+    const tools = entries.map(([toolName, tool], index) => {
+      const label = this.getToolTooltip(toolName);
+      const isActive = this.currentTool === toolName;
+      return html`<button
+        class=${isActive ? "tools--active" : ""}
+        aria-label=${label}
+        title=${label}
+        aria-pressed=${isActive}
+        tabindex=${index === activeIndex ? 0 : -1}
+        @mouseover=${(e: MouseEvent) =>
+          this.toolbarTooltip.show(e.target, label)}
+        @mouseout=${() => this.toolbarTooltip.hide()}
+        @focus=${(e: FocusEvent) => this.toolbarTooltip.show(e.target, label)}
+        @blur=${() => this.toolbarTooltip.hide()}
+        @click=${(e: Event) => this.handleToolChange(toolName, e)}
+      >
+        ${tool.getIcon()}
+      </button>`;
+    });
+
+    return html`<div
+      class="tools"
+      role="toolbar"
+      aria-label=${i18n.t("toolbar-label")}
+      @keydown=${(e: KeyboardEvent) => this.handleToolbarKeyDown(e)}
+    >
+      ${tools}
+    </div>`;
   }
 
   /**
@@ -614,6 +804,9 @@ export class SimpleWhiteboard extends LitElement {
         ${renderFooterTools(this)}
 
         <canvas
+          tabindex="0"
+          aria-label=${this.i18nContext.t("whiteboard-label")}
+          aria-describedby="whiteboard-hint"
           @mousedown="${this.handleMouseDown}"
           @mouseup="${this.handleMouseUp}"
           @mousemove="${this.handleMouseMove}"
@@ -623,6 +816,13 @@ export class SimpleWhiteboard extends LitElement {
           @touchend="${this.handleTouchEnd}"
           @touchcancel="${this.handleTouchCancel}"
         ></canvas>
+
+        <p id="whiteboard-hint" class="visually-hidden">
+          ${this.i18nContext.t("whiteboard-hint")}
+        </p>
+        <p class="visually-hidden" role="status" aria-live="polite">
+          ${this.status}
+        </p>
       </div>
     `;
   }

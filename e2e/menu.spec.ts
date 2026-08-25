@@ -20,9 +20,14 @@ test.describe("menu & i18n (app.html)", () => {
   test("the Export submenu offers exactly three options", async ({ page }) => {
     const menu = page.locator("simple-whiteboard-menu");
     await menu.locator(".menu-button").click();
-    const exportItem = menu.locator(".menu-item", { hasText: "Export" }).first();
+    // The row is a button; its submenu is a sibling inside the same wrapper.
+    const exportItem = menu
+      .locator(".menu-item-wrap", { hasText: "Export" })
+      .first();
     await exportItem.hover();
     await expect(exportItem.locator(".submenu-item")).toHaveCount(3);
+    // Present is not enough — the panel has to actually be on screen.
+    await expect(exportItem.locator(".submenu-item").first()).toBeVisible();
   });
 
   test("switching the language translates the menu labels", async ({ page }) => {

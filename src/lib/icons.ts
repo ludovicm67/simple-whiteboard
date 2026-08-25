@@ -110,6 +110,10 @@ export const getIconSvg = (
   const svgElement = createElement(icon, {
     ...defaultSvgIconOptions,
     ...(options || {}),
+    // Icons illustrate a control that carries its own accessible name, so they
+    // are decorative and must not be announced twice.
+    "aria-hidden": "true",
+    focusable: "false",
   });
   return svgElement.outerHTML;
 };

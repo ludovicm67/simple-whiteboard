@@ -9,7 +9,7 @@ const getLocaleContent = async (locale: string): Promise<any> => {
 
 export class I18nContext {
   private instance: i18n;
-  private _t = (key: string) => key;
+  private _t: TFunction | ((key: string) => string) = (key: string) => key;
 
   constructor() {
     this.instance = i18next.createInstance(
@@ -67,14 +67,30 @@ export class I18nContext {
     );
   }
 
-  public t(key: string): string {
+  /**
+   * Translate a key, optionally interpolating values into it (`{{name}}`).
+   *
+   * @param key The translation key.
+   * @param params Values for the placeholders the translation contains.
+   * @returns The translated string, or the key itself when unavailable.
+   */
+  public t(
+    key: string,
+    params?: Record<string, string | number>
+  ): string {
     if (!this || !this._t) {
       console.error(
         "I18nContext is not initialized, please call it the following way: const i18n = whiteboard.getI18nContext(); i18n.t('your_key')"
       );
       return key;
     }
-    return this._t(key);
+    // The i18next overloads do not describe "key plus interpolation values",
+    // which is exactly what this thin wrapper exists to offer.
+    const translate = this._t as (
+      key: string,
+      params?: Record<string, string | number>
+    ) => string;
+    return translate(key, params);
   }
 
   public async setLocale(lng: string): Promise<TFunction> {

@@ -36,5 +36,12 @@
   "tool-tooltip-sticky": "Nota adhesiva",
   "tool-tooltip-picture": "Insertar imagen",
   "tool-tooltip-eraser": "Borrador",
-  "tool-tooltip-clear": "Borrar pizarra"
+  "tool-tooltip-clear": "Borrar pizarra",
+  "toolbar-label": "Herramientas",
+  "whiteboard-empty": "La pizarra está vacía",
+  "whiteboard-hint": "Pulsa Intro para recorrer los elementos, las flechas para mover el elemento seleccionado o la pizarra, Retroceso para eliminarlo y Escape para deseleccionar.",
+  "whiteboard-label": "Área de dibujo de la pizarra",
+  "whiteboard-removed": "{{name}} eliminado",
+  "whiteboard-selected": "{{name}} seleccionado, {{index}} de {{total}}",
+  "whiteboard-selection-cleared": "Selección borrada"
 }

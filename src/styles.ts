@@ -18,7 +18,7 @@ export const styles = css`
     --sw-surface-muted: #f2f3f5;
     --sw-border: rgba(15, 23, 42, 0.08);
     --sw-text: #1f2933;
-    --sw-text-muted: rgba(31, 41, 51, 0.55);
+    --sw-text-muted: #59626d;
     --sw-accent: #135aa0;
     --sw-accent-soft: rgba(19, 90, 160, 0.12);
     --sw-radius: 10px;
@@ -58,6 +58,36 @@ export const styles = css`
 
   .hidden {
     display: none;
+  }
+
+  /*
+   * Available to assistive technology, invisible on screen. Unlike
+   * \`display: none\` it stays focusable, which matters for the controls it
+   * hides (the file input behind the "select a picture" button) and lets the
+   * canvas carry instructions and a live region for what happens on it.
+   */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* The visible button has to show the focus its hidden input receives. */
+  label.button:has(+ input:focus-visible) {
+    outline: 2px solid var(--sw-accent);
+    outline-offset: 2px;
+  }
+
+  canvas:focus-visible {
+    outline: 2px solid var(--sw-accent);
+    outline-offset: -2px;
   }
 
   /* Keyboard focus should always be clearly visible for accessibility. */

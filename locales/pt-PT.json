@@ -36,5 +36,12 @@
   "tool-tooltip-sticky": "Nota adesiva",
   "tool-tooltip-picture": "Inserir imagem",
   "tool-tooltip-eraser": "Borracha",
-  "tool-tooltip-clear": "Limpar quadro"
+  "tool-tooltip-clear": "Limpar quadro",
+  "toolbar-label": "Ferramentas",
+  "whiteboard-empty": "O quadro está vazio",
+  "whiteboard-hint": "Pressione Enter para percorrer os itens, as setas para mover o item selecionado ou o quadro, Backspace para excluí-lo e Escape para desmarcar.",
+  "whiteboard-label": "Área de desenho do quadro branco",
+  "whiteboard-removed": "{{name}} excluído",
+  "whiteboard-selected": "{{name}} selecionado, {{index}} de {{total}}",
+  "whiteboard-selection-cleared": "Seleção limpa"
 }

@@ -36,5 +36,12 @@
   "tool-tooltip-sticky": "Note autocollante",
   "tool-tooltip-picture": "Insérer une image",
   "tool-tooltip-eraser": "Gomme",
-  "tool-tooltip-clear": "Réinitialiser"
+  "tool-tooltip-clear": "Réinitialiser",
+  "toolbar-label": "Outils",
+  "whiteboard-empty": "Le tableau est vide",
+  "whiteboard-hint": "Appuyez sur Entrée pour parcourir les éléments, sur les flèches pour déplacer l'élément sélectionné ou le tableau, sur Retour arrière pour le supprimer, sur Échap pour désélectionner.",
+  "whiteboard-label": "Zone de dessin du tableau blanc",
+  "whiteboard-removed": "{{name}} supprimé",
+  "whiteboard-selected": "{{name}} sélectionné, {{index}} sur {{total}}",
+  "whiteboard-selection-cleared": "Sélection effacée"
 }

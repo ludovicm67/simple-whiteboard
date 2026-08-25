@@ -36,5 +36,12 @@
   "tool-tooltip-sticky": "Lepicí poznámka",
   "tool-tooltip-picture": "Vložit obrázek",
   "tool-tooltip-eraser": "Guma",
-  "tool-tooltip-clear": "Vymazat tabuli"
+  "tool-tooltip-clear": "Vymazat tabuli",
+  "toolbar-label": "Nástroje",
+  "whiteboard-empty": "Tabule je prázdná",
+  "whiteboard-hint": "Stisknutím klávesy Enter procházíte objekty, šipkami přesunete vybraný objekt nebo tabuli, klávesou Backspace jej odstraníte a klávesou Escape zrušíte výběr.",
+  "whiteboard-label": "Kreslicí plocha tabule",
+  "whiteboard-removed": "{{name}} odstraněno",
+  "whiteboard-selected": "{{name}} vybráno, {{index}} z {{total}}",
+  "whiteboard-selection-cleared": "Výběr zrušen"
 }

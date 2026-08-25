@@ -36,5 +36,12 @@
   "tool-tooltip-sticky": "Haftnotiz",
   "tool-tooltip-picture": "Bild einfügen",
   "tool-tooltip-eraser": "Radiergummi",
-  "tool-tooltip-clear": "Whiteboard löschen"
+  "tool-tooltip-clear": "Whiteboard löschen",
+  "toolbar-label": "Werkzeuge",
+  "whiteboard-empty": "Die Tafel ist leer",
+  "whiteboard-hint": "Drücken Sie die Eingabetaste, um die Elemente zu durchlaufen, die Pfeiltasten, um das ausgewählte Element oder die Tafel zu verschieben, die Rücktaste zum Löschen und Escape zum Aufheben der Auswahl.",
+  "whiteboard-label": "Zeichenfläche des Whiteboards",
+  "whiteboard-removed": "{{name}} gelöscht",
+  "whiteboard-selected": "{{name}} ausgewählt, {{index}} von {{total}}",
+  "whiteboard-selection-cleared": "Auswahl aufgehoben"
 }
