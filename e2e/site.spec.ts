@@ -55,6 +55,26 @@ test.describe("landing page (index.html)", () => {
       expect(overflows, `overflow at ${width}px`).toBe(false);
     }
   });
+
+  test("the nav fits even with a wider fallback font", async ({ page }) => {
+    // Inter is not installed everywhere (CI included), so the nav has to hold
+    // up with whatever it falls back to. Verdana is wider than any of those
+    // fallbacks: the brand truncates rather than pushing the page sideways.
+    await page.setViewportSize({ width: 360, height: 800 });
+    await page.goto("/index.html");
+    await page.addStyleTag({
+      content:
+        "body, .brand, .btn, .nav-links a { font-family: Verdana, sans-serif !important; }",
+    });
+
+    const overflows = await page.evaluate(
+      () =>
+        document.documentElement.scrollWidth >
+        document.documentElement.clientWidth + 1
+    );
+    expect(overflows).toBe(false);
+    await expect(page.locator(".theme-toggle")).toBeVisible();
+  });
 });
 
 test.describe("404 page", () => {

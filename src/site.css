@@ -201,6 +201,21 @@ a:hover {
   font-size: 1.05rem;
   letter-spacing: -0.01em;
   color: var(--ink);
+  /*
+   * The nav must never push the page wider than the viewport, whatever the
+   * font it ends up rendering with. The actions on the right keep their size,
+   * so the brand is what gives: it shrinks and, if it really has to, truncates.
+   */
+  min-width: 0;
+}
+.brand-mark,
+.nav-cta {
+  flex: none;
+}
+.brand-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .brand:hover {
   color: var(--ink);
@@ -297,6 +312,20 @@ a:hover {
     display: none;
   }
 }
+/*
+ * Phones: the logo mark alone identifies the site, so the name steps aside
+ * rather than crowding the Docs link, the theme toggle and the call to action.
+ * (The footer keeps its full brand — this is scoped to the nav.)
+ */
+@media (max-width: 460px) {
+  .nav .brand-name {
+    display: none;
+  }
+  .nav .brand {
+    gap: 0;
+  }
+}
+
 /* Very small screens: reclaim horizontal room so the nav (and everything else)
    fits comfortably. */
 @media (max-width: 420px) {
