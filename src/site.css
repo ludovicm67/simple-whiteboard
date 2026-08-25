@@ -7,30 +7,62 @@
  * the soft shadow) so the site and the product feel like one thing.
  */
 
+/*
+ * Palette. Every color is declared once, with its light and its dark value:
+ * `color-scheme` decides which one applies. The site therefore follows the
+ * visitor's OS preference on its own, and the nav toggle only has to narrow
+ * that scheme (through `data-theme` on <html>) to pin one of the two.
+ */
 :root {
-  --ink: #1f2933;
-  --ink-soft: #3e4c59;
-  --muted: #6b7684;
-  --board: #fcfcff;
-  --surface: #ffffff;
-  --surface-muted: #f5f7fa;
-  --surface-translucent: rgba(255, 255, 255, 0.72);
-  --border: rgba(15, 23, 42, 0.09);
-  --border-strong: rgba(15, 23, 42, 0.16);
-  --accent: #135aa0;
-  --accent-hover: #0f4881;
-  --accent-soft: rgba(19, 90, 160, 0.1);
-  --accent-2: #7c3aed;
+  color-scheme: light dark;
+
+  --ink: light-dark(#1f2933, #e8eef6);
+  --ink-soft: light-dark(#3e4c59, #bcc8d6);
+  --muted: light-dark(#6b7684, #8b98a9);
+  --board: light-dark(#fcfcff, #0b131f);
+  --surface: light-dark(#ffffff, #101a27);
+  --surface-muted: light-dark(#f5f7fa, #16212f);
+  --surface-translucent: light-dark(
+    rgba(255, 255, 255, 0.72),
+    rgba(16, 26, 39, 0.72)
+  );
+  --border: light-dark(rgba(15, 23, 42, 0.09), rgba(255, 255, 255, 0.1));
+  --border-strong: light-dark(rgba(15, 23, 42, 0.16), rgba(255, 255, 255, 0.2));
+
+  /* `--accent` colors text and icons, so it brightens on the dark theme;
+     `--accent-solid` stays dark enough to carry white text on top of it. */
+  --accent: light-dark(#135aa0, #7ab4f0);
+  --accent-hover: light-dark(#0f4881, #a5cdf7);
+  --accent-soft: light-dark(rgba(19, 90, 160, 0.1), rgba(122, 180, 240, 0.15));
+  --accent-solid: light-dark(#135aa0, #1f6fc0);
+  --accent-2: light-dark(#7c3aed, #a78bfa);
+
+  /* Decorations: the dotted grid and the aurora glow behind the headline. */
+  --dot-color: light-dark(rgba(15, 23, 42, 0.14), rgba(255, 255, 255, 0.11));
+  --glow-1: light-dark(rgba(19, 90, 160, 0.16), rgba(56, 132, 214, 0.26));
+  --glow-2: light-dark(rgba(124, 58, 237, 0.14), rgba(139, 92, 246, 0.22));
+
   --radius: 14px;
   --radius-sm: 8px;
   --radius-lg: 22px;
-  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.06);
-  --shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 12px 30px rgba(15, 23, 42, 0.1);
-  --shadow-lg: 0 20px 50px -12px rgba(15, 23, 42, 0.28);
+  --shadow-color: light-dark(rgba(15, 23, 42, 0.06), rgba(0, 0, 0, 0.4));
+  --shadow-color-mid: light-dark(rgba(15, 23, 42, 0.1), rgba(0, 0, 0, 0.5));
+  --shadow-color-lg: light-dark(rgba(15, 23, 42, 0.28), rgba(0, 0, 0, 0.65));
+  --shadow-sm: 0 1px 2px var(--shadow-color), 0 4px 12px var(--shadow-color);
+  --shadow: 0 1px 2px var(--shadow-color), 0 12px 30px var(--shadow-color-mid);
+  --shadow-lg: 0 20px 50px -12px var(--shadow-color-lg);
   --font: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
     "Liberation Mono", monospace;
   --maxw: 1120px;
+}
+
+/* The nav toggle pins a theme by narrowing the scheme the palette reads. */
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
 }
 
 * {
@@ -118,12 +150,12 @@ a:hover {
   height: 18px;
 }
 .btn-primary {
-  background-color: var(--accent);
+  background-color: var(--accent-solid);
   color: #fff;
   box-shadow: 0 8px 20px -6px rgba(19, 90, 160, 0.55);
 }
 .btn-primary:hover {
-  background-color: var(--accent-hover);
+  background-color: light-dark(var(--accent-hover), #2f81d4);
   color: #fff;
   transform: translateY(-1px);
   box-shadow: 0 12px 26px -6px rgba(19, 90, 160, 0.6);
@@ -169,6 +201,21 @@ a:hover {
   font-size: 1.05rem;
   letter-spacing: -0.01em;
   color: var(--ink);
+  /*
+   * The nav must never push the page wider than the viewport, whatever the
+   * font it ends up rendering with. The actions on the right keep their size,
+   * so the brand is what gives: it shrinks and, if it really has to, truncates.
+   */
+  min-width: 0;
+}
+.brand-mark,
+.nav-cta {
+  flex: none;
+}
+.brand-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .brand:hover {
   color: var(--ink);
@@ -179,7 +226,8 @@ a:hover {
   width: 32px;
   height: 32px;
   border-radius: 9px;
-  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  /* Logo colors, fixed in both themes: white sits on top of them. */
+  background: linear-gradient(135deg, #135aa0, #7c3aed);
   color: #fff;
   box-shadow: var(--shadow-sm);
 }
@@ -208,6 +256,54 @@ a:hover {
   align-items: center;
   gap: 10px;
 }
+
+/*
+ * Theme toggle. It shows the theme it switches *to*, so the moon appears while
+ * the light theme is active and the sun while the dark one is. Which theme is
+ * active is either the OS preference or, once the visitor has chosen, the
+ * `data-theme` pinned on <html> — hence the two pairs of rules below.
+ */
+.theme-toggle {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background-color: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease,
+    border-color 0.15s ease;
+}
+.theme-toggle:hover {
+  background-color: var(--surface-muted);
+  border-color: var(--border-strong);
+  color: var(--ink);
+}
+.theme-toggle svg {
+  grid-area: 1 / 1;
+  width: 17px;
+  height: 17px;
+}
+.theme-toggle .icon-sun {
+  display: none;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .theme-toggle .icon-sun {
+    display: block;
+  }
+  :root:not([data-theme="light"]) .theme-toggle .icon-moon {
+    display: none;
+  }
+}
+:root[data-theme="dark"] .theme-toggle .icon-sun {
+  display: block;
+}
+:root[data-theme="dark"] .theme-toggle .icon-moon {
+  display: none;
+}
 .nav-links .nav-hide-sm {
   /* shown on wide screens, collapsed on small ones */
 }
@@ -216,6 +312,20 @@ a:hover {
     display: none;
   }
 }
+/*
+ * Phones: the logo mark alone identifies the site, so the name steps aside
+ * rather than crowding the Docs link, the theme toggle and the call to action.
+ * (The footer keeps its full brand — this is scoped to the nav.)
+ */
+@media (max-width: 460px) {
+  .nav .brand-name {
+    display: none;
+  }
+  .nav .brand {
+    gap: 0;
+  }
+}
+
 /* Very small screens: reclaim horizontal room so the nav (and everything else)
    fits comfortably. */
 @media (max-width: 420px) {
@@ -230,6 +340,14 @@ a:hover {
   }
   .btn {
     padding: 11px 16px;
+  }
+  /* The theme toggle has to earn its place next to the brand and the CTA. */
+  .nav-cta {
+    gap: 6px;
+  }
+  .theme-toggle {
+    width: 32px;
+    height: 32px;
   }
 }
 
@@ -248,10 +366,7 @@ a:hover {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(
-    rgba(15, 23, 42, 0.14) 1.1px,
-    transparent 1.1px
-  );
+  background-image: radial-gradient(var(--dot-color) 1.1px, transparent 1.1px);
   background-size: 22px 22px;
   -webkit-mask-image: radial-gradient(
     ellipse 80% 70% at 50% 30%,
@@ -274,13 +389,9 @@ a:hover {
   width: 900px;
   height: 520px;
   transform: translateX(-50%);
-  background: radial-gradient(
-      closest-side,
-      rgba(19, 90, 160, 0.16),
-      transparent
-    ),
-    radial-gradient(closest-side, rgba(124, 58, 237, 0.14), transparent) 65% 40% /
-      70% 70% no-repeat;
+  background: radial-gradient(closest-side, var(--glow-1), transparent),
+    radial-gradient(closest-side, var(--glow-2), transparent) 65% 40% / 70% 70%
+      no-repeat;
   filter: blur(10px);
   pointer-events: none;
 }
@@ -354,7 +465,13 @@ a:hover {
 }
 
 /* Mac-style browser frame around the live embedded whiteboard. */
+/*
+ * The whiteboard is light-only for now, so its mock window opts back into the
+ * light palette: on the dark theme it reads as a light app window sitting on
+ * a dark page, instead of a half-dark frame around a white board.
+ */
 .board-frame {
+  color-scheme: light;
   border-radius: var(--radius-lg);
   overflow: hidden;
   background-color: var(--surface);
@@ -406,10 +523,7 @@ a:hover {
   position: relative;
   height: 460px;
   background-color: var(--board);
-  background-image: radial-gradient(
-    rgba(15, 23, 42, 0.1) 1px,
-    transparent 1px
-  );
+  background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
   background-size: 22px 22px;
 }
 .board-embed simple-whiteboard {
@@ -633,11 +747,13 @@ a:hover {
 }
 
 .code {
-  background-color: #0f1b2d;
+  /* A shade darker than the page on the dark theme, so it still reads as an
+     inset block rather than melting into the background. */
+  background-color: light-dark(#0f1b2d, #0a121e);
   border-radius: var(--radius);
   overflow: hidden;
   box-shadow: var(--shadow);
-  border: 1px solid rgba(15, 23, 42, 0.5);
+  border: 1px solid light-dark(rgba(15, 23, 42, 0.5), rgba(255, 255, 255, 0.12));
 }
 .code-head {
   display: flex;
@@ -652,21 +768,41 @@ a:hover {
   font-size: 0.78rem;
   color: #8b98ac;
 }
+/*
+ * Copy button. The colors are tokens because the same button sits both on the
+ * dark code blocks (the defaults below) and on light surfaces, which override
+ * them: white-on-white would otherwise make the label vanish on hover.
+ */
 .code-copy {
+  --copy-fg: #c7d2e0;
+  --copy-fg-hover: #fff;
+  --copy-bg: rgba(255, 255, 255, 0.06);
+  --copy-bg-hover: rgba(255, 255, 255, 0.12);
+  --copy-border: rgba(255, 255, 255, 0.1);
+
   font-family: inherit;
   font-size: 0.76rem;
   font-weight: 600;
-  color: #c7d2e0;
-  background-color: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--copy-fg);
+  background-color: var(--copy-bg);
+  border: 1px solid var(--copy-border);
   border-radius: 6px;
   padding: 4px 10px;
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
 .code-copy:hover {
-  background-color: rgba(255, 255, 255, 0.12);
-  color: #fff;
+  background-color: var(--copy-bg-hover);
+  color: var(--copy-fg-hover);
+}
+
+/* Light surfaces: ink on a tinted background instead of white on white. */
+.hero-install .code-copy {
+  --copy-fg: var(--ink-soft);
+  --copy-fg-hover: var(--accent);
+  --copy-bg: var(--surface-muted);
+  --copy-bg-hover: var(--accent-soft);
+  --copy-border: var(--border-strong);
 }
 .code pre {
   margin: 0;
@@ -728,7 +864,9 @@ a:hover {
 
 /* ----------------------------------------------------------------- cta band */
 
+/* Always a dark brand band, so the tokens used inside it stay light-theme. */
 .cta {
+  color-scheme: light;
   position: relative;
   overflow: hidden;
   padding-block: 84px;
@@ -808,10 +946,7 @@ a:hover {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: radial-gradient(
-    rgba(15, 23, 42, 0.14) 1.1px,
-    transparent 1.1px
-  );
+  background-image: radial-gradient(var(--dot-color) 1.1px, transparent 1.1px);
   background-size: 22px 22px;
   -webkit-mask-image: radial-gradient(
     ellipse 70% 60% at 50% 45%,

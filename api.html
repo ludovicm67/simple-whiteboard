@@ -12,6 +12,22 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="stylesheet" href="./src/site.css" />
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b131f" />
+    <script>
+      // Pin the remembered theme before the first paint, so a visitor who chose
+      // one never sees the other flash by. The toggle itself lives in
+      // src/site-theme.ts, which shares this storage key.
+      try {
+        const theme = localStorage.getItem("sw-site-theme");
+        if (theme === "light" || theme === "dark") {
+          document.documentElement.dataset.theme = theme;
+        }
+      } catch (_) {
+        /* storage unavailable — fall back to the OS preference */
+      }
+    </script>
+    <script type="module" src="/src/site-theme.ts"></script>
   </head>
   <body>
     <!-- ============================================================== nav -->
@@ -21,7 +37,7 @@
           <span class="brand-mark">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
           </span>
-          Simple Whiteboard
+          <span class="brand-name">Simple Whiteboard</span>
         </a>
         <nav class="nav-cta">
           <div class="nav-links">
@@ -29,6 +45,33 @@
             <a href="/api.html">Docs</a>
             <a class="nav-hide-sm" href="https://github.com/ludovicm67/simple-whiteboard" target="_blank" rel="noopener">GitHub</a>
           </div>
+          <button class="theme-toggle" type="button" data-theme-toggle>
+            <svg
+              class="icon-moon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+            </svg>
+            <svg
+              class="icon-sun"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4" />
+            </svg>
+          </button>
           <a class="btn btn-primary" href="/app.html">
             Try it
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
@@ -450,7 +493,7 @@ channel.<span class="c-fn">onmessage</span> = (e) =&gt; {
               <span class="brand-mark">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
               </span>
-              Simple Whiteboard
+              <span class="brand-name">Simple Whiteboard</span>
             </a>
             <p>A simple, lightweight whiteboard web component that embeds anywhere.</p>
           </div>

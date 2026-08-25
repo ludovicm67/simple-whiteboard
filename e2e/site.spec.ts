@@ -55,6 +55,26 @@ test.describe("landing page (index.html)", () => {
       expect(overflows, `overflow at ${width}px`).toBe(false);
     }
   });
+
+  test("the nav fits even with a wider fallback font", async ({ page }) => {
+    // Inter is not installed everywhere (CI included), so the nav has to hold
+    // up with whatever it falls back to. Verdana is wider than any of those
+    // fallbacks: the brand truncates rather than pushing the page sideways.
+    await page.setViewportSize({ width: 360, height: 800 });
+    await page.goto("/index.html");
+    await page.addStyleTag({
+      content:
+        "body, .brand, .btn, .nav-links a { font-family: Verdana, sans-serif !important; }",
+    });
+
+    const overflows = await page.evaluate(
+      () =>
+        document.documentElement.scrollWidth >
+        document.documentElement.clientWidth + 1
+    );
+    expect(overflows).toBe(false);
+    await expect(page.locator(".theme-toggle")).toBeVisible();
+  });
 });
 
 test.describe("404 page", () => {
@@ -128,5 +148,58 @@ test.describe("API docs (api.html)", () => {
       "href",
       "/app.html"
     );
+  });
+});
+
+test.describe("site theme", () => {
+  const bodyBackground = (page: import("@playwright/test").Page) =>
+    page
+      .locator("body")
+      .evaluate((el) => getComputedStyle(el).backgroundColor);
+
+  test("follows the OS preference by default", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.goto("/index.html");
+    const light = await bodyBackground(page);
+
+    await page.emulateMedia({ colorScheme: "dark" });
+    const dark = await bodyBackground(page);
+
+    expect(dark).not.toBe(light);
+    // No explicit choice was made, so nothing is pinned on <html>.
+    await expect(page.locator("html")).not.toHaveAttribute("data-theme", /.*/);
+  });
+
+  test("the nav toggle pins a theme and remembers it", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.goto("/index.html");
+    const light = await bodyBackground(page);
+
+    const toggle = page.locator("[data-theme-toggle]");
+    await expect(toggle).toHaveAttribute("aria-label", /dark theme/);
+    await toggle.click();
+
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    await expect(toggle).toHaveAttribute("aria-label", /light theme/);
+    const dark = await bodyBackground(page);
+    expect(dark).not.toBe(light);
+
+    // The choice survives a reload, and wins over the OS preference.
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    expect(await bodyBackground(page)).toBe(dark);
+  });
+
+  test("the embedded whiteboard keeps its light frame on the dark theme", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.goto("/index.html");
+    // The component is light-only for now, so its mock window stays light even
+    // though the page around it is dark.
+    const chrome = await page
+      .locator(".board-chrome")
+      .evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(chrome).toBe("rgb(245, 247, 250)");
   });
 });
