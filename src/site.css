@@ -652,21 +652,41 @@ a:hover {
   font-size: 0.78rem;
   color: #8b98ac;
 }
+/*
+ * Copy button. The colors are tokens because the same button sits both on the
+ * dark code blocks (the defaults below) and on light surfaces, which override
+ * them: white-on-white would otherwise make the label vanish on hover.
+ */
 .code-copy {
+  --copy-fg: #c7d2e0;
+  --copy-fg-hover: #fff;
+  --copy-bg: rgba(255, 255, 255, 0.06);
+  --copy-bg-hover: rgba(255, 255, 255, 0.12);
+  --copy-border: rgba(255, 255, 255, 0.1);
+
   font-family: inherit;
   font-size: 0.76rem;
   font-weight: 600;
-  color: #c7d2e0;
-  background-color: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--copy-fg);
+  background-color: var(--copy-bg);
+  border: 1px solid var(--copy-border);
   border-radius: 6px;
   padding: 4px 10px;
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease;
 }
 .code-copy:hover {
-  background-color: rgba(255, 255, 255, 0.12);
-  color: #fff;
+  background-color: var(--copy-bg-hover);
+  color: var(--copy-fg-hover);
+}
+
+/* Light surfaces: ink on a tinted background instead of white on white. */
+.hero-install .code-copy {
+  --copy-fg: var(--ink-soft);
+  --copy-fg-hover: var(--accent);
+  --copy-bg: var(--surface-muted);
+  --copy-bg-hover: var(--accent-soft);
+  --copy-border: var(--border-strong);
 }
 .code pre {
   margin: 0;
