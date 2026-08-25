@@ -56,6 +56,29 @@ test.describe("landing page (index.html)", () => {
     }
   });
 
+  test("the hero board shows no button chrome behind its gate", async ({
+    page,
+  }) => {
+    await page.goto("/index.html");
+    // The gate is a button so it can be activated with the keyboard; none of
+    // the browser's button styling may show on top of the board.
+    const chrome = await page
+      .locator(".board-gate")
+      .evaluate((el) => {
+        const style = getComputedStyle(el as HTMLElement);
+        return {
+          borderWidth: style.borderTopWidth,
+          borderStyle: style.borderTopStyle,
+          padding: style.paddingTop,
+        };
+      });
+    expect(chrome).toEqual({
+      borderWidth: "0px",
+      borderStyle: "none",
+      padding: "0px",
+    });
+  });
+
   test("the nav fits even with a wider fallback font", async ({ page }) => {
     // Inter is not installed everywhere (CI included), so the nav has to hold
     // up with whatever it falls back to. Verdana is wider than any of those

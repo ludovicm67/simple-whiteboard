@@ -568,6 +568,18 @@ a:hover {
 }
 /* Gate: keep the page scrollable until the visitor opts into drawing. */
 .board-gate {
+  /*
+   * A real button, so it can be reached and activated with the keyboard — but
+   * it covers the whole board, so none of the button chrome may show.
+   */
+  appearance: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
   position: absolute;
   inset: 0;
   z-index: 3;
