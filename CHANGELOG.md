@@ -1,5 +1,28 @@
 # @ludovicm67/whiteboard
 
+## 0.7.0
+
+### Minor Changes
+
+- 6a5e572: Make the whiteboard usable without a mouse and readable by assistive
+  technology. Every tool button now carries a name and its pressed state, the
+  toolbar is a single tab stop walked with the arrow keys, the sliders and colour
+  swatches are labelled controls (the swatches are radio buttons grouped under
+  their "Stroke" or "Fill" heading), and the menus open from the keyboard instead
+  of on hover alone. The canvas itself is focusable and describes what it holds:
+  Enter moves through the items, the arrow keys move the selected one or pan the
+  board, Backspace deletes it and Escape deselects — each announced in a live
+  region. The muted text colour was also darkened to meet the contrast minimum.
+- ee421b1: Ask for confirmation before the clear tool empties the board, instead of wiping
+  it on the first click. The dialog is a native modal `<dialog>`, so it traps
+  focus, closes on Escape and hands focus back to the button that opened it;
+  cancelling — with the button, Escape, or a click outside the panel — leaves
+  both the board and the previously selected tool untouched.
+  An already empty board still clears straight away, since there is nothing to
+  lose, and the new `skip-clear-confirmation` attribute turns the dialog off
+  for apps that have their own safeguards. Tools can reuse the same dialog
+  through the new `confirm()` method.
+
 ## 0.6.2
 
 ### Patch Changes
