@@ -29,7 +29,7 @@
     "url": "https://ludovic-muller.fr/"
   },
   "dependencies": {
-    "i18next": "^26.3.6",
+    "i18next": "^27.1.1",
     "lit": "^3.3.3",
     "lucide": "^1.33.0",
     "perfect-freehand": "^1.2.3",
